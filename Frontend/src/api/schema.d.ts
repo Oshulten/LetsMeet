@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/api/Notifications": {
+    "/api/Geolocation": {
         parameters: {
             query?: never;
             header?: never;
@@ -13,21 +13,21 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["Notifications_Post"];
+        post: operations["Geolocation_PostLocation"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/ApiSecrets/google-maps-api-key": {
+    "/api/Secrets/google-maps-api-key": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["ApiSecrets_GoogleMapsApiKey"];
+        get: operations["Secrets_GoogleMapsApiKey"];
         put?: never;
         post?: never;
         delete?: never;
@@ -40,10 +40,13 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        Notification: {
-            /** Format: int32 */
-            userId?: number;
-            message?: string;
+        Geolocation: {
+            /** Format: guid */
+            userGuid?: string;
+            /** Format: double */
+            latitude?: number;
+            /** Format: double */
+            longitude?: number;
         };
         ApiKey: {
             key?: string;
@@ -67,7 +70,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    Notifications_Post: {
+    Geolocation_PostLocation: {
         parameters: {
             query?: never;
             header?: never;
@@ -76,7 +79,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["Notification"];
+                "application/json": components["schemas"]["Geolocation"];
             };
         };
         responses: {
@@ -90,7 +93,7 @@ export interface operations {
             };
         };
     };
-    ApiSecrets_GoogleMapsApiKey: {
+    Secrets_GoogleMapsApiKey: {
         parameters: {
             query?: never;
             header?: never;

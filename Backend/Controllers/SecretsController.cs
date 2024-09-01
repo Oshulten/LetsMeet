@@ -9,7 +9,7 @@ namespace Backend.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ApiSecrets(TemplateDatabaseContext context, IConfiguration configuration) : ControllerBase
+public class SecretsController(TemplateDatabaseContext context, IConfiguration configuration) : ControllerBase
 {
     [HttpGet("google-maps-api-key")]
     [ProducesResponseType(200, Type = typeof(ApiKey))]

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Backend.Hubs;
 
-public interface INotificationClient
+public interface IGeolocationClient
 {
-    Task ReceiveNotification(string message);
+    Task RecieveGeolocation(string message);
 }

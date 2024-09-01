@@ -3,10 +3,26 @@ import { useQuery } from '@tanstack/react-query';
 import { APIProvider, Map } from '@vis.gl/react-google-maps';
 import { getGoogleMapsApiKey } from '../api/endpoints';
 import getPosition from '../utilities/getPosition';
+import { useEffect, useState } from 'react';
+import { HubConnectionBuilder } from '@microsoft/signalr';
 
 export default function GoogleMap() {
     const apiKeyQuery = useQuery({ queryKey: ["googleApiKey"], queryFn: getGoogleMapsApiKey });
     const geolocationQuery = useQuery({ queryKey: ["geolocation"], queryFn: () => getPosition() });
+    const [userLocations, setUserLocations] = useState<Location[]>([]);
+
+    useEffect(() => {
+        const connection = new HubConnectionBuilder()
+            .withUrl("http://localhost:5055/notifications")
+            .build();
+
+        connection.start();
+        connection.on("RecieveGeolocation", data => {
+            const location = JSON.parse(data) as Location;
+            setUserLocations([...userLocations, location]);
+            console.log(userLocations);
+        });
+    }, []);
 
     switch (apiKeyQuery.status) {
         case "pending":
@@ -20,7 +36,7 @@ export default function GoogleMap() {
                 }
 
                 const { latitude: lat, longitude: lng } = geolocationQuery.data.coords;
-                console.log(geolocationQuery.data.coords);
+
                 return (
                     <>
                         <APIProvider apiKey={apiKeyQuery.data}>

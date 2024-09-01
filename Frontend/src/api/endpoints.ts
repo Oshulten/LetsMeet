@@ -7,7 +7,7 @@ export const getGoogleMapsApiKey = async () => {
     const {
         data,
         error,
-    } = await client.GET("/api/ApiSecrets/google-maps-api-key", {});
+    } = await client.GET("/api/Secrets/google-maps-api-key", {});
 
     if (error) throw error;
 
