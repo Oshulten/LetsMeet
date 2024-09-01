@@ -1,52 +1,51 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { useQuery } from '@tanstack/react-query';
-import { APIProvider, Map } from '@vis.gl/react-google-maps';
+import { AdvancedMarker, APIProvider, Map, Pin } from '@vis.gl/react-google-maps';
 import { getGoogleMapsApiKey } from '../api/endpoints';
 import getPosition from '../utilities/getPosition';
-import { useEffect, useState } from 'react';
-import { HubConnectionBuilder } from '@microsoft/signalr';
+import useSignalRLocations from '../hooks/useSignalRLocations';
 
 export default function GoogleMap() {
     const apiKeyQuery = useQuery({ queryKey: ["googleApiKey"], queryFn: getGoogleMapsApiKey });
     const geolocationQuery = useQuery({ queryKey: ["geolocation"], queryFn: () => getPosition() });
-    const [userLocations, setUserLocations] = useState<Location[]>([]);
+    const locations = useSignalRLocations();
 
-    useEffect(() => {
-        const connection = new HubConnectionBuilder()
-            .withUrl("http://localhost:5055/notifications")
-            .build();
-
-        connection.start();
-        connection.on("RecieveGeolocation", data => {
-            const location = JSON.parse(data) as Location;
-            setUserLocations([...userLocations, location]);
-            console.log(userLocations);
-        });
-    }, []);
+    console.log(`locations: ${JSON.stringify(locations)}`)
 
     switch (apiKeyQuery.status) {
         case "pending":
             return <p>Fetching Google Maps api key...</p>
+
         case "error":
             return <p>Google Maps api key could not be fetched</p>
+
         case "success":
             if (apiKeyQuery.data) {
                 if (!geolocationQuery.data?.coords) {
                     return <span className="loading loading-ring loading-lg"></span>
                 }
+                const location: google.maps.LatLngLiteral = {
+                    lat: geolocationQuery.data.coords.latitude,
+                    lng: geolocationQuery.data.coords.longitude
+                }
 
-                const { latitude: lat, longitude: lng } = geolocationQuery.data.coords;
+
 
                 return (
                     <>
                         <APIProvider apiKey={apiKeyQuery.data}>
                             <Map
                                 style={{ width: '100vw', height: '100vh' }}
-                                defaultCenter={{ lat: lat, lng: lng }}
+                                defaultCenter={location}
                                 defaultZoom={15}
                                 gestureHandling={'greedy'}
                                 disableDefaultUI={true}
-                            />
+                                mapId={"LetsMeetMap"}>
+                                <AdvancedMarker
+                                    position={location}>
+                                    <Pin background={'#FBBC04'} glyphColor={'#000'} borderColor={'#000'} />
+                                </AdvancedMarker>
+                            </Map>
                         </APIProvider>
                     </>
                 );
