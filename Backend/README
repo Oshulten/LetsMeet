@@ -1,0 +1,10 @@
+To reset database:
+
+-   remove all files in Migrations folder
+-   dotnet ef migrations add InitialCreate
+-   dotnet ef database update
+
+To view database file:
+
+-   Find in File Explorer
+-   Open with DB Browser
