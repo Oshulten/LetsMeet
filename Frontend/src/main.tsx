@@ -6,7 +6,7 @@ import { routeTree } from './routeTree.gen'
 import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { DefaultCatchBoundary } from './components/DefaultCatchBoundary.tsx';
 import { NotFound } from './components/NotFound.tsx';
-import { ApplicationContext, defaultApplicationContext } from './types/AppContext.tsx';
+import { ApplicationContext, defaultApplicationContext } from './types/AppContext.ts';
 import './css/index.css'
 
 const queryClient = new QueryClient();
