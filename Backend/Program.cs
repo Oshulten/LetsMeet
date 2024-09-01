@@ -4,12 +4,13 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Backend.Database;
 using Backend.Hubs;
 
-const string applicationTitle = "TemplateApi";
+const string applicationTitle = "LetsMeetApi";
 const string version = "v1";
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddUserSecrets<Program>();
+
 builder.Services.AddDbContext<TemplateDatabaseContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 

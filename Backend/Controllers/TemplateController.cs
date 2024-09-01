@@ -1,4 +1,5 @@
 using Backend.Database;
+using Backend.Dto;
 using Backend.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -8,11 +9,15 @@ namespace Backend.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class TemplateController(TemplateDatabaseContext context) : ControllerBase
+public class ApiSecrets(TemplateDatabaseContext context, IConfiguration configuration) : ControllerBase
 {
-    [HttpGet]
-    public string TemplateGreeting()
+    [HttpGet("google-maps-api-key")]
+    [ProducesResponseType(200, Type = typeof(ApiKey))]
+    [ProducesResponseType(404)]
+    public ActionResult<ApiKey> GoogleMapsApiKey()
     {
-        return "TemplateEndpoint";
+        return configuration["google-api-key"] is string key
+            ? Ok(new ApiKey(key))
+            : NotFound();
     }
 }
