@@ -1,6 +1,6 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { useQuery } from '@tanstack/react-query';
-import { AdvancedMarker, APIProvider, Map, Pin } from '@vis.gl/react-google-maps';
+import { AdvancedMarker, APIProvider, Map, MapMouseEvent, Pin } from '@vis.gl/react-google-maps';
 import getPosition from '../utilities/getPosition';
 import useSignalRLocations from '../hooks/useSignalRLocations';
 import { useState } from 'react';
@@ -18,6 +18,10 @@ export default function GoogleMap() {
         ? currentLocation
         : { lat: geolocationQuery.data.coords.latitude, lng: geolocationQuery.data.coords.longitude };
 
+    const handleContextmenu = (e: MapMouseEvent) => {
+        setCurrentLocation(e.detail.latLng);
+    }
+
     return (
         <>
             <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
@@ -28,10 +32,7 @@ export default function GoogleMap() {
                     gestureHandling={'greedy'}
                     disableDefaultUI={true}
                     mapId={"LetsMeetMap"}
-                    onContextmenu={e => {
-                        console.log(e);
-                        setCurrentLocation(e.detail.latLng);
-                    }}>
+                    onContextmenu={handleContextmenu}>
                     <AdvancedMarker
                         position={location}>
                         <Pin background={'#FBBC04'} glyphColor={'#000'} borderColor={'#000'} />
