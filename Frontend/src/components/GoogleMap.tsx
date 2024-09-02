@@ -20,14 +20,18 @@ export default function GoogleMap() {
 
     return (
         <>
-            <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
+            <APIProvider
+                apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+                region="SE">
                 <Map
                     style={{ width: '100vw', height: '100vh' }}
                     defaultCenter={location}
                     defaultZoom={15}
                     gestureHandling={'greedy'}
                     disableDefaultUI={true}
-                    mapId={"LetsMeetMap"}>
+                    mapId={"LetsMeetMap"}
+                    reuseMaps={true}
+                    colorScheme={'DARK'}>
                     <AdvancedMarker
                         position={location}>
                         <Pin background={'#FBBC04'} glyphColor={'#000'} borderColor={'#000'} />
