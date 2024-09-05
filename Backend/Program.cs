@@ -55,7 +55,7 @@ app.UseHttpsRedirection();
 // app.UseAuthorization();
 
 app.MapControllers();
-app.MapHub<NotificationHub>("/notifications");
+app.MapHub<GeolocationHub>("/notifications");
 
 app.Run();
 public partial class Program { }

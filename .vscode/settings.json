@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "undefined/subscriptions/ed9b8786-81cd-4319-a881-d63ab5b6762c/resourceGroups/LetsMeet/providers/Microsoft.Web/sites/LetsMeetApi",
+    "appService.deploySubpath": "Backend"
+}

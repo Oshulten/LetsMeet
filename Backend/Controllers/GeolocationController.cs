@@ -12,7 +12,7 @@ namespace Backend.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class GeolocationController(IHubContext<NotificationHub, IGeolocationClient> _hubContext) : ControllerBase
+public class GeolocationController(IHubContext<GeolocationHub, IGeolocationClient> _hubContext) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> PostLocation(Geolocation location)
