@@ -14,7 +14,6 @@ export default function GoogleMap({ defaultLocation }: Props) {
     const [clientGuid] = useState<Guid>(Guid.create());
     const { locations, sendLocation } = useSignalRLocations();
 
-
     const handleContextmenu = (e: MapMouseEvent) => {
         setCurrentLocation(e.detail.latLng);
         const location: MapLocation = {
