@@ -3,14 +3,15 @@ import { AdvancedMarker, APIProvider, Map, MapMouseEvent, Pin } from '@vis.gl/re
 import { useEffect, useState } from 'react';
 import { Guid } from "guid-typescript";
 import useSignalRLocations from '../hooks/useSignalRLocations';
-import { MapLocation } from '../api/types';
+import { DtoGeolocation } from '../api/types';
 import { useAuth, useUser } from '@clerk/clerk-react';
+import { ensureUserExists } from '../api/endpoints';
 
 interface Props {
     defaultLocation: google.maps.LatLngLiteral,
 }
 
-function geolocationToLatLngLiteral(location: MapLocation): google.maps.LatLngLiteral {
+function geolocationToLatLngLiteral(location: DtoGeolocation): google.maps.LatLngLiteral {
     return {
         lat: location.latitude,
         lng: location.longitude
@@ -24,13 +25,22 @@ export default function GoogleMap({ defaultLocation }: Props) {
     const [clientGuid] = useState<Guid>(Guid.create());
     const { locations, sendLocation } = useSignalRLocations();
 
+    useEffect(() => {
+        if (user) {
+            ensureUserExists({
+                clerkId: user.id,
+                username: user.username ?? "Inkognito",
+            });
+        }
+    }, []);
+
     console.log(auth);
     console.log(user);
 
     const handleContextmenu = (e: MapMouseEvent) => {
         setCurrentLocation(e.detail.latLng);
-        const location: MapLocation = {
-            userGuid: clientGuid.toString(),
+        const location: DtoGeolocation = {
+            clerkId: user!.id,
             latitude: e.detail.latLng!.lat,
             longitude: e.detail.latLng!.lng
         }

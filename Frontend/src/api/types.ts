@@ -1,4 +1,13 @@
-import { components } from './schema';
+// import { components } from './schema';
 
-export type ApiKey = Required<components["schemas"]["ApiKey"]>;
-export type MapLocation = Required<components["schemas"]["Geolocation"]>
+
+export type DtoGeolocation = {
+    clerkId: string,
+    latitude: number,
+    longitude: number
+}
+
+export type DtoUser = {
+    username: string,
+    clerkId: string
+}
