@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddUserSecrets<Program>();
 
-builder.Services.AddDbContext<TemplateDatabaseContext>(options =>
+builder.Services.AddDbContext<LocationsDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddSignalR();
@@ -55,7 +55,7 @@ app.UseHttpsRedirection();
 // app.UseAuthorization();
 
 app.MapControllers();
-app.MapHub<NotificationHub>("/notifications");
+app.MapHub<GeolocationHub>("/notifications");
 
 app.Run();
 public partial class Program { }

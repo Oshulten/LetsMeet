@@ -1,17 +1,33 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { AdvancedMarker, APIProvider, Map, MapMouseEvent, Pin } from '@vis.gl/react-google-maps';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Guid } from "guid-typescript";
+import useSignalRLocations from '../hooks/useSignalRLocations';
+import { MapLocation } from '../api/types';
 
 interface Props {
-    defaultLocation: google.maps.LatLngLiteral
+    defaultLocation: google.maps.LatLngLiteral,
 }
 
 export default function GoogleMap({ defaultLocation }: Props) {
     const [currentLocation, setCurrentLocation] = useState<google.maps.LatLngLiteral | null>(defaultLocation);
+    const [clientGuid] = useState<Guid>(Guid.create());
+    const { locations, sendLocation } = useSignalRLocations();
 
     const handleContextmenu = (e: MapMouseEvent) => {
         setCurrentLocation(e.detail.latLng);
+        const location: MapLocation = {
+            userGuid: clientGuid.toString(),
+            latitude: e.detail.latLng!.lat,
+            longitude: e.detail.latLng!.lng
+        }
+        sendLocation(location);
     }
+
+    useEffect(() => {
+        console.log("locations changed");
+        console.log(locations);
+    }, [locations]);
 
     return (
         <>
