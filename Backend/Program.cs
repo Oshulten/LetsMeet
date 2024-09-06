@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddUserSecrets<Program>();
 
-builder.Services.AddDbContext<TemplateDatabaseContext>(options =>
+builder.Services.AddDbContext<LocationsDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddSignalR();

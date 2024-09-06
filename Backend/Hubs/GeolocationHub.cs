@@ -1,18 +1,29 @@
+using Backend.Database;
+using Backend.Models;
 using Backend.Dto;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Backend.Hubs;
 
-public class GeolocationHub : Hub<IGeolocationClient>
+public class GeolocationHub(LocationsDbContext context) : Hub<IGeolocationClient>
 {
-    public override async Task OnConnectedAsync()
+    public async Task SendLocation(Geolocation geolocation)
     {
-        await Clients.All.RecieveGeolocation($"Thank you for connecting, {Context.ConnectionId}");
-    }
+        Console.Write($"\nMessage from client {geolocation.UserGuid}\nLatitude: {geolocation.Latitude}\nLongitude: {geolocation.Longitude}");
+        context.Locations.Add(geolocation);
+        context.SaveChanges();
 
-    public void SendLocation(Geolocation location)
-    {
-        Console.Write($"Message from client {location.UserGuid}\nLatitude: {location.Latitude}\nLongitude: {location.Longitude}");
+        var groupsByUserGuid = context.Locations.GroupBy(location => location.UserGuid);
+
+        var dtos = new List<DtoGeolocation>();
+
+        foreach (var grouping in groupsByUserGuid)
+        {
+            dtos.Add((DtoGeolocation)grouping.OrderBy(location => location.Timestamp).First());
+        }
+
+
+        await Clients.All.RecieveGeolocations(dtos);
     }
 
     public string GetConnectionId()

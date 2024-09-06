@@ -1,6 +1,6 @@
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 import { useEffect, useState } from "react";
-import { MapLocation } from "../api/types";
+import { MapLocation } from '../api/types';
 
 export default function useSignalRLocations() {
     const [connection, setConnection] = useState<HubConnection | null>(null);
@@ -11,17 +11,21 @@ export default function useSignalRLocations() {
             .withUrl("http://localhost:5055/notifications")
             .build();
 
-        try {
-            connection.start();
-            connection.on("RecieveGeolocation", data => {
-                const location = JSON.parse(data) as MapLocation;
-                setLocations([...locations, location]);
-            });
+        const establishConnection = async () => {
+            try {
+                await connection.start();
 
-            setConnection(connection);
-        } catch (err) {
-            console.error(err as Error);
+                connection.on("RecieveGeolocations", data => {
+                    setLocations(data);
+                });
+
+                setConnection(connection);
+            } catch (err) {
+                console.error(err as Error);
+            }
         }
+
+        establishConnection();
     }, []);
 
     const sendLocation = async (location: MapLocation) => {

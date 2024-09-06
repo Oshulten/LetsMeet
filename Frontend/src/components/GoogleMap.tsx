@@ -1,6 +1,6 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { AdvancedMarker, APIProvider, Map, MapMouseEvent, Pin } from '@vis.gl/react-google-maps';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Guid } from "guid-typescript";
 import useSignalRLocations from '../hooks/useSignalRLocations';
 import { MapLocation } from '../api/types';
@@ -23,6 +23,11 @@ export default function GoogleMap({ defaultLocation }: Props) {
         }
         sendLocation(location);
     }
+
+    useEffect(() => {
+        console.log("locations changed");
+        console.log(locations);
+    }, [locations]);
 
     return (
         <>

@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Backend.Migrations
 {
-    [DbContext(typeof(TemplateDatabaseContext))]
+    [DbContext(typeof(LocationsDbContext))]
     partial class TemplateDatabaseContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
@@ -22,18 +22,27 @@ namespace Backend.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Backend.Models.DefaultDataType", b =>
+            modelBuilder.Entity("Backend.Models.Geolocation", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Value1")
-                        .HasColumnType("int");
+                    b.Property<double>("Latitude")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserGuid")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.ToTable("DefaultDataTable");
+                    b.ToTable("Locations");
                 });
 #pragma warning restore 612, 618
         }
