@@ -6,12 +6,14 @@ using Backend.Services;
 
 namespace Backend.Hubs;
 
-public class GeolocationHub(HubPersistence persistence) : Hub<IGeolocationClient>
+public class GeolocationHub(LocationsDbContext db, HubPersistence persistence) : Hub<IGeolocationClient>
 {
-    public async Task SendLocation(Geolocation geolocation)
+    public async Task SendLocation(DtoGeolocation dto)
     {
-        Console.Write($"\nMessage from client {geolocation.UserGuid}\nLatitude: {geolocation.Latitude}\nLongitude: {geolocation.Longitude}");
-        persistence.AddToLastLocations(Context.ConnectionId, geolocation);
+        var user = db.UserByClerkId(dto.ClerkId);
+        Console.Write($"\nMessage from user {user.Username}\nLatitude: {dto.Latitude}\nLongitude: {dto.Longitude}");
+        var location = db.AddGeolocation(dto);
+        persistence.AddToLastLocations(dto.ClerkId, location);
         await Clients.All.RecieveGeolocations(persistence.LastLocationPerUser);
     }
 }
