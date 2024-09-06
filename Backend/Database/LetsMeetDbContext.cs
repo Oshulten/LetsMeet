@@ -9,6 +9,9 @@ namespace Backend.Database
         public DbSet<Geolocation> Locations { get; set; }
         public DbSet<User> Users { get; set; }
 
+        public User? UserByClerkId(string clerkId) =>
+            Users.Find(clerkId);
+
         public Geolocation AddGeolocation(DtoGeolocation dto)
         {
             var user = Users.Find(dto.ClerkId)

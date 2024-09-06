@@ -1,10 +1,10 @@
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 import { useEffect, useState } from "react";
-import { MapLocation } from '../api/types';
+import { DtoGeolocation } from '../api/types';
 
 export default function useSignalRLocations() {
     const [connection, setConnection] = useState<HubConnection | null>(null);
-    const [locations, setLocations] = useState<MapLocation[]>([]);
+    const [locations, setLocations] = useState<DtoGeolocation[]>([]);
 
     useEffect(() => {
         const connection = new HubConnectionBuilder()
@@ -28,7 +28,7 @@ export default function useSignalRLocations() {
         establishConnection();
     }, []);
 
-    const sendLocation = async (location: MapLocation) => {
+    const sendLocation = async (location: DtoGeolocation) => {
         if (connection) {
             await connection.invoke("SendLocation", location);
         }

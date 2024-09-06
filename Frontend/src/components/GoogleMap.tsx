@@ -1,10 +1,9 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { AdvancedMarker, APIProvider, Map, MapMouseEvent, Pin } from '@vis.gl/react-google-maps';
 import { useEffect, useState } from 'react';
-import { Guid } from "guid-typescript";
 import useSignalRLocations from '../hooks/useSignalRLocations';
 import { DtoGeolocation } from '../api/types';
-import { useAuth, useUser } from '@clerk/clerk-react';
+import { useUser } from '@clerk/clerk-react';
 import { ensureUserExists } from '../api/endpoints';
 
 interface Props {
@@ -21,8 +20,6 @@ function geolocationToLatLngLiteral(location: DtoGeolocation): google.maps.LatLn
 export default function GoogleMap({ defaultLocation }: Props) {
     const [currentLocation, setCurrentLocation] = useState<google.maps.LatLngLiteral | null>(defaultLocation);
     const { user } = useUser();
-    const auth = useAuth();
-    const [clientGuid] = useState<Guid>(Guid.create());
     const { locations, sendLocation } = useSignalRLocations();
 
     useEffect(() => {
@@ -34,9 +31,6 @@ export default function GoogleMap({ defaultLocation }: Props) {
         }
     }, []);
 
-    console.log(auth);
-    console.log(user);
-
     const handleContextmenu = (e: MapMouseEvent) => {
         setCurrentLocation(e.detail.latLng);
         const location: DtoGeolocation = {
@@ -47,10 +41,7 @@ export default function GoogleMap({ defaultLocation }: Props) {
         sendLocation(location);
     }
 
-    useEffect(() => {
-        console.log("locations changed");
-        console.log(locations);
-    }, [locations]);
+    const otherUserLocations = locations.filter(location => location.clerkId != user!.id);
 
     return (
         <>
@@ -64,27 +55,25 @@ export default function GoogleMap({ defaultLocation }: Props) {
                     mapId={"LetsMeetMap"}
                     onContextmenu={handleContextmenu}>
                     {
-                        locations.filter(location => location.userGuid != clientGuid.toString())
-                            .map(location =>
-                                <AdvancedMarker
-                                    position={geolocationToLatLngLiteral(location)}
-                                    key={location.userGuid}>
-                                    <Pin
-                                        background={'#F0B004'}
-                                        glyphColor={'#000'}
-                                        borderColor={'#000'} />
-                                </AdvancedMarker>)
+                        otherUserLocations.map(location =>
+                            <AdvancedMarker
+                                position={geolocationToLatLngLiteral(location)}
+                                key={location.clerkId}>
+                                <Pin
+                                    background={'#F0B004'}
+                                    glyphColor={'#000'}
+                                    borderColor={'#000'} />
+                            </AdvancedMarker>)
                     }
                     <AdvancedMarker
-                        position={currentLocation}
-                        key={clientGuid.toString()}>
+                        position={currentLocation}>
                         <Pin
                             background={'#FF0000'}
                             glyphColor={'#000'}
                             borderColor={'#000'} />
                     </AdvancedMarker>
                 </Map>
-            </APIProvider>
+            </APIProvider >
         </>
     );
 }
