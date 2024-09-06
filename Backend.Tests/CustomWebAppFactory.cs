@@ -19,9 +19,9 @@ public class CustomWebAppFactory : WebApplicationFactory<Program>, IAsyncLifetim
 
         builder.ConfigureServices(services =>
         {
-            services.RemoveAll<DbContextOptions<LocationsDbContext>>();
-            services.RemoveAll<LocationsDbContext>();
-            services.AddDbContext<LocationsDbContext>(options =>
+            services.RemoveAll<DbContextOptions<LetsMeetDbContext>>();
+            services.RemoveAll<LetsMeetDbContext>();
+            services.AddDbContext<LetsMeetDbContext>(options =>
             {
                 options.UseSqlServer(_sqlContainer.GetConnectionString());
             });
@@ -32,7 +32,7 @@ public class CustomWebAppFactory : WebApplicationFactory<Program>, IAsyncLifetim
     {
         await _sqlContainer.StartAsync();
         using var serviceScope = this.Services.CreateAsyncScope();
-        var service = (serviceScope.ServiceProvider.GetService<LocationsDbContext>()!);
+        var service = (serviceScope.ServiceProvider.GetService<LetsMeetDbContext>()!);
         service.Database.EnsureCreated();
     }
 

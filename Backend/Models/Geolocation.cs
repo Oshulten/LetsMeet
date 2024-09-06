@@ -7,14 +7,14 @@ namespace Backend.Models;
 
 public class Geolocation(User user, double latitude, double longitude)
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public string Id { get; set; } = Guid.NewGuid().ToString();
     public User User { get; set; } = user;
-    public Guid UserId { get; set; }
+    public string UserId { get; set; } = user.Id;
     public double Latitude { get; set; } = latitude;
     public double Longitude { get; set; } = longitude;
     public DateTime Timestamp { get; set; } = DateTime.Now;
 
-    public static Geolocation Null = new Geolocation(User.Null, 0, 0);
+    public static Geolocation Null = new(User.Null, 0, 0);
 
     public Geolocation() : this(Null.User, Null.Latitude, Null.Longitude) { }
 }

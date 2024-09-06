@@ -9,5 +9,5 @@ public class DtoGeolocation(string clerkId, double latitude, double longitude)
     public double Longitude { get; set; } = longitude;
 
     public static explicit operator DtoGeolocation(Geolocation dto) =>
-        new(dto.User.ClerkId, dto.Latitude, dto.Longitude);
+        new(dto.User.Id, dto.Latitude, dto.Longitude);
 }

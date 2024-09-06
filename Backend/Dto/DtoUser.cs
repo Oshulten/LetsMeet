@@ -11,5 +11,5 @@ public class DtoUser(string username, string clerkId)
     public string ClerkId { get; set; } = clerkId;
 
     public static explicit operator DtoUser(User user) =>
-        new(user.Username, user.ClerkId);
+        new(user.Username, user.Id);
 }

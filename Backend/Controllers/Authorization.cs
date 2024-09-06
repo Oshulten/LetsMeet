@@ -6,7 +6,7 @@ namespace Backend.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class Authorization(LocationsDbContext db) : ControllerBase
+public class Authorization(LetsMeetDbContext db) : ControllerBase
 {
     [HttpPost("ensure-created")]
     public IActionResult EnsureUserIsCreated(DtoUser dto)

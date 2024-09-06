@@ -6,7 +6,7 @@ using Backend.Services;
 
 namespace Backend.Hubs;
 
-public class GeolocationHub(LocationsDbContext db, HubPersistence persistence) : Hub<IGeolocationClient>
+public class GeolocationHub(LetsMeetDbContext db, HubPersistence persistence) : Hub<IGeolocationClient>
 {
     public async Task SendLocation(DtoGeolocation dto)
     {

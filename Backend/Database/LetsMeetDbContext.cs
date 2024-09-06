@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Database
 {
-    public class LocationsDbContext(DbContextOptions options) : DbContext(options)
+    public class LetsMeetDbContext(DbContextOptions options) : DbContext(options)
     {
         public DbSet<Geolocation> Locations { get; set; }
         public DbSet<User> Users { get; set; }
 
         public User? UserByClerkId(string clerkId) =>
-            Users.FirstOrDefault(user => user.ClerkId == clerkId);
+            Users.Find(clerkId);
 
         public Geolocation AddGeolocation(DtoGeolocation dto)
         {
