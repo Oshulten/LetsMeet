@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Guid } from "guid-typescript";
 import useSignalRLocations from '../hooks/useSignalRLocations';
 import { MapLocation } from '../api/types';
+import { useAuth } from '@clerk/clerk-react';
 
 interface Props {
     defaultLocation: google.maps.LatLngLiteral,
@@ -18,8 +19,11 @@ function geolocationToLatLngLiteral(location: MapLocation): google.maps.LatLngLi
 
 export default function GoogleMap({ defaultLocation }: Props) {
     const [currentLocation, setCurrentLocation] = useState<google.maps.LatLngLiteral | null>(defaultLocation);
+    const auth = useAuth();
     const [clientGuid] = useState<Guid>(Guid.create());
     const { locations, sendLocation } = useSignalRLocations();
+
+    console.log(auth);
 
     const handleContextmenu = (e: MapMouseEvent) => {
         setCurrentLocation(e.detail.latLng);
