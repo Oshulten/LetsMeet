@@ -9,6 +9,13 @@ interface Props {
     defaultLocation: google.maps.LatLngLiteral,
 }
 
+function geolocationToLatLngLiteral(location: MapLocation): google.maps.LatLngLiteral {
+    return {
+        lat: location.latitude,
+        lng: location.longitude
+    }
+}
+
 export default function GoogleMap({ defaultLocation }: Props) {
     const [currentLocation, setCurrentLocation] = useState<google.maps.LatLngLiteral | null>(defaultLocation);
     const [clientGuid] = useState<Guid>(Guid.create());
@@ -40,9 +47,25 @@ export default function GoogleMap({ defaultLocation }: Props) {
                     disableDefaultUI={true}
                     mapId={"LetsMeetMap"}
                     onContextmenu={handleContextmenu}>
+                    {
+                        locations.filter(location => location.userGuid != clientGuid.toString())
+                            .map(location =>
+                                <AdvancedMarker
+                                    position={geolocationToLatLngLiteral(location)}
+                                    key={location.userGuid}>
+                                    <Pin
+                                        background={'#F0B004'}
+                                        glyphColor={'#000'}
+                                        borderColor={'#000'} />
+                                </AdvancedMarker>)
+                    }
                     <AdvancedMarker
-                        position={currentLocation ?? defaultLocation}>
-                        <Pin background={'#FBBC04'} glyphColor={'#000'} borderColor={'#000'} />
+                        position={currentLocation}
+                        key={clientGuid.toString()}>
+                        <Pin
+                            background={'#FF0000'}
+                            glyphColor={'#000'}
+                            borderColor={'#000'} />
                     </AdvancedMarker>
                 </Map>
             </APIProvider>

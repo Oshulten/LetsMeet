@@ -19,9 +19,8 @@ public class GeolocationHub(LocationsDbContext context) : Hub<IGeolocationClient
 
         foreach (var grouping in groupsByUserGuid)
         {
-            dtos.Add((DtoGeolocation)grouping.OrderBy(location => location.Timestamp).First());
+            dtos.Add((DtoGeolocation)grouping.OrderByDescending(location => location.Timestamp).First());
         }
-
 
         await Clients.All.RecieveGeolocations(dtos);
     }
