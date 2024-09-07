@@ -92,10 +92,10 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
     const signalIsInitialized = !(!connection || !user || !user.username || !locations);
 
     return {
-        locations,
-        currentLocation,
-        setCurrentLocation,
-        user,
+        otherUserLocations: locations,
+        userLocation: currentLocation,
+        setUserLocation: setCurrentLocation,
+        user: user,
         signalIsInitialized: signalIsInitialized
     };
 }
