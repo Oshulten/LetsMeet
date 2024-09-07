@@ -28,11 +28,13 @@ namespace Backend.Database
             var user = Users.Find(dto.ClerkId);
             if (user is null)
             {
+                Console.WriteLine($"User {dto.Username} doesn't exist in db. Adding user to db.");
                 var newUser = new User(dto.Username, dto.ClerkId);
                 Users.Add(newUser);
                 SaveChanges();
                 return newUser;
             }
+            Console.WriteLine($"User {dto.Username} already exists in db.");
             return user;
         }
     }

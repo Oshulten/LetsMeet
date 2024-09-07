@@ -10,27 +10,49 @@ namespace Backend.Services;
 
 public class HubPersistence
 {
-    public Dictionary<string, Geolocation> _lastLocations { get; set; } = [];
+    public Dictionary<string /* ClerkId */, Geolocation> _lastLocations = [];
+    public Dictionary<string /* ConnectionId */, User> _activeUsers = [];
 
     public List<DtoGeolocation> LastLocationPerUser =>
         _lastLocations
             .Select(keyvalue => (DtoGeolocation)keyvalue.Value)
             .ToList();
 
-    public List<User> ActiveUsers(LetsMeetDbContext db) =>
-        _lastLocations.Keys.Select(clerkId => db.Users.Find(clerkId)!).ToList();
-
-    public void AddToLastLocations(string connectionId, Geolocation location)
+    public User RegisterUser(string connectionId, DtoUser dtoUser, LetsMeetDbContext db)
     {
-        if (!_lastLocations.ContainsKey(connectionId))
+        if (_activeUsers.Values.FirstOrDefault(u => u.Id == dtoUser.ClerkId) is null)
         {
-            _lastLocations.Add(connectionId, location);
+            Console.WriteLine($"User {dtoUser.Username} is not registered");
+            var existingUser = db.Users.Find(dtoUser.ClerkId) ?? db.AddUser(dtoUser);
+            _activeUsers.Add(connectionId, existingUser);
+        }
+        else
+        {
+            Console.WriteLine($"User {dtoUser.Username} is already registered");
+        }
+        return _activeUsers[connectionId];
+    }
+
+    public List<User> ActiveUsers =>
+        _activeUsers.Values.ToList();
+
+    public void LogActiveUsers()
+    {
+        var itemStrings = _activeUsers.Select(item => $"{item.Value.Username} [{item.Key}]: {item.Value.Id}");
+        Console.WriteLine($"Connected users:\n\t{string.Join("\n\t", itemStrings)}");
+    }
+
+    public void AddToLastLocations(string clerkId, Geolocation location)
+    {
+        if (!_lastLocations.ContainsKey(clerkId))
+        {
+            _lastLocations.Add(clerkId, location);
             return;
         }
 
-        if (_lastLocations[connectionId].Timestamp > location.Timestamp)
+        if (_lastLocations[clerkId].Timestamp > location.Timestamp)
         {
-            _lastLocations[connectionId] = location;
+            _lastLocations[clerkId] = location;
         }
     }
 }

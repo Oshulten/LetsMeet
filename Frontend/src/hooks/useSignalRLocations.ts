@@ -1,8 +1,7 @@
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 import { useEffect, useState } from "react";
-import { DtoGeolocation } from '../api/types';
+import { DtoGeolocation, DtoUser } from '../api/types';
 import { useUser } from "@clerk/clerk-react";
-import { ensureUserExists } from "../api/endpoints";
 
 export default function useSignalRLocations() {
     const { user } = useUser();
@@ -20,19 +19,25 @@ export default function useSignalRLocations() {
             try {
                 await connection.start();
 
+                await connection.invoke("RegisterUser", { username: user?.username, clerkId: user?.id } as DtoUser)
+
                 connection.on("RecieveGeolocations", data => {
                     setLocations(data);
                 });
 
                 setConnection(connection);
-
-                if (user) ensureUserExists({ clerkId: user.id, username: user.username ?? "Inkognito", });
             } catch (err) {
                 console.error(err as Error);
             }
         }
 
+        const abortConnection = () => {
+            connection.stop();
+        }
+
         establishConnection();
+
+        return abortConnection;
     }, []);
 
     const sendLocation = async (location: DtoGeolocation) => {
