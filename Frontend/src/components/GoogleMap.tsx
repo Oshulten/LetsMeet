@@ -36,7 +36,7 @@ export default function GoogleMap({ defaultLocation }: Props) {
             <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
                 <Map {...mapProps}>
                     {otherUserLocations.map(location =>
-                        <OtherUserMarker key={location.clerkId} position={location} />)}
+                        <OtherUserMarker key={location.clerkId} position={location} userPosition={userLocation} />)}
                     <UserMarker position={userLocation} onDragEnd={handleDragEnd} />
                 </Map>
             </APIProvider >
