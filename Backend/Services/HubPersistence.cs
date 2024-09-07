@@ -22,15 +22,15 @@ public class HubPersistence
     {
         if (_activeUsers.Values.FirstOrDefault(u => u.Id == dtoUser.ClerkId) is null)
         {
-            Console.WriteLine($"User {dtoUser.Username} is not registered");
             var existingUser = db.Users.Find(dtoUser.ClerkId) ?? db.AddUser(dtoUser);
             _activeUsers.Add(connectionId, existingUser);
         }
-        else
-        {
-            Console.WriteLine($"User {dtoUser.Username} is already registered");
-        }
         return _activeUsers[connectionId];
+    }
+
+    public void DeregisterUserByConnectionId(string connectionId)
+    {
+        _activeUsers.Remove(connectionId);
     }
 
     public List<User> ActiveUsers =>

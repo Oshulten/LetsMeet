@@ -17,6 +17,7 @@ public class GeolocationHub(LetsMeetDbContext db, HubPersistence persistence) : 
     public override Task OnDisconnectedAsync(Exception? exception)
     {
         Console.WriteLine($"Disconnected id {Context.ConnectionId}");
+        persistence.DeregisterUserByConnectionId(Context.ConnectionId);
         return Task.CompletedTask;
     }
 
