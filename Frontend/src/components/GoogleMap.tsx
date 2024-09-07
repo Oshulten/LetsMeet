@@ -20,10 +20,6 @@ export default function GoogleMap({ defaultLocation }: Props) {
     const [currentLocation, setCurrentLocation] = useState<google.maps.LatLngLiteral | null>(defaultLocation);
     const { locations, sendLocation, user } = useSignalRLocations();
 
-    useEffect(() => {
-        if (user) ensureUserExists({ clerkId: user.id, username: user.username ?? "Inkognito", });
-    }, []);
-
     const handleContextmenu = (e: MapMouseEvent) => {
         setCurrentLocation(e.detail.latLng);
         const location: DtoGeolocation = {
