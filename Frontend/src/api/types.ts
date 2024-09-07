@@ -3,6 +3,7 @@
 
 export type DtoGeolocation = {
     clerkId: string,
+    username: string,
     latitude: number,
     longitude: number
 }

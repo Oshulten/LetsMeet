@@ -24,6 +24,7 @@ export default function GoogleMap({ defaultLocation }: Props) {
         setCurrentLocation(e.detail.latLng);
         const location: DtoGeolocation = {
             clerkId: user!.id,
+            username: user!.username!,
             latitude: e.detail.latLng!.lat,
             longitude: e.detail.latLng!.lng
         }
