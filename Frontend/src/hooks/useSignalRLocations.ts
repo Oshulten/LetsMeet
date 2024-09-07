@@ -5,8 +5,6 @@ import { useUser } from "@clerk/clerk-react";
 import { latLngLiteralToGeolocation } from "../utilities/conversations";
 
 export default function useSignalRLocations(defaultLocation: google.maps.LatLngLiteral) {
-    console.log("Top of useSignalRLocations");
-
     const { user } = useUser();
     const [currentLocation, setCurrentLocationLocal] = useState<Geolocation>(latLngLiteralToGeolocation(defaultLocation, user!.id, user!.username!));
     const [connection, setConnection] = useState<HubConnection | null>(null);
@@ -15,7 +13,6 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
 
     const initializeConnection = () => {
         if (connection) {
-            console.error(`InitializeConnection: connection is already initialized`);
             return connection;
         }
 
@@ -25,8 +22,6 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
                 .build();
 
         setConnection(localConnection);
-        console.log(`Connected user ${user!.id} to hub`);
-
         return localConnection;
     }
 
@@ -47,12 +42,10 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
 
     const registerUser = async (localConnection: HubConnection) => {
         if (!user) {
-            console.error(`RegisterUser: user is undefined`);
             return;
         }
 
         if (!user.username) {
-            console.error(`RegisterUser: username is undefined`);
             return;
         }
 
@@ -61,12 +54,10 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
 
     const sendInitialLocation = async (localConnection: HubConnection) => {
         if (!user) {
-            console.error(`RegisterUser: user is undefined`);
             return;
         }
 
         if (!user.username) {
-            console.error(`RegisterUser: username is undefined`);
             return;
         }
 
@@ -76,7 +67,6 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
 
     const stopConnection = () => {
         if (!connection) {
-            console.error(`StopConnection: connection is not initialized`);
             return;
         }
 
@@ -88,7 +78,6 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
         console.log("effectCallback");
 
         if (connection) {
-            console.log("Effect of useSignalRLocations: connection is already initialized");
             return stopConnection
         }
 
@@ -97,7 +86,6 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
         localConnection = (await startConnection(localConnection))!;
 
         if (!localConnection.connectionId) {
-            console.error("Local connection lacks id");
             return stopConnection;
         }
 
@@ -107,7 +95,6 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
     }
 
     useEffect(() => {
-        console.log("Effect of useSignalRLocations");
         effectCallback();
         return stopConnection
     }, []);

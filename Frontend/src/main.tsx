@@ -1,5 +1,5 @@
 /* eslint-disable react/react-in-jsx-scope */
-import { createContext, StrictMode } from 'react'
+import { createContext } from 'react'
 import { createRoot } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { routeTree } from './routeTree.gen'

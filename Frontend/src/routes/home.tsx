@@ -12,25 +12,22 @@ export const Route = createFileRoute('/home')({
 export default function Home() {
   const geolocationQuery = useQuery({ queryKey: ["geolocation"], queryFn: () => getPosition() });
 
-  if (geolocationQuery.data) {
-    const location: google.maps.LatLngLiteral = {
-      lat: geolocationQuery.data.coords.latitude,
-      lng: geolocationQuery.data.coords.longitude
-    }
-
-    return (
-      <>
-        <ClerkProvider publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY} afterSignOutUrl="/">
-          <SignedIn>
-            <UserButton />
-            <GoogleMap defaultLocation={{ lat: 59.3755, lng: 17.9668}} />
-          </SignedIn>
-          <SignedOut>
-            <SignInButton />
-          </SignedOut>
-        </ClerkProvider>
-      </>
-    );
-  }
-
+  return (
+    <>
+      <ClerkProvider publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY} afterSignOutUrl="/">
+        <SignedIn>
+          <UserButton />
+          {geolocationQuery.data &&
+            <GoogleMap defaultLocation={{
+              lat: geolocationQuery.data.coords.latitude,
+              lng: geolocationQuery.data.coords.longitude
+            }} />
+          }
+        </SignedIn>
+        <SignedOut>
+          <SignInButton />
+        </SignedOut>
+      </ClerkProvider>
+    </>
+  );
 }

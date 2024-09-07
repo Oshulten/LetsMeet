@@ -9,7 +9,6 @@ interface Props {
 }
 
 export default function GoogleMap({ defaultLocation }: Props) {
-    console.log("Top of GoogleMap");
     const { locations, currentLocation, setCurrentLocation, user, signalIsInitialized } = useSignalRLocations(defaultLocation);
 
     const handleContextmenu = (e: MapMouseEvent) => {
