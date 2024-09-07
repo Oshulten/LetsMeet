@@ -5,8 +5,8 @@ import { useUser } from "@clerk/clerk-react";
 import { latLngLiteralToGeolocation } from "../utilities/conversations";
 
 export default function useSignalRLocations(defaultLocation: google.maps.LatLngLiteral) {
-    const { user } = useUser();
-    const [currentLocation, setCurrentLocationLocal] = useState<Geolocation>(latLngLiteralToGeolocation(defaultLocation, user!.id, user!.username!));
+    const user = useUser().user!;
+    const [currentLocation, setCurrentLocationLocal] = useState<Geolocation>(latLngLiteralToGeolocation(defaultLocation, user.id, user.username));
     const [connection, setConnection] = useState<HubConnection | null>(null);
     const [locations, setLocations] = useState<Geolocation[]>([]);
 
@@ -41,27 +41,11 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
     }
 
     const registerUser = async (localConnection: HubConnection) => {
-        if (!user) {
-            return;
-        }
-
-        if (!user.username) {
-            return;
-        }
-
         await localConnection.invoke("RegisterUser", { username: user.username, clerkId: user.id } as User);
     }
 
     const sendInitialLocation = async (localConnection: HubConnection) => {
-        if (!user) {
-            return;
-        }
-
-        if (!user.username) {
-            return;
-        }
-
-        const geolocation = latLngLiteralToGeolocation(defaultLocation, user.id, user.username);
+        const geolocation = latLngLiteralToGeolocation(defaultLocation, user.id, user.username!);
         await localConnection.invoke("SendLocation", geolocation);
     }
 
@@ -75,8 +59,6 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
     }
 
     const effectCallback = async () => {
-        console.log("effectCallback");
-
         if (connection) {
             return stopConnection
         }
