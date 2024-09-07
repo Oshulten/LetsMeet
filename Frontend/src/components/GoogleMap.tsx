@@ -3,9 +3,7 @@ import { AdvancedMarker, APIProvider, Map, MapMouseEvent, Pin } from '@vis.gl/re
 import { useEffect, useState } from 'react';
 import useSignalRLocations from '../hooks/useSignalRLocations';
 import { DtoGeolocation } from '../api/types';
-import { useUser } from '@clerk/clerk-react';
 import { ensureUserExists } from '../api/endpoints';
-import haversine from 'haversine-distance'
 
 interface Props {
     defaultLocation: google.maps.LatLngLiteral,
@@ -20,8 +18,7 @@ function geolocationToLatLngLiteral(location: DtoGeolocation): google.maps.LatLn
 
 export default function GoogleMap({ defaultLocation }: Props) {
     const [currentLocation, setCurrentLocation] = useState<google.maps.LatLngLiteral | null>(defaultLocation);
-    const { user } = useUser();
-    const { locations, sendLocation } = useSignalRLocations();
+    const { locations, sendLocation, user } = useSignalRLocations();
 
     useEffect(() => {
         if (user) ensureUserExists({ clerkId: user.id, username: user.username ?? "Inkognito", });
@@ -55,7 +52,7 @@ export default function GoogleMap({ defaultLocation }: Props) {
                             <AdvancedMarker
                                 position={geolocationToLatLngLiteral(location)}
                                 key={location.clerkId}
-                                onClick={e => console.log("Clikcked marker!")}>
+                                onClick={e => console.log("Clicked marker!")}>
                                 <Pin
                                     background={'#F0B004'}
                                     glyphColor={'#000'}

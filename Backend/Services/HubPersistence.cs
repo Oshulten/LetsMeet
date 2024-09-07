@@ -8,7 +8,7 @@ using Backend.Models;
 
 namespace Backend.Services;
 
-public class HubPersistence(LetsMeetDbContext db)
+public class HubPersistence
 {
     public Dictionary<string, Geolocation> _lastLocations { get; set; } = [];
 
@@ -17,7 +17,8 @@ public class HubPersistence(LetsMeetDbContext db)
             .Select(keyvalue => (DtoGeolocation)keyvalue.Value)
             .ToList();
 
-    public List<User> ActiveUsers => _lastLocations.Keys.Select(clerkId => db.Users.Find(clerkId)!).ToList();
+    public List<User> ActiveUsers(LetsMeetDbContext db) =>
+        _lastLocations.Keys.Select(clerkId => db.Users.Find(clerkId)!).ToList();
 
     public void AddToLastLocations(string connectionId, Geolocation location)
     {
