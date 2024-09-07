@@ -2,27 +2,28 @@ import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 import { useEffect, useState } from "react";
 import { DtoGeolocation, DtoUser } from '../api/types';
 import { useUser } from "@clerk/clerk-react";
+import { latLngLiteralToGeolocation } from "../utilities/conversations";
 
-export default function useSignalRLocations() {
+export default function useSignalRLocations(defaultLocation: google.maps.LatLngLiteral) {
     const { user } = useUser();
+    const [currentLocation, setCurrentLocationLocal] = useState<DtoGeolocation>(latLngLiteralToGeolocation(defaultLocation, user!.id, user!.username!));
     const [connection, setConnection] = useState<HubConnection | null>(null);
     const [locations, setLocations] = useState<DtoGeolocation[]>([]);
-
-    console.log(`Connected user ${user!.id} to hub`);
 
     useEffect(() => {
         const connection = new HubConnectionBuilder()
             .withUrl("http://localhost:5055/notifications")
             .build();
 
-        const establishConnection = async () => {
+        console.log(`Connected user ${user!.id} to hub`);
+
+        const startConnection = async () => {
             try {
                 await connection.start();
-
                 await connection.invoke("RegisterUser", { username: user?.username, clerkId: user?.id } as DtoUser)
 
-                connection.on("RecieveGeolocations", data => {
-                    setLocations(data);
+                connection.on("RecieveGeolocations", fetchedLocations => {
+                    setLocations(fetchedLocations);
                 });
 
                 setConnection(connection);
@@ -31,24 +32,26 @@ export default function useSignalRLocations() {
             }
         }
 
-        const abortConnection = () => {
+        const stopConnection = () => {
             connection.stop();
         }
 
-        establishConnection();
+        startConnection();
 
-        return abortConnection;
+        return stopConnection;
     }, []);
 
-    const sendLocation = async (location: DtoGeolocation) => {
+    const setCurrentLocation = async (location: DtoGeolocation) => {
         if (connection) {
             await connection.invoke("SendLocation", location);
+            setCurrentLocationLocal(location);
         }
     }
 
     return {
         locations,
-        sendLocation,
+        currentLocation,
+        setCurrentLocation,
         user
     };
 }

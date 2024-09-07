@@ -1,37 +1,34 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { AdvancedMarker, APIProvider, Map, MapMouseEvent, Pin } from '@vis.gl/react-google-maps';
-import { useEffect, useState } from 'react';
 import useSignalRLocations from '../hooks/useSignalRLocations';
 import { DtoGeolocation } from '../api/types';
-import { ensureUserExists } from '../api/endpoints';
+import { geolocationToLatLngLiteral, latLngLiteralToGeolocation } from '../utilities/conversations';
 
 interface Props {
     defaultLocation: google.maps.LatLngLiteral,
 }
 
-function geolocationToLatLngLiteral(location: DtoGeolocation): google.maps.LatLngLiteral {
-    return {
-        lat: location.latitude,
-        lng: location.longitude
-    }
-}
-
 export default function GoogleMap({ defaultLocation }: Props) {
-    const [currentLocation, setCurrentLocation] = useState<google.maps.LatLngLiteral | null>(defaultLocation);
-    const { locations, sendLocation, user } = useSignalRLocations();
+    const { locations, currentLocation, setCurrentLocation, user } = useSignalRLocations(defaultLocation);
 
     const handleContextmenu = (e: MapMouseEvent) => {
-        setCurrentLocation(e.detail.latLng);
+        setCurrentLocation(latLngLiteralToGeolocation(e.detail.latLng!, user!.id, user!.username!));
         const location: DtoGeolocation = {
             clerkId: user!.id,
             username: user!.username!,
             latitude: e.detail.latLng!.lat,
             longitude: e.detail.latLng!.lng
         }
-        sendLocation(location);
+        setCurrentLocation(location);
     }
 
-    const otherUserLocations = locations.filter(location => location.clerkId != user!.id);
+    if (currentLocation) {
+        console.log(`Current location [${currentLocation.username}]: (${currentLocation.latitude}, ${currentLocation.longitude})`);
+    }
+    if (locations) {
+        locations.forEach(loc => console.log(`${loc.username} : (${loc.latitude}, ${loc.longitude})`));
+    }
+
 
     return (
         <>
@@ -45,24 +42,25 @@ export default function GoogleMap({ defaultLocation }: Props) {
                     mapId={"LetsMeetMap"}
                     onContextmenu={handleContextmenu}>
                     {
-                        otherUserLocations.map(location =>
+                        locations.map(location =>
                             <AdvancedMarker
                                 position={geolocationToLatLngLiteral(location)}
                                 key={location.clerkId}
-                                onClick={e => console.log("Clicked marker!")}>
+                                onClick={() => console.log(`Clicked on ${location.username}`)}
+                            >
                                 <Pin
                                     background={'#F0B004'}
                                     glyphColor={'#000'}
                                     borderColor={'#000'} />
                             </AdvancedMarker>)
                     }
-                    <AdvancedMarker
+                    {/* <AdvancedMarker
                         position={currentLocation}>
                         <Pin
                             background={'#FF0000'}
                             glyphColor={'#000'}
                             borderColor={'#000'} />
-                    </AdvancedMarker>
+                    </AdvancedMarker> */}
                 </Map>
             </APIProvider >
         </>
