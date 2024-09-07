@@ -5,6 +5,7 @@ import useSignalRLocations from '../hooks/useSignalRLocations';
 import { DtoGeolocation } from '../api/types';
 import { useUser } from '@clerk/clerk-react';
 import { ensureUserExists } from '../api/endpoints';
+import haversine from 'haversine-distance'
 
 interface Props {
     defaultLocation: google.maps.LatLngLiteral,
@@ -23,12 +24,7 @@ export default function GoogleMap({ defaultLocation }: Props) {
     const { locations, sendLocation } = useSignalRLocations();
 
     useEffect(() => {
-        if (user) {
-            ensureUserExists({
-                clerkId: user.id,
-                username: user.username ?? "Inkognito",
-            });
-        }
+        if (user) ensureUserExists({ clerkId: user.id, username: user.username ?? "Inkognito", });
     }, []);
 
     const handleContextmenu = (e: MapMouseEvent) => {
@@ -58,7 +54,8 @@ export default function GoogleMap({ defaultLocation }: Props) {
                         otherUserLocations.map(location =>
                             <AdvancedMarker
                                 position={geolocationToLatLngLiteral(location)}
-                                key={location.clerkId}>
+                                key={location.clerkId}
+                                onClick={e => console.log("Clikcked marker!")}>
                                 <Pin
                                     background={'#F0B004'}
                                     glyphColor={'#000'}
