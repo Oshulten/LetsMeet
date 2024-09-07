@@ -26,6 +26,7 @@ namespace Backend.Database
         public User AddUser(DtoUser dto)
         {
             var user = Users.Find(dto.ClerkId);
+
             if (user is null)
             {
                 var newUser = new User(dto.Username, dto.ClerkId);
@@ -33,6 +34,7 @@ namespace Backend.Database
                 SaveChanges();
                 return newUser;
             }
+
             return user;
         }
     }
