@@ -6,7 +6,7 @@ import { latLngLiteralToGeolocation } from "../utilities/conversations";
 
 export default function useSignalRLocations(defaultLocation: google.maps.LatLngLiteral) {
     const user = useUser().user!;
-    const [currentLocation, setCurrentLocationLocal] = useState<Geolocation>(latLngLiteralToGeolocation(defaultLocation, user.id, user.username));
+    const [currentLocation, setCurrentLocationLocal] = useState<Geolocation>(latLngLiteralToGeolocation(defaultLocation, user.id, user.username!));
     const [connection, setConnection] = useState<HubConnection | null>(null);
     const [locations, setLocations] = useState<Geolocation[]>([]);
 
@@ -35,7 +35,8 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
     }
 
     const setConnectionCallbacks = (localConnection: HubConnection) => {
-        localConnection.on("RecieveGeolocations", fetchedLocations => {
+        localConnection.on("RecieveGeolocations", (fetchedLocations: Geolocation[]) => {
+            fetchedLocations = fetchedLocations.filter(loc => loc.clerkId != user.id);
             setLocations(fetchedLocations);
         });
     }
