@@ -27,7 +27,18 @@ builder.Services.AddOpenApiDocument(config =>
     config.Version = version;
 });
 
-builder.Services.AddCors();
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        policy =>
+        {
+            policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+        });
+});
 
 var app = builder.Build();
 
@@ -43,18 +54,12 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseCors(options =>
-{
-    options
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowCredentials();
-});
+app.UseCors();
 
 app.UseHttpsRedirection();
 
-// app.UseAuthentication();
-// app.UseAuthorization();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<GeolocationHub>("/notifications");

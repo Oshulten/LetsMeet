@@ -12,6 +12,7 @@ public class Authorization(LetsMeetDbContext db) : ControllerBase
     public IActionResult EnsureUserIsCreated(DtoUser dto)
     {
         db.AddUser(dto);
+        Console.WriteLine($"Ensured user {dto.Username} exists");
         return Ok();
     }
 }
