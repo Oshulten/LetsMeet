@@ -1,14 +1,11 @@
-// import { components } from './schema';
-
-
-export type DtoGeolocation = {
+export type Geolocation = {
     clerkId: string,
     username: string,
     latitude: number,
     longitude: number
 }
 
-export type DtoUser = {
+export type User = {
     username: string,
     clerkId: string
 }

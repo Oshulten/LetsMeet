@@ -11,14 +11,14 @@ public class GeolocationHub(LetsMeetDbContext db, HubPersistence persistence) : 
     public override Task OnConnectedAsync()
     {
         Console.WriteLine($"Established connection with id {Context.ConnectionId}");
-        return Task.CompletedTask;
+        return base.OnConnectedAsync();
     }
 
     public override Task OnDisconnectedAsync(Exception? exception)
     {
         Console.WriteLine($"Disconnected id {Context.ConnectionId}");
         persistence.DeregisterUserByConnectionId(Context.ConnectionId);
-        return Task.CompletedTask;
+        return base.OnDisconnectedAsync(exception);
     }
 
     public void RegisterUser(DtoUser user)

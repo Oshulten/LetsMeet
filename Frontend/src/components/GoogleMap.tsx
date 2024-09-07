@@ -1,7 +1,7 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { AdvancedMarker, APIProvider, Map, MapMouseEvent, Pin } from '@vis.gl/react-google-maps';
 import useSignalRLocations from '../hooks/useSignalRLocations';
-import { DtoGeolocation } from '../api/types';
+import { Geolocation } from '../api/types';
 import { geolocationToLatLngLiteral, latLngLiteralToGeolocation } from '../utilities/conversations';
 
 interface Props {
@@ -9,11 +9,12 @@ interface Props {
 }
 
 export default function GoogleMap({ defaultLocation }: Props) {
-    const { locations, currentLocation, setCurrentLocation, user } = useSignalRLocations(defaultLocation);
+    console.log("Top of GoogleMap");
+    const { locations, currentLocation, setCurrentLocation, user, signalIsInitialized } = useSignalRLocations(defaultLocation);
 
     const handleContextmenu = (e: MapMouseEvent) => {
         setCurrentLocation(latLngLiteralToGeolocation(e.detail.latLng!, user!.id, user!.username!));
-        const location: DtoGeolocation = {
+        const location: Geolocation = {
             clerkId: user!.id,
             username: user!.username!,
             latitude: e.detail.latLng!.lat,
@@ -22,13 +23,17 @@ export default function GoogleMap({ defaultLocation }: Props) {
         setCurrentLocation(location);
     }
 
-    if (currentLocation) {
-        console.log(`Current location [${currentLocation.username}]: (${currentLocation.latitude}, ${currentLocation.longitude})`);
-    }
-    if (locations) {
-        locations.forEach(loc => console.log(`${loc.username} : (${loc.latitude}, ${loc.longitude})`));
+    if (!signalIsInitialized) {
+        console.log("Signal is not initialized");
+        return <p>Loading...</p>
     }
 
+    // if (currentLocation) {
+    //     console.log(`Current location [${currentLocation.username}]: (${currentLocation.latitude}, ${currentLocation.longitude})`);
+    // }
+    // if (locations) {
+    //     locations.forEach(loc => console.log(`${loc.username} : (${loc.latitude}, ${loc.longitude})`));
+    // }
 
     return (
         <>

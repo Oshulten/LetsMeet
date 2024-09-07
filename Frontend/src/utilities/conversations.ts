@@ -1,6 +1,6 @@
-import { DtoGeolocation } from "../api/types";
+import { Geolocation } from "../api/types";
 
-export function geolocationToLatLngLiteral(location: DtoGeolocation) {
+export function geolocationToLatLngLiteral(location: Geolocation) {
     return {
         lat: location.latitude,
         lng: location.longitude
@@ -9,9 +9,9 @@ export function geolocationToLatLngLiteral(location: DtoGeolocation) {
 
 export function latLngLiteralToGeolocation(latLng: google.maps.LatLngLiteral, clerkId: string, username: string) {
     return {
-        clerkId,
-        username,
+        clerkId: clerkId,
+        username: username,
         latitude: latLng.lat,
         longitude: latLng.lng
-    } as DtoGeolocation;
+    } as Geolocation;
 }

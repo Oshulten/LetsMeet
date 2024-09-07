@@ -31,11 +31,9 @@ declare module '@tanstack/react-router' {
 export const AppContext = createContext<ApplicationContext>(defaultApplicationContext);
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <AppContext.Provider value={defaultApplicationContext}>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-      </QueryClientProvider>
-    </AppContext.Provider>
-  </StrictMode>,
+  <AppContext.Provider value={defaultApplicationContext}>
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
+  </AppContext.Provider>
 )

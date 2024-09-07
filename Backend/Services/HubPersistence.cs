@@ -20,21 +20,31 @@ public class HubPersistence
 
     public User RegisterUser(string connectionId, DtoUser dtoUser, LetsMeetDbContext db)
     {
+        Console.WriteLine("RegisterUser");
+        LogActiveUsers();
+
+        if (_activeUsers.ContainsKey(connectionId))
+        {
+            Console.WriteLine("1");
+            return _activeUsers[connectionId];
+        }
+
+        //Checks if a user with a specific clerkId exists in the dictionary
         if (_activeUsers.Values.FirstOrDefault(u => u.Id == dtoUser.ClerkId) is null)
         {
-            var existingUser = db.Users.Find(dtoUser.ClerkId) ?? db.AddUser(dtoUser);
-            _activeUsers.Add(connectionId, existingUser);
+            Console.WriteLine("2");
+            var existingUser = db.AddUser(dtoUser);
+            _activeUsers.TryAdd(connectionId, existingUser);
+            return existingUser;
         }
+
+        Console.WriteLine("2");
         return _activeUsers[connectionId];
     }
 
-    public void DeregisterUserByConnectionId(string connectionId)
-    {
-        _activeUsers.Remove(connectionId);
-    }
+    public void DeregisterUserByConnectionId(string connectionId) => _activeUsers.Remove(connectionId);
 
-    public List<User> ActiveUsers =>
-        _activeUsers.Values.ToList();
+    public List<User> ActiveUsers => [.. _activeUsers.Values];
 
     public void LogActiveUsers()
     {
@@ -44,13 +54,10 @@ public class HubPersistence
 
     public void AddToLastLocations(string clerkId, Geolocation location)
     {
-        if (!_lastLocations.ContainsKey(clerkId))
-        {
-            _lastLocations.Add(clerkId, location);
-            return;
-        }
+        Console.WriteLine($"Add location {location.Id} with clerkId {clerkId}");
+        _lastLocations.TryAdd(clerkId, location);
 
-        if (_lastLocations[clerkId].Timestamp > location.Timestamp)
+        if (_lastLocations[clerkId].Timestamp < location.Timestamp)
         {
             _lastLocations[clerkId] = location;
         }

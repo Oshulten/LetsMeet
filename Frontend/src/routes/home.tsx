@@ -23,7 +23,7 @@ export default function Home() {
         <ClerkProvider publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY} afterSignOutUrl="/">
           <SignedIn>
             <UserButton />
-            <GoogleMap defaultLocation={location} />
+            <GoogleMap defaultLocation={{ lat: 59.3755, lng: 17.9668}} />
           </SignedIn>
           <SignedOut>
             <SignInButton />
