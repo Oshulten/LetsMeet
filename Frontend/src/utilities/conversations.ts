@@ -15,3 +15,10 @@ export function latLngLiteralToGeolocation(latLng: google.maps.LatLngLiteral, cl
         longitude: latLng.lng
     } as Geolocation;
 }
+
+export function latLngToLatLngLiteral(latLng: google.maps.LatLng) {
+    return {
+        lat: latLng.lat(),
+        lng: latLng.lng()
+    } as google.maps.LatLngLiteral;
+}

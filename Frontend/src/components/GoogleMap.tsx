@@ -2,7 +2,7 @@
 import { AdvancedMarker, APIProvider, Map, MapMouseEvent, MapProps, Pin } from '@vis.gl/react-google-maps';
 import useSignalRLocations from '../hooks/useSignalRLocations';
 import { Geolocation } from '../api/types';
-import { geolocationToLatLngLiteral, latLngLiteralToGeolocation } from '../utilities/conversations';
+import { geolocationToLatLngLiteral, latLngLiteralToGeolocation, latLngToLatLngLiteral } from '../utilities/conversations';
 
 interface Props {
     defaultLocation: google.maps.LatLngLiteral,
@@ -11,14 +11,9 @@ interface Props {
 export default function GoogleMap({ defaultLocation }: Props) {
     const { otherUserLocations, userLocation, setUserLocation, user, signalIsInitialized } = useSignalRLocations(defaultLocation);
 
-    const handleContextMenu = (e: MapMouseEvent) => {
-        const location: Geolocation = {
-            clerkId: user!.id,
-            username: user!.username!,
-            latitude: e.detail.latLng!.lat,
-            longitude: e.detail.latLng!.lng
-        }
-        setUserLocation(location);
+    const handleDragEnd = (e: google.maps.MapMouseEvent) => {
+        const latLngLiteral = latLngToLatLngLiteral(e.latLng!);
+        setUserLocation(latLngLiteralToGeolocation(latLngLiteral, user.id, user.username!));
     }
 
     if (!signalIsInitialized) {
@@ -39,7 +34,8 @@ export default function GoogleMap({ defaultLocation }: Props) {
 
     const userLocationMarker = (
         <AdvancedMarker
-            position={geolocationToLatLngLiteral(userLocation)}>
+            position={geolocationToLatLngLiteral(userLocation)}
+            onDragEnd={handleDragEnd}>
             <Pin
                 background={'#FF0000'}
                 glyphColor={'#000'}
@@ -53,7 +49,6 @@ export default function GoogleMap({ defaultLocation }: Props) {
         gestureHandling: 'greedy',
         disableDefaultUI: true,
         mapId: 'LetsMeetMap',
-        onContextmenu: handleContextMenu,
     }
 
     return (
