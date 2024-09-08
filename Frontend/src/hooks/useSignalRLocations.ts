@@ -10,7 +10,7 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
     const [currentLocation, setCurrentLocationLocal] = useState<Geolocation>(latLngLiteralToGeolocation(defaultLocation, user.id, user.username!));
     const [connection, setConnection] = useState<HubConnection | null>(null);
     const [locations, setLocations] = useState<Geolocation[]>([]);
-    const [userWantsToMeet, setUserWantsToMeet] = useState<User[]>([]);
+    const [meetingRequests, setMeetingRequests] = useState<User[]>([]);
 
     const initializeConnection = () => {
         if (connection) {
@@ -42,11 +42,13 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
         });
 
         HubClient.registerReceiveMeetingRequest(localConnection, meeting => {
-            setUserWantsToMeet([...userWantsToMeet, meeting.requestUser]);
+            setMeetingRequests([...meetingRequests, meeting.requestUser]);
+            console.log(`${meeting.requestUser.username} wants to meet you!`);
         });
 
         HubClient.registerRecieveMeetingCancellation(localConnection, meeting => {
-            setUserWantsToMeet(userWantsToMeet.filter(u => u.clerkId != meeting.requestUser.clerkId));
+            setMeetingRequests(meetingRequests.filter(u => u.clerkId != meeting.requestUser.clerkId));
+            console.log(`${meeting.requestUser.username} cancelled your meeting`);
         });
     }
 
@@ -97,7 +99,7 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
         }
     }
 
-    const wantsMeeting = async (targetUser: User) => {
+    const requestMeeting = async (targetUser: User) => {
         if (connection) {
             await HubServer.requestMeeting(connection, {
                 requestUser: ClerkUserToUser(user.id, user.username!),
@@ -124,8 +126,8 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
         userLocation: currentLocation,
         setUserLocation: setCurrentLocation,
         user: user,
-        userWantsToMeet: userWantsToMeet,
-        wantsMeeting: wantsMeeting,
+        meetingRequests: meetingRequests,
+        requestMeeting: requestMeeting,
         cancelMeeting: cancelMeeting,
         signalIsInitialized: signalIsInitialized
     };

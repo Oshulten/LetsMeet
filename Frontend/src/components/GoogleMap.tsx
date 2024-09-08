@@ -15,14 +15,14 @@ export default function GoogleMap({ defaultLocation }: Props) {
         userLocation,
         setUserLocation,
         user,
-        userWantsToMeet,
-        wantsMeeting,
+        meetingRequests,
+        requestMeeting,
         cancelMeeting,
         signalIsInitialized
     } = useSignalRLocations(defaultLocation);
 
     console.log("UserWantsToMeet");
-    console.log(userWantsToMeet);
+    console.log(meetingRequests);
 
     const handleDragEnd = (e: google.maps.MapMouseEvent) => {
         const latLngLiteral = latLngToLatLngLiteral(e.latLng!);
@@ -52,7 +52,7 @@ export default function GoogleMap({ defaultLocation }: Props) {
                             key={location.clerkId}
                             position={location}
                             userPosition={userLocation}
-                            handleWantMeeting={() => wantsMeeting(GeolocationToUser(location))}
+                            handleWantMeeting={() => requestMeeting(GeolocationToUser(location))}
                             handleCancelMeeting={() => cancelMeeting(GeolocationToUser(location))} />)}
                     <UserMarker position={userLocation} onDragEnd={handleDragEnd} />
                 </Map>
