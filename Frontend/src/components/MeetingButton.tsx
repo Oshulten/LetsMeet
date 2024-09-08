@@ -3,15 +3,16 @@ import { useState } from "react";
 import { User } from "../api/types";
 
 interface Props {
+    state?: MeetButtonState,
     handleRequestMeeting: () => Promise<void>,
     handleCancelMeeting: () => Promise<void>,
     otherUser: User
 }
 
-type MeetButtonState = "neutral" | "awaitingOtherUserConfirmation" | "awaitingUserConfirmation" | "cancelled";
+type MeetButtonState = "neutral" | "awaitingOtherUserConfirmation" | "awaitingUserConfirmation";
 
-export default function MeetingButton({ handleRequestMeeting, handleCancelMeeting, otherUser }: Props) {
-    const [meetButtonState, setMeetButtonState] = useState<MeetButtonState>('neutral');
+export default function MeetingButton({ state, handleRequestMeeting, handleCancelMeeting, otherUser }: Props) {
+    const [meetButtonState, setMeetButtonState] = useState<MeetButtonState>(state ?? 'neutral');
 
     switch (meetButtonState) {
         case 'neutral':
@@ -29,7 +30,7 @@ export default function MeetingButton({ handleRequestMeeting, handleCancelMeetin
             return (
                 <button
                     onClick={() => {
-                        setMeetButtonState('cancelled');
+                        setMeetButtonState('neutral');
                         handleCancelMeeting();
                     }}
                     className="btn btn-info text-white font-normal w-full">
@@ -47,11 +48,5 @@ export default function MeetingButton({ handleRequestMeeting, handleCancelMeetin
                     {`Not a good time...`}
                 </button>
             </ >)
-
-        case 'cancelled':
-            return (
-                <button className="btn btn-info text-white font-normal w-full">
-                    {`Maybe another time`}
-                </button>)
     }
 }

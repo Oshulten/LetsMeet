@@ -10,15 +10,14 @@ import MeetingButton from "./MeetingButton";
 interface Props {
     position: Geolocation,
     userPosition: Geolocation,
-    handleWantMeeting: () => Promise<void>,
-    handleCancelMeeting: () => Promise<void>
+    handleRequestMeeting: () => Promise<void>,
+    handleCancelMeeting: () => Promise<void>,
+    infoWindowIsOpen: boolean
 }
 
-type MeetButtonState = "neutral" | "awaitingOtherUserConfirmation" | "awaitingUserConfirmation" | "cancelled";
-
-export default function OtherUserMarker({ position, userPosition, handleWantMeeting, handleCancelMeeting }: Props) {
+export default function OtherUserMarker({ position, userPosition, handleRequestMeeting, handleCancelMeeting, infoWindowIsOpen }: Props) {
     const [markerRef, marker] = useAdvancedMarkerRef();
-    const [infoWindowShown, setInfoWindowShown] = useState(false);
+    const [infoWindowShown, setInfoWindowShown] = useState(infoWindowIsOpen);
 
     const handleMarkerClick = useCallback(() => setInfoWindowShown(isShown => !isShown), []);
     const handleClose = useCallback(() => setInfoWindowShown(false), []);
@@ -32,7 +31,7 @@ export default function OtherUserMarker({ position, userPosition, handleWantMeet
         <div>
             <p>{readableDistance(haversine(position, userPosition))} away</p>
             <MeetingButton
-                handleRequestMeeting={handleWantMeeting}
+                handleRequestMeeting={handleRequestMeeting}
                 handleCancelMeeting={handleCancelMeeting}
                 otherUser={GeolocationToUser(position)}
             />

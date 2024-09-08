@@ -52,8 +52,9 @@ export default function GoogleMap({ defaultLocation }: Props) {
                             key={location.clerkId}
                             position={location}
                             userPosition={userLocation}
-                            handleWantMeeting={() => requestMeeting(GeolocationToUser(location))}
-                            handleCancelMeeting={() => cancelMeeting(GeolocationToUser(location))} />)}
+                            handleRequestMeeting={() => requestMeeting(GeolocationToUser(location))}
+                            handleCancelMeeting={() => cancelMeeting(GeolocationToUser(location))}
+                            infoWindowIsOpen={meetingRequests.find(request => request.clerkId == location.clerkId) != undefined} />)}
                     <UserMarker position={userLocation} onDragEnd={handleDragEnd} />
                 </Map>
             </APIProvider >
