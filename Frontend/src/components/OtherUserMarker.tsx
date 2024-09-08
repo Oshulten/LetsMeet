@@ -8,12 +8,14 @@ import readableDistance from "../utilities/readableDistance";
 
 interface Props {
     position: Geolocation,
-    userPosition: Geolocation
+    userPosition: Geolocation,
+    handleWantMeeting: () => Promise<void>,
+    handleCancelMeeting: () => Promise<void>
 }
 
 type MeetButtonState = "neutral" | "awaitingOtherUserConfirmation" | "awaitingUserConfirmation" | "cancelled";
 
-export default function OtherUserMarker({ position, userPosition }: Props) {
+export default function OtherUserMarker({ position, userPosition, handleWantMeeting, handleCancelMeeting }: Props) {
     const [meetButtonState, setMeetButtonState] = useState<MeetButtonState>('neutral');
     const [markerRef, marker] = useAdvancedMarkerRef();
     const [infoWindowShown, setInfoWindowShown] = useState(false);
@@ -29,9 +31,19 @@ export default function OtherUserMarker({ position, userPosition }: Props) {
     function meetButton() {
         switch (meetButtonState) {
             case 'neutral':
-                return <button onClick={() => setMeetButtonState('awaitingOtherUserConfirmation')} className="btn btn-info text-white font-normal w-full">{`Let's Meet!`}</button>
+                return <button
+                    onClick={() => {
+                        setMeetButtonState('awaitingOtherUserConfirmation');
+                        handleWantMeeting();
+                    }}
+                    className="btn btn-info text-white font-normal w-full">{`Let's Meet!`}</button>
             case 'awaitingOtherUserConfirmation':
-                return (<button onClick={() => setMeetButtonState('cancelled')} className="btn btn-info text-white font-normal w-full">
+                return (<button
+                    onClick={() => {
+                        setMeetButtonState('cancelled');
+                        handleCancelMeeting();
+                    }}
+                    className="btn btn-info text-white font-normal w-full">
                     Waiting for response
                     <span className="loading loading-spinner text-white"></span>
                 </button>)

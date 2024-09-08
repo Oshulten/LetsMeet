@@ -9,3 +9,8 @@ export type User = {
     username: string,
     clerkId: string
 }
+
+export type Meeting = {
+    requestUser: User,
+    targetUser: User
+}

@@ -28,18 +28,18 @@ public class GeolocationHub(LetsMeetDbContext db, HubPersistence persistence) : 
         persistence.LogActiveUsers();
     }
 
-    public async Task WantsToMeet(string clerkId)
+    public async Task WantsToMeet(DtoMeeting meeting)
     {
-        var user = db.UserByClerkId(clerkId);
-        var connectionId = persistence.ConnectionIdByUserId(clerkId);
-        await Clients.Client(connectionId).ReceiveWantMeeting((DtoUser)user!);
+        var connectionId = persistence.ConnectionIdByUserId(meeting.TargetUser.ClerkId);
+        await Clients.Client(connectionId).ReceiveWantMeeting(meeting);
+        Console.WriteLine($"{meeting.RequestUser.Username} wants to meet {meeting.TargetUser.Username}");
     }
 
-    public async Task CancelWantsToMeet(string clerkId)
+    public async Task CancelWantsToMeet(DtoMeeting meeting)
     {
-        var user = db.UserByClerkId(clerkId);
-        var connectionId = persistence.ConnectionIdByUserId(clerkId);
-        await Clients.Client(connectionId).ReceiveCancelMeeting((DtoUser)user!);
+        var connectionId = persistence.ConnectionIdByUserId(meeting.RequestUser.ClerkId);
+        await Clients.Client(connectionId).ReceiveCancelMeeting(meeting);
+        Console.WriteLine($"{meeting.RequestUser.Username} cancels meeting with {meeting.TargetUser.Username}");
     }
 
     public async Task SendLocation(DtoGeolocation dto)

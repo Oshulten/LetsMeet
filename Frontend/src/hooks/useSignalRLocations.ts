@@ -1,6 +1,6 @@
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 import { useEffect, useState } from "react";
-import { Geolocation, User } from '../api/types';
+import { Geolocation, Meeting, User } from '../api/types';
 import { useUser } from "@clerk/clerk-react";
 import { latLngLiteralToGeolocation } from "../utilities/conversations";
 
@@ -41,12 +41,12 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
             setLocations(fetchedLocations);
         });
 
-        localConnection.on("ReceiveWantMeeting", (user: User) => {
-            setUserWantsToMeet([...userWantsToMeet, user]);
+        localConnection.on("ReceiveWantMeeting", (meeting: Meeting) => {
+            setUserWantsToMeet([...userWantsToMeet, meeting.requestUser]);
         });
 
-        localConnection.on("ReceiveCancelMeeting", (user: User) => {
-            setUserWantsToMeet(userWantsToMeet.filter(u => u.clerkId != user.clerkId));
+        localConnection.on("ReceiveCancelMeeting", (meeting: Meeting) => {
+            setUserWantsToMeet(userWantsToMeet.filter(u => u.clerkId != meeting.requestUser.clerkId));
         });
     }
 
