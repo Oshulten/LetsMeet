@@ -1,6 +1,6 @@
 import { AdvancedMarker, Pin } from "@vis.gl/react-google-maps";
 import { Geolocation } from '../api/types';
-import { geolocationToLatLngLiteral } from "../utilities/conversations";
+import { latLngLiteral } from "../utilities/conversations";
 
 /* eslint-disable react/react-in-jsx-scope */
 interface Props {
@@ -11,7 +11,7 @@ interface Props {
 export default function UserMarker({ position, onDragEnd }: Props) {
     return (
         <AdvancedMarker
-            position={geolocationToLatLngLiteral(position)}
+            position={latLngLiteral(position)}
             onDragEnd={onDragEnd}>
             <Pin
                 background={'#00AA00'}

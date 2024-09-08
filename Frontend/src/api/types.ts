@@ -1,6 +1,5 @@
 export type Geolocation = {
-    clerkId: string,
-    username: string,
+    user: User,
     latitude: number,
     longitude: number
 }

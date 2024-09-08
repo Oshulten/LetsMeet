@@ -2,7 +2,7 @@
 import { AdvancedMarker, AdvancedMarkerProps, InfoWindow, InfoWindowProps, Pin, PinProps, useAdvancedMarkerRef } from "@vis.gl/react-google-maps";
 import { useCallback, useState } from "react";
 import { Geolocation } from "../api/types";
-import { geolocationToLatLngLiteral, GeolocationToUser } from "../utilities/conversations";
+import { latLngLiteral, GeolocationToUser } from "../utilities/conversations";
 import haversine from 'haversine-distance';
 import readableDistance from "../utilities/readableDistance";
 import MeetingButton from "./MeetingButton";
@@ -38,7 +38,7 @@ export default function OtherUserMarker({ position, userPosition, handleRequestM
         </div>
 
     const markerProps: AdvancedMarkerProps = {
-        position: geolocationToLatLngLiteral(position),
+        position: latLngLiteral(position),
         onClick: handleMarkerClick
     }
 

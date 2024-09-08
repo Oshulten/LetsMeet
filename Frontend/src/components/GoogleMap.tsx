@@ -1,7 +1,7 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { APIProvider, Map, MapProps } from '@vis.gl/react-google-maps';
 import useSignalRLocations from '../hooks/useSignalRLocations';
-import { GeolocationToUser, latLngLiteralToGeolocation, latLngToLatLngLiteral } from '../utilities/conversations';
+import { GeolocationToUser, latLngLiteralToGeolocation, latLngLiteralFromlatLng } from '../utilities/conversations';
 import OtherUserMarker from './OtherUserMarker';
 import UserMarker from './UserMarker';
 
@@ -25,7 +25,7 @@ export default function GoogleMap({ defaultLocation }: Props) {
     console.log(meetingRequests);
 
     const handleDragEnd = (e: google.maps.MapMouseEvent) => {
-        const latLngLiteral = latLngToLatLngLiteral(e.latLng!);
+        const latLngLiteral = latLngLiteralFromlatLng(e.latLng!);
         setUserLocation(latLngLiteralToGeolocation(latLngLiteral, user.id, user.username!));
     }
 

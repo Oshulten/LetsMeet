@@ -1,38 +1,25 @@
-import { Geolocation, User } from "../api/types";
+import { Geolocation, Meeting, User } from "../api/types";
 
-export function geolocationToLatLngLiteral(location: Geolocation) {
-    return {
-        lat: location.latitude,
-        lng: location.longitude
-    } as google.maps.LatLngLiteral;
+export function latLngLiteral(lat: number, lng: number) {
+    return { lat, lng } as google.maps.LatLngLiteral;
 }
 
-export function latLngLiteralToGeolocation(latLng: google.maps.LatLngLiteral, clerkId: string, username: string) {
-    return {
-        clerkId: clerkId,
-        username: username,
-        latitude: latLng.lat,
-        longitude: latLng.lng
-    } as Geolocation;
+export function latLngLiteralFromGeolocation(fromLocation: Geolocation) {
+    return latLngLiteral(fromLocation.latitude, fromLocation.longitude);
 }
 
-export function latLngToLatLngLiteral(latLng: google.maps.LatLng) {
-    return {
-        lat: latLng.lat(),
-        lng: latLng.lng()
-    } as google.maps.LatLngLiteral;
+export function latLng(lat: number, lng: number) {
+    return new google.maps.LatLng(lat, lng);
 }
 
-export function ClerkUserToUser(id: string, username: string) {
-    return {
-        username: username,
-        clerkId: id
-    } as User;
+export function latLngLiteralFromlatLng(fromLatLng: google.maps.LatLng) {
+    return latLng(fromLatLng.lat(), fromLatLng.lng());
 }
 
-export function GeolocationToUser(location: Geolocation) {
-    return {
-        username: location.username,
-        clerkId: location.clerkId
-    }
+export function geolocationFromLatLngLiteral(latLng: google.maps.LatLngLiteral, user: User) {
+    return { user, latitude: latLng.lat, longitude: latLng.lng } as Geolocation;
+}
+
+export function meeting(requestUser: User, targetUser: User) {
+    return { requestUser, targetUser } as Meeting;
 }
