@@ -11,12 +11,14 @@ function checkConnection(connection: HubConnection) {
 
 export const HubClient = {
     registerRecieveGeolocations: function (connection: HubConnection, callback: (fetchedLocations: UserLocation[]) => void) {
-        connection.on("RecieveGeolocations", (fetchedLocations: DtoLocation[]) =>
+        connection.on("ReceiveGeolocations", (fetchedLocations: DtoLocation[]) =>
             callback(fetchedLocations.map(loc => userLocationFromDto(loc))))
     },
     registerReceiveMeetingRequest: function (connection: HubConnection, callback: (meeting: Meeting) => void) {
-        connection.on("ReceiveMeetingRequest", (meeting: DtoMeeting) =>
-            callback(meetingFromDto(meeting)));
+        connection.on("ReceiveMeetingRequest", (meeting: DtoMeeting) => {
+            console.log("receiveMeetingRequest");
+            callback(meetingFromDto(meeting));
+        });
     },
     registerRecieveMeetingCancellation: function (connection: HubConnection, callback: (meeting: Meeting) => void) {
         connection.on("ReceiveMeetingCancellation", (meeting: DtoMeeting) =>

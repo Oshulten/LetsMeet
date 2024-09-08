@@ -26,7 +26,7 @@ export default function GoogleMap({ defaultLocation }: Props) {
         cancelMeeting
     } = useMeetings(connection);
 
-    console.log("User WantsToMeet");
+    console.log("User Wants To Meet");
     console.log(meetingRequests);
 
     const handleDragEnd = (e: google.maps.MapMouseEvent) => {

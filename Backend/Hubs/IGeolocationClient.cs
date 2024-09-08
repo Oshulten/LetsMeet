@@ -5,7 +5,7 @@ namespace Backend.Hubs;
 
 public interface IGeolocationClient
 {
-    Task RecieveGeolocations(List<DtoGeolocation> locations);
+    Task ReceiveGeolocations(List<DtoGeolocation> locations);
     Task ReceiveMeetingRequest(DtoMeeting meeting);
-    Task RecieveMeetingCancellation(DtoMeeting meeting);
+    Task ReceiveMeetingCancellation(DtoMeeting meeting);
 }

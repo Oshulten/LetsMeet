@@ -44,7 +44,7 @@ public class GeolocationHub(LetsMeetDbContext db, HubPersistence persistence) : 
     {
         persistence.LogActiveUsers();
         var connectionId = persistence.ConnectionIdByUserId(meeting.RequestUser.ClerkId);
-        await Clients.Client(connectionId).RecieveMeetingCancellation(meeting);
+        await Clients.Client(connectionId).ReceiveMeetingCancellation(meeting);
         Console.WriteLine($"{meeting.RequestUser.Username} cancels meeting with {meeting.TargetUser.Username}");
     }
 
@@ -58,6 +58,6 @@ public class GeolocationHub(LetsMeetDbContext db, HubPersistence persistence) : 
         Console.WriteLine($"{user!.Username} ({Context.ConnectionId})\n\tLatitude: {dto.Latitude}\n\tLongitude: {dto.Longitude}");
         Console.WriteLine($"Connected users: {string.Join(", ", persistence.ActiveUsers.Select(user => user!.Username))}");
 
-        await Clients.All.RecieveGeolocations(persistence.LastLocationPerUser);
+        await Clients.All.ReceiveGeolocations(persistence.LastLocationPerUser);
     }
 }
