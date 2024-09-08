@@ -2,9 +2,10 @@
 import { AdvancedMarker, AdvancedMarkerProps, InfoWindow, InfoWindowProps, Pin, PinProps, useAdvancedMarkerRef } from "@vis.gl/react-google-maps";
 import { useCallback, useState } from "react";
 import { Geolocation } from "../api/types";
-import { geolocationToLatLngLiteral } from "../utilities/conversations";
+import { geolocationToLatLngLiteral, GeolocationToUser } from "../utilities/conversations";
 import haversine from 'haversine-distance';
 import readableDistance from "../utilities/readableDistance";
+import MeetingButton from "./MeetingButton";
 
 interface Props {
     position: Geolocation,
@@ -16,7 +17,6 @@ interface Props {
 type MeetButtonState = "neutral" | "awaitingOtherUserConfirmation" | "awaitingUserConfirmation" | "cancelled";
 
 export default function OtherUserMarker({ position, userPosition, handleWantMeeting, handleCancelMeeting }: Props) {
-    const [meetButtonState, setMeetButtonState] = useState<MeetButtonState>('neutral');
     const [markerRef, marker] = useAdvancedMarkerRef();
     const [infoWindowShown, setInfoWindowShown] = useState(false);
 
@@ -28,36 +28,14 @@ export default function OtherUserMarker({ position, userPosition, handleWantMeet
             <h2 className="font-bold text-lg">{position.username}</h2>
         </div>
 
-    function meetButton() {
-        switch (meetButtonState) {
-            case 'neutral':
-                return <button
-                    onClick={() => {
-                        setMeetButtonState('awaitingOtherUserConfirmation');
-                        handleWantMeeting();
-                    }}
-                    className="btn btn-info text-white font-normal w-full">{`Let's Meet!`}</button>
-            case 'awaitingOtherUserConfirmation':
-                return (<button
-                    onClick={() => {
-                        setMeetButtonState('cancelled');
-                        handleCancelMeeting();
-                    }}
-                    className="btn btn-info text-white font-normal w-full">
-                    Waiting for response
-                    <span className="loading loading-spinner text-white"></span>
-                </button>)
-            case 'awaitingUserConfirmation':
-                return <button className="btn btn-info text-white font-normal w-full">{`Awaiting your response`}</button>
-            case 'cancelled':
-                return <button className="btn btn-info text-white font-normal w-full">{`Cancelled`}</button>
-        }
-    }
-
     const infoWindowMainContent =
         <div>
             <p>{readableDistance(haversine(position, userPosition))} away</p>
-            {meetButton()}
+            <MeetingButton
+                handleRequestMeeting={handleWantMeeting}
+                handleCancelMeeting={handleCancelMeeting}
+                otherUser={GeolocationToUser(position)}
+            />
         </div>
 
     const markerProps: AdvancedMarkerProps = {
