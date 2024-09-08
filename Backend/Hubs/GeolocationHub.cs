@@ -3,6 +3,7 @@ using Backend.Models;
 using Backend.Dto;
 using Microsoft.AspNetCore.SignalR;
 using Backend.Services;
+using System.Text.Json;
 
 namespace Backend.Hubs;
 
@@ -30,13 +31,18 @@ public class GeolocationHub(LetsMeetDbContext db, HubPersistence persistence) : 
 
     public async Task RequestMeeting(DtoMeeting meeting)
     {
+        persistence.LogActiveUsers();
+        Console.WriteLine(meeting.TargetUser.ClerkId);
+        Console.WriteLine(meeting.TargetUser.Username);
         var connectionId = persistence.ConnectionIdByUserId(meeting.TargetUser.ClerkId);
+        Console.WriteLine(connectionId);
         await Clients.Client(connectionId).ReceiveMeetingRequest(meeting);
         Console.WriteLine($"{meeting.RequestUser.Username} wants to meet {meeting.TargetUser.Username}");
     }
 
     public async Task CancelMeeting(DtoMeeting meeting)
     {
+        persistence.LogActiveUsers();
         var connectionId = persistence.ConnectionIdByUserId(meeting.RequestUser.ClerkId);
         await Clients.Client(connectionId).RecieveMeetingCancellation(meeting);
         Console.WriteLine($"{meeting.RequestUser.Username} cancels meeting with {meeting.TargetUser.Username}");

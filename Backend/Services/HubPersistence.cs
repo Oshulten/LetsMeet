@@ -19,7 +19,7 @@ public class HubPersistence
             .ToList();
 
     public string ConnectionIdByUserId(string userId) =>
-        _activeUsers.FirstOrDefault(item => item.Key == userId).Key;
+        _activeUsers.FirstOrDefault(item => item.Value.Id == userId).Key;
 
     public User RegisterUser(string connectionId, DtoUser dtoUser, LetsMeetDbContext db)
     {
