@@ -1,35 +1,46 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { APIProvider, Map, MapProps } from '@vis.gl/react-google-maps';
-import useSignalRLocations from '../hooks/useSignalRLocations';
+import useLocations from '../hooks/useLocations';
 import OtherUserMarker from './OtherUserMarker';
 import UserMarker from './UserMarker';
+import useLetsMeetUser from '../hooks/useLetsMeetUser';
+import useMeetings from '../hooks/useMeetings';
 
 interface Props {
     defaultLocation: google.maps.LatLngLiteral,
 }
 
 export default function GoogleMap({ defaultLocation }: Props) {
+    const user = useLetsMeetUser();
+
     const {
-        otherUserLocations,
-        userLocation,
-        setUserLocation,
-        user,
+        location,
+        setLocation,
+        locations,
+        connection,
+    } = useLocations(defaultLocation);
+
+    const {
         meetingRequests,
         requestMeeting,
-        cancelMeeting,
-        signalIsInitialized
-    } = useSignalRLocations(defaultLocation);
+        cancelMeeting
+    } = useMeetings(connection);
 
     console.log("User WantsToMeet");
     console.log(meetingRequests);
 
     const handleDragEnd = (e: google.maps.MapMouseEvent) => {
-        setUserLocation({ user: user, location: { lat: e.latLng!.lat(), lng: e.latLng!.lng() } });
+        setLocation({ user: user, location: { lat: e.latLng!.lat(), lng: e.latLng!.lng() } });
     }
 
-    if (!signalIsInitialized) {
-        console.log("Signal is not initialized");
-        return <p>Loading...</p>
+    if (!connection) {
+        console.log('No connection is initialized');
+        return <p>Establishing connection...</p>;
+    }
+
+    if (connection.state != "Connected") {
+        console.log(connection.state);
+        return <p>{connection.state}</p>;
     }
 
     const mapProps: MapProps = {
@@ -45,17 +56,17 @@ export default function GoogleMap({ defaultLocation }: Props) {
         <>
             <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
                 <Map {...mapProps}>
-                    {otherUserLocations.map(location =>
+                    {locations.map(location =>
                         <OtherUserMarker
                             key={location.user.clerkId}
                             position={location}
-                            userPosition={userLocation}
+                            userPosition={location}
                             handleRequestMeeting={() => requestMeeting(location.user)}
                             handleCancelMeeting={() => cancelMeeting(location.user)}
                             infoWindowIsOpen={meetingRequests.find(request => request.clerkId == location.user.clerkId) != undefined} />)}
-                    <UserMarker position={userLocation} onDragEnd={handleDragEnd} />
+                    <UserMarker location={location} onDragEnd={handleDragEnd} />
                 </Map>
-            </APIProvider >
+            </APIProvider>
         </>
     );
 }

@@ -1,6 +1,6 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { useState } from "react";
-import { User } from "../api/types";
+import { User } from "../types/types";
 
 interface Props {
     state?: MeetButtonState,

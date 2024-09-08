@@ -1,15 +1,14 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { AdvancedMarker, AdvancedMarkerProps, InfoWindow, InfoWindowProps, Pin, PinProps, useAdvancedMarkerRef } from "@vis.gl/react-google-maps";
 import { useCallback, useState } from "react";
-import { Geolocation } from "../api/types";
-import { latLngLiteral, GeolocationToUser } from "../utilities/conversations";
 import haversine from 'haversine-distance';
 import readableDistance from "../utilities/readableDistance";
 import MeetingButton from "./MeetingButton";
+import { UserLocation } from "../types/types";
 
 interface Props {
-    position: Geolocation,
-    userPosition: Geolocation,
+    position: UserLocation,
+    userPosition: UserLocation,
     handleRequestMeeting: () => Promise<void>,
     handleCancelMeeting: () => Promise<void>,
     infoWindowIsOpen: boolean
@@ -24,21 +23,21 @@ export default function OtherUserMarker({ position, userPosition, handleRequestM
 
     const infoWindowHeaderContent =
         <div className="flex flex-row">
-            <h2 className="font-bold text-lg">{position.username}</h2>
+            <h2 className="font-bold text-lg">{position.user.username}</h2>
         </div>
 
     const infoWindowMainContent =
         <div>
-            <p>{readableDistance(haversine(position, userPosition))} away</p>
+            <p>{readableDistance(haversine(position.location, userPosition.location))} away</p>
             <MeetingButton
                 handleRequestMeeting={handleRequestMeeting}
                 handleCancelMeeting={handleCancelMeeting}
-                otherUser={GeolocationToUser(position)}
+                otherUser={position.user}
             />
         </div>
 
     const markerProps: AdvancedMarkerProps = {
-        position: latLngLiteral(position),
+        position: position.location,
         onClick: handleMarkerClick
     }
 
