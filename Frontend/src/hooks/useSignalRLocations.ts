@@ -1,8 +1,9 @@
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 import { useEffect, useState } from "react";
-import { Geolocation, Meeting, User } from '../api/types';
+import { Geolocation, User } from '../api/types';
 import { useUser } from "@clerk/clerk-react";
 import { ClerkUserToUser, latLngLiteralToGeolocation } from "../utilities/conversations";
+import { HubClient, HubServer } from "../api/hubMethods";
 
 export default function useSignalRLocations(defaultLocation: google.maps.LatLngLiteral) {
     const user = useUser().user!;
@@ -35,27 +36,26 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
     }
 
     const setConnectionCallbacks = (localConnection: HubConnection) => {
-        localConnection.on("RecieveGeolocations", (fetchedLocations: Geolocation[]) => {
+        HubClient.registerRecieveGeolocations(localConnection, fetchedLocations => {
             fetchedLocations = fetchedLocations.filter(loc => loc.clerkId != user.id);
             setLocations(fetchedLocations);
         });
 
-        localConnection.on("ReceiveWantMeeting", (meeting: Meeting) => {
+        HubClient.registerReceiveMeetingRequest(localConnection, meeting => {
             setUserWantsToMeet([...userWantsToMeet, meeting.requestUser]);
         });
 
-        localConnection.on("ReceiveCancelMeeting", (meeting: Meeting) => {
+        HubClient.registerRecieveMeetingCancellation(localConnection, meeting => {
             setUserWantsToMeet(userWantsToMeet.filter(u => u.clerkId != meeting.requestUser.clerkId));
         });
     }
 
     const registerUser = async (localConnection: HubConnection) => {
-        await localConnection.invoke("RegisterUser", { username: user.username, clerkId: user.id } as User);
+        await HubServer.registerUser(localConnection, { username: user.username, clerkId: user.id } as User);
     }
 
     const sendInitialLocation = async (localConnection: HubConnection) => {
-        const geolocation = latLngLiteralToGeolocation(defaultLocation, user.id, user.username!);
-        await localConnection.invoke("SendLocation", geolocation);
+        await HubServer.sendLocation(localConnection, latLngLiteralToGeolocation(defaultLocation, user.id, user.username!));
     }
 
     const stopConnection = () => {
@@ -92,30 +92,28 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
 
     const setCurrentLocation = async (location: Geolocation) => {
         if (connection) {
-            await connection.invoke("SendLocation", location);
+            await HubServer.sendLocation(connection, location);
             setCurrentLocationLocal(location);
         }
     }
 
     const wantsMeeting = async (targetUser: User) => {
         if (connection) {
-            console.log(`You request a meeting with ${targetUser.username}`);
-            const meeting: Meeting = {
+            await HubServer.requestMeeting(connection, {
                 requestUser: ClerkUserToUser(user.id, user.username!),
                 targetUser: targetUser
-            }
-            await connection.invoke("WantsToMeet", meeting);
+            });
+            console.log(`You request a meeting with ${targetUser.username}`);
         }
     }
 
     const cancelMeeting = async (targetUser: User) => {
         if (connection) {
-            console.log(`You cancel your meeting with ${targetUser.username}`);
-            const meeting: Meeting = {
+            await HubServer.cancelMeeting(connection, {
                 requestUser: ClerkUserToUser(user.id, user.username!),
                 targetUser: targetUser
-            }
-            await connection.invoke("CancelWantsMeet", meeting);
+            });
+            console.log(`You cancel your meeting with ${targetUser.username}`);
         }
     }
 

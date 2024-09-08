@@ -1,5 +1,5 @@
 import { HubConnection } from "@microsoft/signalr";
-import { Meeting, User } from "./types";
+import { Meeting, User, Geolocation } from "./types";
 
 function checkConnection(connection: HubConnection) {
     if (!connection?.connectionId) {
@@ -10,36 +10,36 @@ function checkConnection(connection: HubConnection) {
 }
 
 export const HubClient = {
-    registerRecieveGeolocations: function(connection: HubConnection, callback: (fetchedLocations: Geolocation[]) => void) {
+    registerRecieveGeolocations: function (connection: HubConnection, callback: (fetchedLocations: Geolocation[]) => void) {
         connection.on("RecieveGeolocations", callback);
     },
-    registerReceiveMeetingRequest: function(connection: HubConnection, callback: (meeting: Meeting) => void) {
+    registerReceiveMeetingRequest: function (connection: HubConnection, callback: (meeting: Meeting) => void) {
         connection.on("ReceiveMeetingRequest", callback);
     },
-    registerRecieveMeetingCancellation: function(connection: HubConnection, callback: (meeting: Meeting) => void) {
+    registerRecieveMeetingCancellation: function (connection: HubConnection, callback: (meeting: Meeting) => void) {
         connection.on("ReceiveMeetingRequest", callback);
     }
 }
 
 export const HubServer = {
-    registerUser: function(connection: HubConnection, user: User) {
+    registerUser: async function (connection: HubConnection, user: User) {
         if (checkConnection(connection)) {
-            connection.invoke("RegisterUser", user);
+            await connection.invoke("RegisterUser", user);
         }
     },
-    requestMeeting: function(connection: HubConnection, meeting: Meeting) {
+    requestMeeting: async function (connection: HubConnection, meeting: Meeting) {
         if (checkConnection(connection)) {
-            connection.invoke("RequestMeeting", meeting);
+            await connection.invoke("RequestMeeting", meeting);
         }
     },
-    cancelMeeting: function(connection: HubConnection, meeting: Meeting) {
+    cancelMeeting: async function (connection: HubConnection, meeting: Meeting) {
         if (checkConnection(connection)) {
-            connection.invoke("CancelMeeting", meeting);
+            await connection.invoke("CancelMeeting", meeting);
         }
     },
-    sendLocation: function(connection: HubConnection, location: Geolocation) {
+    sendLocation: async function (connection: HubConnection, location: Geolocation) {
         if (checkConnection(connection)) {
-            connection.invoke("SendLocation", location);
+            await connection.invoke("SendLocation", location);
         }
     }
 }
