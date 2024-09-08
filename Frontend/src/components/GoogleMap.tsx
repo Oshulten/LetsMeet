@@ -10,7 +10,19 @@ interface Props {
 }
 
 export default function GoogleMap({ defaultLocation }: Props) {
-    const { otherUserLocations, userLocation, setUserLocation, user, signalIsInitialized } = useSignalRLocations(defaultLocation);
+    const {
+        otherUserLocations,
+        userLocation,
+        setUserLocation,
+        user,
+        userWantsToMeet,
+        wantsMeeting,
+        cancelMeeting,
+        signalIsInitialized
+    } = useSignalRLocations(defaultLocation);
+
+    console.log("UserWantsToMeet");
+    console.log(userWantsToMeet);
 
     const handleDragEnd = (e: google.maps.MapMouseEvent) => {
         const latLngLiteral = latLngToLatLngLiteral(e.latLng!);

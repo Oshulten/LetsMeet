@@ -98,6 +98,19 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
         }
     }
 
+    const wantsMeeting = async (clerkId: string) => {
+        if (connection) {
+            await connection.invoke("WantsToMeet", clerkId);
+        }
+    }
+
+    const cancelMeeting = async (clerkId: string) => {
+        if (connection) {
+            await connection.invoke("CancelWantsToMeet", clerkId);
+        }
+    }
+
+
     const signalIsInitialized = !(!connection || !user || !user.username || !locations);
 
     return {
@@ -105,6 +118,9 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
         userLocation: currentLocation,
         setUserLocation: setCurrentLocation,
         user: user,
+        userWantsToMeet: userWantsToMeet,
+        wantsMeeting: wantsMeeting,
+        cancelMeeting: cancelMeeting,
         signalIsInitialized: signalIsInitialized
     };
 }
