@@ -10,13 +10,16 @@ namespace Backend.Services;
 
 public class HubPersistence
 {
-    public Dictionary<string /* ClerkId */, Geolocation> _lastLocations = [];
-    public Dictionary<string /* ConnectionId */, User> _activeUsers = [];
+    private Dictionary<string /* ClerkId */, Geolocation> _lastLocations = [];
+    private Dictionary<string /* ConnectionId */, User> _activeUsers = [];
 
     public List<DtoGeolocation> LastLocationPerUser =>
         _lastLocations
             .Select(keyvalue => (DtoGeolocation)keyvalue.Value)
             .ToList();
+
+    public string ConnectionIdByUserId(string userId) =>
+        _activeUsers.FirstOrDefault(item => item.Key == userId).Key;
 
     public User RegisterUser(string connectionId, DtoUser dtoUser, LetsMeetDbContext db)
     {

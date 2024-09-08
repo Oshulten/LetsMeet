@@ -9,6 +9,7 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
     const [currentLocation, setCurrentLocationLocal] = useState<Geolocation>(latLngLiteralToGeolocation(defaultLocation, user.id, user.username!));
     const [connection, setConnection] = useState<HubConnection | null>(null);
     const [locations, setLocations] = useState<Geolocation[]>([]);
+    const [userWantsToMeet, setUserWantsToMeet] = useState<User[]>([]);
 
 
     const initializeConnection = () => {
@@ -38,6 +39,14 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
         localConnection.on("RecieveGeolocations", (fetchedLocations: Geolocation[]) => {
             fetchedLocations = fetchedLocations.filter(loc => loc.clerkId != user.id);
             setLocations(fetchedLocations);
+        });
+
+        localConnection.on("ReceiveWantMeeting", (user: User) => {
+            setUserWantsToMeet([...userWantsToMeet, user]);
+        });
+
+        localConnection.on("ReceiveCancelMeeting", (user: User) => {
+            setUserWantsToMeet(userWantsToMeet.filter(u => u.clerkId != user.clerkId));
         });
     }
 
