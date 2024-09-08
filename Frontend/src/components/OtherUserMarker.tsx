@@ -11,24 +11,41 @@ interface Props {
     userPosition: Geolocation
 }
 
+type MeetButtonState = "neutral" | "awaitingOtherUserConfirmation" | "awaitingUserConfirmation" | "cancelled";
+
 export default function OtherUserMarker({ position, userPosition }: Props) {
+    const [meetButtonState, setMeetButtonState] = useState<MeetButtonState>('neutral');
     const [markerRef, marker] = useAdvancedMarkerRef();
     const [infoWindowShown, setInfoWindowShown] = useState(false);
 
     const handleMarkerClick = useCallback(() => setInfoWindowShown(isShown => !isShown), []);
     const handleClose = useCallback(() => setInfoWindowShown(false), []);
 
-    const distanceFromUser = haversine(position, userPosition);
-
     const infoWindowHeaderContent =
         <div className="flex flex-row">
             <h2 className="font-bold text-lg">{position.username}</h2>
         </div>
 
+    function meetButton() {
+        switch (meetButtonState) {
+            case 'neutral':
+                return <button onClick={() => setMeetButtonState('awaitingOtherUserConfirmation')} className="btn btn-info text-white font-normal w-full">{`Let's Meet!`}</button>
+            case 'awaitingOtherUserConfirmation':
+                return (<button onClick={() => setMeetButtonState('cancelled')} className="btn btn-info text-white font-normal w-full">
+                    Waiting for response
+                    <span className="loading loading-spinner text-white"></span>
+                </button>)
+            case 'awaitingUserConfirmation':
+                return <button className="btn btn-info text-white font-normal w-full">{`Awaiting your response`}</button>
+            case 'cancelled':
+                return <button className="btn btn-info text-white font-normal w-full">{`Cancelled`}</button>
+        }
+    }
+
     const infoWindowMainContent =
         <div>
-            <p>{readableDistance(distanceFromUser)} away</p>
-            <button className="btn btn-info text-white font-normal w-full">{`Let's Meet!`}</button>
+            <p>{readableDistance(haversine(position, userPosition))} away</p>
+            {meetButton()}
         </div>
 
     const markerProps: AdvancedMarkerProps = {
