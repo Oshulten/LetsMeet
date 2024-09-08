@@ -1,4 +1,4 @@
-import { Geolocation } from "../api/types";
+import { Geolocation, User } from "../api/types";
 
 export function geolocationToLatLngLiteral(location: Geolocation) {
     return {
@@ -21,4 +21,18 @@ export function latLngToLatLngLiteral(latLng: google.maps.LatLng) {
         lat: latLng.lat(),
         lng: latLng.lng()
     } as google.maps.LatLngLiteral;
+}
+
+export function ClerkUserToUser(id: string, username: string) {
+    return {
+        username: username,
+        clerkId: id
+    } as User;
+}
+
+export function GeolocationToUser(location: Geolocation) {
+    return {
+        username: location.username,
+        clerkId: location.clerkId
+    }
 }

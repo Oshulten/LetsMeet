@@ -2,7 +2,7 @@ import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 import { useEffect, useState } from "react";
 import { Geolocation, Meeting, User } from '../api/types';
 import { useUser } from "@clerk/clerk-react";
-import { latLngLiteralToGeolocation } from "../utilities/conversations";
+import { ClerkUserToUser, latLngLiteralToGeolocation } from "../utilities/conversations";
 
 export default function useSignalRLocations(defaultLocation: google.maps.LatLngLiteral) {
     const user = useUser().user!;
@@ -10,7 +10,6 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
     const [connection, setConnection] = useState<HubConnection | null>(null);
     const [locations, setLocations] = useState<Geolocation[]>([]);
     const [userWantsToMeet, setUserWantsToMeet] = useState<User[]>([]);
-
 
     const initializeConnection = () => {
         if (connection) {
@@ -98,18 +97,27 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
         }
     }
 
-    const wantsMeeting = async (clerkId: string) => {
+    const wantsMeeting = async (targetUser: User) => {
         if (connection) {
-            await connection.invoke("WantsToMeet", clerkId);
+            console.log(`You request a meeting with ${targetUser.username}`);
+            const meeting: Meeting = {
+                requestUser: ClerkUserToUser(user.id, user.username!),
+                targetUser: targetUser
+            }
+            await connection.invoke("WantsToMeet", meeting);
         }
     }
 
-    const cancelMeeting = async (clerkId: string) => {
+    const cancelMeeting = async (targetUser: User) => {
         if (connection) {
-            await connection.invoke("CancelWantsToMeet", clerkId);
+            console.log(`You cancel your meeting with ${targetUser.username}`);
+            const meeting: Meeting = {
+                requestUser: ClerkUserToUser(user.id, user.username!),
+                targetUser: targetUser
+            }
+            await connection.invoke("CancelWantsMeet", meeting);
         }
     }
-
 
     const signalIsInitialized = !(!connection || !user || !user.username || !locations);
 

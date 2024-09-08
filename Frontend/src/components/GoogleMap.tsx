@@ -1,7 +1,7 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { APIProvider, Map, MapProps } from '@vis.gl/react-google-maps';
 import useSignalRLocations from '../hooks/useSignalRLocations';
-import { latLngLiteralToGeolocation, latLngToLatLngLiteral } from '../utilities/conversations';
+import { GeolocationToUser, latLngLiteralToGeolocation, latLngToLatLngLiteral } from '../utilities/conversations';
 import OtherUserMarker from './OtherUserMarker';
 import UserMarker from './UserMarker';
 
@@ -48,12 +48,12 @@ export default function GoogleMap({ defaultLocation }: Props) {
             <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
                 <Map {...mapProps}>
                     {otherUserLocations.map(location =>
-                        <OtherUserMarker 
-                            key={location.clerkId} 
-                            position={location} 
+                        <OtherUserMarker
+                            key={location.clerkId}
+                            position={location}
                             userPosition={userLocation}
-                            handleWantMeeting={() => wantsMeeting(user.id)}
-                            handleCancelMeeting={() => cancelMeeting(user.id)} />)}
+                            handleWantMeeting={() => wantsMeeting(GeolocationToUser(location))}
+                            handleCancelMeeting={() => cancelMeeting(GeolocationToUser(location))} />)}
                     <UserMarker position={userLocation} onDragEnd={handleDragEnd} />
                 </Map>
             </APIProvider >
