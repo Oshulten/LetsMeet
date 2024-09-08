@@ -21,8 +21,10 @@ export const HubClient = {
         });
     },
     registerRecieveMeetingCancellation: function (connection: HubConnection, callback: (meeting: Meeting) => void) {
-        connection.on("ReceiveMeetingCancellation", (meeting: DtoMeeting) =>
-            callback(meetingFromDto(meeting)));
+        connection.on("ReceiveMeetingCancellation", (meeting: DtoMeeting) => {
+            console.log("receiveMeetingRequest");
+            callback(meetingFromDto(meeting));
+        });
     }
 }
 
