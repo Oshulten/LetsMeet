@@ -1,15 +1,14 @@
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 import { useEffect, useState } from "react";
-import { Geolocation, User } from '../api/types';
-import { useUser } from "@clerk/clerk-react";
-import { ClerkUserToUser, latLngLiteralToGeolocation } from "../utilities/conversations";
-import { HubClient, HubServer } from "../api/hubMethods";
+import { UserLocation, User } from '../types/types';
+import { HubClient, HubServer } from "../api/hub";
+import useUserFromClerk from "./useLetsMeetUser";
 
 export default function useSignalRLocations(defaultLocation: google.maps.LatLngLiteral) {
-    const user = useUser().user!;
-    const [currentLocation, setCurrentLocationLocal] = useState<Geolocation>(latLngLiteralToGeolocation(defaultLocation, user.id, user.username!));
+    const user = useUserFromClerk();
+    const [location, setLocation] = useState<UserLocation>({ user: user, location: defaultLocation });
     const [connection, setConnection] = useState<HubConnection | null>(null);
-    const [locations, setLocations] = useState<Geolocation[]>([]);
+    const [locations, setLocations] = useState<UserLocation[]>([]);
     const [meetingRequests, setMeetingRequests] = useState<User[]>([]);
 
     const initializeConnection = () => {
@@ -37,7 +36,7 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
 
     const setConnectionCallbacks = (localConnection: HubConnection) => {
         HubClient.registerRecieveGeolocations(localConnection, fetchedLocations => {
-            fetchedLocations = fetchedLocations.filter(loc => loc.clerkId != user.id);
+            fetchedLocations = fetchedLocations.filter(loc => loc.user.clerkId != user.clerkId);
             setLocations(fetchedLocations);
         });
 
@@ -53,11 +52,11 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
     }
 
     const registerUser = async (localConnection: HubConnection) => {
-        await HubServer.registerUser(localConnection, { username: user.username, clerkId: user.id } as User);
+        await HubServer.registerUser(localConnection, user);
     }
 
     const sendInitialLocation = async (localConnection: HubConnection) => {
-        await HubServer.sendLocation(localConnection, latLngLiteralToGeolocation(defaultLocation, user.id, user.username!));
+        await HubServer.sendLocation(localConnection, location);
     }
 
     const stopConnection = () => {
@@ -92,17 +91,17 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
         return stopConnection
     }, []);
 
-    const setCurrentLocation = async (location: Geolocation) => {
+    const setCurrentLocation = async (location: UserLocation) => {
         if (connection) {
             await HubServer.sendLocation(connection, location);
-            setCurrentLocationLocal(location);
+            setLocation(location);
         }
     }
 
     const requestMeeting = async (targetUser: User) => {
         if (connection) {
             await HubServer.requestMeeting(connection, {
-                requestUser: ClerkUserToUser(user.id, user.username!),
+                requestUser: user,
                 targetUser: targetUser
             });
             console.log(`You request a meeting with ${targetUser.username}`);
@@ -112,18 +111,19 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
     const cancelMeeting = async (targetUser: User) => {
         if (connection) {
             await HubServer.cancelMeeting(connection, {
-                requestUser: ClerkUserToUser(user.id, user.username!),
+                requestUser: user,
                 targetUser: targetUser
             });
             console.log(`You cancel your meeting with ${targetUser.username}`);
         }
     }
 
-    const signalIsInitialized = !(!connection || !user || !user.username || !locations);
+    const signalIsInitialized = !(!connection || !user || !locations);
+
 
     return {
         otherUserLocations: locations,
-        userLocation: currentLocation,
+        userLocation: location,
         setUserLocation: setCurrentLocation,
         user: user,
         meetingRequests: meetingRequests,

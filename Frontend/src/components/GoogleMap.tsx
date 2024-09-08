@@ -1,7 +1,6 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { APIProvider, Map, MapProps } from '@vis.gl/react-google-maps';
 import useSignalRLocations from '../hooks/useSignalRLocations';
-import { GeolocationToUser, latLngLiteralToGeolocation, latLngLiteralFromlatLng } from '../utilities/conversations';
 import OtherUserMarker from './OtherUserMarker';
 import UserMarker from './UserMarker';
 
@@ -21,12 +20,11 @@ export default function GoogleMap({ defaultLocation }: Props) {
         signalIsInitialized
     } = useSignalRLocations(defaultLocation);
 
-    console.log("UserWantsToMeet");
+    console.log("User WantsToMeet");
     console.log(meetingRequests);
 
     const handleDragEnd = (e: google.maps.MapMouseEvent) => {
-        const latLngLiteral = latLngLiteralFromlatLng(e.latLng!);
-        setUserLocation(latLngLiteralToGeolocation(latLngLiteral, user.id, user.username!));
+        setUserLocation({ user: user, location: { lat: e.latLng!.lat(), lng: e.latLng!.lng() } });
     }
 
     if (!signalIsInitialized) {
@@ -49,12 +47,12 @@ export default function GoogleMap({ defaultLocation }: Props) {
                 <Map {...mapProps}>
                     {otherUserLocations.map(location =>
                         <OtherUserMarker
-                            key={location.clerkId}
+                            key={location.user.clerkId}
                             position={location}
                             userPosition={userLocation}
-                            handleRequestMeeting={() => requestMeeting(GeolocationToUser(location))}
-                            handleCancelMeeting={() => cancelMeeting(GeolocationToUser(location))}
-                            infoWindowIsOpen={meetingRequests.find(request => request.clerkId == location.clerkId) != undefined} />)}
+                            handleRequestMeeting={() => requestMeeting(location.user)}
+                            handleCancelMeeting={() => cancelMeeting(location.user)}
+                            infoWindowIsOpen={meetingRequests.find(request => request.clerkId == location.user.clerkId) != undefined} />)}
                     <UserMarker position={userLocation} onDragEnd={handleDragEnd} />
                 </Map>
             </APIProvider >
