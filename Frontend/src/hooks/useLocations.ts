@@ -2,7 +2,7 @@ import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 import { useEffect, useState } from "react";
 import { UserLocation } from '../types/types';
 import { HubClient, HubServer } from "../api/hub";
-import useUserFromClerk from "./useLetsMeetUser";
+import useUserFromClerk from "./useUserFromClerk";
 
 export default function useLocations(defaultLocation: google.maps.LatLngLiteral) {
     const user = useUserFromClerk();

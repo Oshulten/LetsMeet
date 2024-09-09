@@ -3,7 +3,7 @@ import { Map, MapProps } from '@vis.gl/react-google-maps';
 import useLocations from '../hooks/useLocations';
 import OtherUserMarker from './OtherUserMarker';
 import UserMarker from './UserMarker';
-import useLetsMeetUser from '../hooks/useLetsMeetUser';
+import useLetsMeetUser from '../hooks/useUserFromClerk';
 import useMeetings from '../hooks/useMeetings';
 import { User } from '../types/types';
 import { useEffect } from 'react';

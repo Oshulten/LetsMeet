@@ -2,7 +2,7 @@ import { HubConnection } from "@microsoft/signalr";
 import { useEffect, useState } from "react";
 import { User } from '../types/types';
 import { HubClient, HubServer } from "../api/hub";
-import useUserFromClerk from "./useLetsMeetUser";
+import useUserFromClerk from "./useUserFromClerk";
 
 interface Props {
     connection: HubConnection | null,
