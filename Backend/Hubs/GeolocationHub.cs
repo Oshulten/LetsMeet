@@ -59,4 +59,15 @@ public class GeolocationHub(LetsMeetDbContext db, HubPersistence persistence) : 
 
         await Clients.All.ReceiveGeolocations(persistence.LastLocationPerUser);
     }
+
+    public async Task ConfirmMeeting(DtoMeeting meeting)
+    {
+        var requestConnectionId = persistence.ConnectionIdByUserId(meeting.RequestUser.ClerkId);
+        var targetConnectionId = persistence.ConnectionIdByUserId(meeting.TargetUser.ClerkId);
+
+        await Clients.Client(requestConnectionId).ReceiveMeetingConfirmation(meeting);
+        await Clients.Client(targetConnectionId).ReceiveMeetingConfirmation(meeting);
+
+        Console.WriteLine($"Confirm meeting between {meeting.TargetUser.Username} and {meeting.RequestUser.Username}");
+    }
 }

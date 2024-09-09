@@ -16,13 +16,16 @@ export const HubClient = {
     },
     registerReceiveMeetingRequest: function (connection: HubConnection, callback: (meeting: Meeting) => void) {
         connection.on("ReceiveMeetingRequest", (meeting: DtoMeeting) => {
-            console.log("receiveMeetingRequest");
             callback(meetingFromDto(meeting));
         });
     },
     registerRecieveMeetingCancellation: function (connection: HubConnection, callback: (meeting: Meeting) => void) {
         connection.on("ReceiveMeetingCancellation", (meeting: DtoMeeting) => {
-            console.log("receiveMeetingCancellation");
+            callback(meetingFromDto(meeting));
+        });
+    },
+    registerReceiveMeetingConfirmation: function (connection: HubConnection, callback: (meeting: Meeting) => void) {
+        connection.on("ReceiveMeetingConfirmation", (meeting: DtoMeeting) => {
             callback(meetingFromDto(meeting));
         });
     }
@@ -48,6 +51,11 @@ export const HubServer = {
         if (checkConnection(connection)) {
             await connection.invoke("SendLocation", dtoFromUserLocation(location));
         }
-    }
+    },
+    confirmMeeting: async function (connection: HubConnection, meeting: Meeting) {
+        if (checkConnection(connection)) {
+            await connection.invoke("ConfirmMeeting", dtoFromMeeting(meeting));
+        }
+    },
 }
 

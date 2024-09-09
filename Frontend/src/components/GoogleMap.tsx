@@ -5,6 +5,7 @@ import OtherUserMarker from './OtherUserMarker';
 import UserMarker from './UserMarker';
 import useLetsMeetUser from '../hooks/useLetsMeetUser';
 import useMeetings from '../hooks/useMeetings';
+import { User } from '../types/types';
 
 interface Props {
     defaultLocation: google.maps.LatLngLiteral,
@@ -20,14 +21,15 @@ export default function GoogleMap({ defaultLocation }: Props) {
         connection,
     } = useLocations(defaultLocation);
 
+    const handleSuccessfulMeetingRequest = (meetingUser: User) => {
+        console.log(`You have a meeting with ${meetingUser.username}!`);
+    }
+
     const {
         meetingRequests,
         requestMeeting,
         cancelMeeting
-    } = useMeetings(connection);
-
-    console.log("User Wants To Meet");
-    console.log(meetingRequests);
+    } = useMeetings(connection, handleSuccessfulMeetingRequest);
 
     const handleDragEnd = (e: google.maps.MapMouseEvent) => {
         setLocation({ user: user, location: { lat: e.latLng!.lat(), lng: e.latLng!.lng() } });

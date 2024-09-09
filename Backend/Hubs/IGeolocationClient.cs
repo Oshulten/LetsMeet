@@ -8,4 +8,5 @@ public interface IGeolocationClient
     Task ReceiveGeolocations(List<DtoGeolocation> locations);
     Task ReceiveMeetingRequest(DtoMeeting meeting);
     Task ReceiveMeetingCancellation(DtoMeeting meeting);
+    Task ReceiveMeetingConfirmation(DtoMeeting meeting);
 }
