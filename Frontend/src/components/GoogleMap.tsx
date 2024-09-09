@@ -1,11 +1,12 @@
 /* eslint-disable react/react-in-jsx-scope */
-import { APIProvider, Map, MapProps } from '@vis.gl/react-google-maps';
+import { APIProvider, Map, MapProps, useMap, useMapsLibrary } from '@vis.gl/react-google-maps';
 import useLocations from '../hooks/useLocations';
 import OtherUserMarker from './OtherUserMarker';
 import UserMarker from './UserMarker';
 import useLetsMeetUser from '../hooks/useLetsMeetUser';
 import useMeetings from '../hooks/useMeetings';
 import { User } from '../types/types';
+import { useEffect } from 'react';
 
 interface Props {
     defaultLocation: google.maps.LatLngLiteral,
@@ -13,6 +14,14 @@ interface Props {
 
 export default function GoogleMap({ defaultLocation }: Props) {
     const user = useLetsMeetUser();
+    const placesLib = useMapsLibrary('places');
+    const map = useMap(import.meta.env.VITE_GOOGLE_MAP_ID);
+
+    useEffect(() => {
+        if (!placesLib || !map) return;
+
+        const svc = new placesLib.PlacesService(map);
+    }, [placesLib, map]);
 
     const {
         location,
@@ -52,7 +61,7 @@ export default function GoogleMap({ defaultLocation }: Props) {
         defaultZoom: 5,
         gestureHandling: 'greedy',
         disableDefaultUI: true,
-        mapId: 'LetsMeetMap',
+        mapId: import.meta.env.VITE_GOOGLE_MAP_ID,
     }
 
     return (
