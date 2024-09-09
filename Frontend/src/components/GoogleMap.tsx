@@ -46,7 +46,7 @@ export default function GoogleMap({ defaultLocation }: Props) {
     const mapProps: MapProps = {
         style: { width: '100vw', height: '100vh' },
         defaultCenter: defaultLocation,
-        defaultZoom: 15,
+        defaultZoom: 5,
         gestureHandling: 'greedy',
         disableDefaultUI: true,
         mapId: 'LetsMeetMap',

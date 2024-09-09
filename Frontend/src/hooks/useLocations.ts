@@ -65,7 +65,6 @@ export default function useLocations(defaultLocation: google.maps.LatLngLiteral)
         let localConnection = initializeConnection();
 
         localConnection = (await startConnection(localConnection))!;
-
         if (!localConnection.connectionId) {
             return stopConnection;
         }

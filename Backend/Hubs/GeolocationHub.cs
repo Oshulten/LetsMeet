@@ -32,10 +32,8 @@ public class GeolocationHub(LetsMeetDbContext db, HubPersistence persistence) : 
     public async Task RequestMeeting(DtoMeeting meeting)
     {
         persistence.LogActiveUsers();
-        Console.WriteLine(meeting.TargetUser.ClerkId);
-        Console.WriteLine(meeting.TargetUser.Username);
         var connectionId = persistence.ConnectionIdByUserId(meeting.TargetUser.ClerkId);
-        Console.WriteLine(connectionId);
+        Console.WriteLine($"Sending out meeting request to {meeting.TargetUser.Username} [{connectionId}]");
         await Clients.Client(connectionId).ReceiveMeetingRequest(meeting);
         Console.WriteLine($"{meeting.RequestUser.Username} wants to meet {meeting.TargetUser.Username}");
     }
@@ -43,7 +41,8 @@ public class GeolocationHub(LetsMeetDbContext db, HubPersistence persistence) : 
     public async Task CancelMeeting(DtoMeeting meeting)
     {
         persistence.LogActiveUsers();
-        var connectionId = persistence.ConnectionIdByUserId(meeting.RequestUser.ClerkId);
+        var connectionId = persistence.ConnectionIdByUserId(meeting.TargetUser.ClerkId);
+        Console.WriteLine($"Sending out meeting cancellation to {meeting.TargetUser.Username} [{connectionId}]");
         await Clients.Client(connectionId).ReceiveMeetingCancellation(meeting);
         Console.WriteLine($"{meeting.RequestUser.Username} cancels meeting with {meeting.TargetUser.Username}");
     }

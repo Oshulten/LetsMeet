@@ -1,8 +1,9 @@
 import { HubConnection } from "@microsoft/signalr";
 import { useEffect, useState } from "react";
-import { User } from '../types/types';
+import { DtoMeeting, User, userFromDto } from '../types/types';
 import { HubClient, HubServer } from "../api/hub";
 import useUserFromClerk from "./useLetsMeetUser";
+import { latLng } from '../utilities/conversations';
 
 export default function useMeetings(connection: HubConnection | null) {
     const user = useUserFromClerk();
@@ -41,9 +42,13 @@ export default function useMeetings(connection: HubConnection | null) {
     }
 
     useEffect(() => {
-        if (connection)
-            setHubCallbacks(connection);
-    }, []);
+        if (!connection) {
+            console.error("No connection");
+            return;
+        }
+        setHubCallbacks(connection!);
+        console.log("Setting callbacks");
+    }, [connection]);
 
     return {
         meetingRequests,
