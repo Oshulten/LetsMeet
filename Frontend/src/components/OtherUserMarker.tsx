@@ -26,9 +26,11 @@ export default function OtherUserMarker({ position, userPosition, handleRequestM
             <h2 className="font-bold text-lg">{position.user.username}</h2>
         </div>
 
+    const distanceToUser = haversine(position.location, userPosition.location);
+
     const infoWindowMainContent =
         <div>
-            <p>{readableDistance(haversine(position.location, userPosition.location))} away</p>
+            <p>{readableDistance(distanceToUser)} away</p>
             <MeetingButton
                 handleRequestMeeting={handleRequestMeeting}
                 handleCancelMeeting={handleCancelMeeting}

@@ -21,17 +21,15 @@ export default function GoogleMap({ defaultLocation }: Props) {
         connection,
     } = useLocations(defaultLocation);
 
-    const handleSuccessfulMeetingRequest = (meetingUser: User) => {
-        console.log(`You have a meeting with ${meetingUser.username}!`);
-    }
-
     const {
         meetingRequests,
         requestMeeting,
         cancelMeeting
     } = useMeetings({
         connection,
-        onSuccessfulMeetingRequest: handleSuccessfulMeetingRequest
+        onSuccessfulMeetingRequest: (meetingUser: User) => {
+            console.log(`You have a meeting with ${meetingUser.username}!`);
+        }
     });
 
     const handleDragEnd = (e: google.maps.MapMouseEvent) => {
@@ -61,14 +59,14 @@ export default function GoogleMap({ defaultLocation }: Props) {
         <>
             <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
                 <Map {...mapProps}>
-                    {locations.map(location =>
+                    {locations.map(loc =>
                         <OtherUserMarker
-                            key={location.user.clerkId}
-                            position={location}
+                            key={loc.user.clerkId}
+                            position={loc}
                             userPosition={location}
-                            handleRequestMeeting={() => requestMeeting(location.user)}
-                            handleCancelMeeting={() => cancelMeeting(location.user)}
-                            infoWindowIsOpen={meetingRequests.find(request => request.clerkId == location.user.clerkId) != undefined} />)}
+                            handleRequestMeeting={() => requestMeeting(loc.user)}
+                            handleCancelMeeting={() => cancelMeeting(loc.user)}
+                            infoWindowIsOpen={meetingRequests.find(request => request.clerkId == loc.user.clerkId) != undefined} />)}
                     <UserMarker location={location} onDragEnd={handleDragEnd} />
                 </Map>
             </APIProvider>
