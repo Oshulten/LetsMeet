@@ -1,38 +1,45 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { AdvancedMarker, AdvancedMarkerProps, InfoWindow, InfoWindowProps, Pin, PinProps, useAdvancedMarkerRef } from "@vis.gl/react-google-maps";
 import { useCallback, useState } from "react";
-import { Geolocation } from "../api/types";
-import { geolocationToLatLngLiteral } from "../utilities/conversations";
 import haversine from 'haversine-distance';
 import readableDistance from "../utilities/readableDistance";
+import MeetingButton from "./MeetingButton";
+import { UserLocation } from "../types/types";
 
 interface Props {
-    position: Geolocation,
-    userPosition: Geolocation
+    position: UserLocation,
+    userPosition: UserLocation,
+    handleRequestMeeting: () => Promise<void>,
+    handleCancelMeeting: () => Promise<void>,
+    infoWindowIsOpen: boolean
 }
 
-export default function OtherUserMarker({ position, userPosition }: Props) {
+export default function OtherUserMarker({ position, userPosition, handleRequestMeeting, handleCancelMeeting, infoWindowIsOpen }: Props) {
     const [markerRef, marker] = useAdvancedMarkerRef();
-    const [infoWindowShown, setInfoWindowShown] = useState(false);
+    const [infoWindowShown, setInfoWindowShown] = useState(infoWindowIsOpen);
 
     const handleMarkerClick = useCallback(() => setInfoWindowShown(isShown => !isShown), []);
     const handleClose = useCallback(() => setInfoWindowShown(false), []);
 
-    const distanceFromUser = haversine(position, userPosition);
-
     const infoWindowHeaderContent =
         <div className="flex flex-row">
-            <h2 className="font-bold text-lg">{position.username}</h2>
+            <h2 className="font-bold text-lg">{position.user.username}</h2>
         </div>
+
+    const distanceToUser = haversine(position.location, userPosition.location);
 
     const infoWindowMainContent =
         <div>
-            <p>{readableDistance(distanceFromUser)} away</p>
-            <button className="btn btn-info text-white font-normal w-full">{`Let's Meet!`}</button>
+            <p>{readableDistance(distanceToUser)} away</p>
+            <MeetingButton
+                handleRequestMeeting={handleRequestMeeting}
+                handleCancelMeeting={handleCancelMeeting}
+                otherUser={position.user}
+            />
         </div>
 
     const markerProps: AdvancedMarkerProps = {
-        position: geolocationToLatLngLiteral(position),
+        position: position.location,
         onClick: handleMarkerClick
     }
 

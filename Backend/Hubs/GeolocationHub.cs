@@ -3,6 +3,7 @@ using Backend.Models;
 using Backend.Dto;
 using Microsoft.AspNetCore.SignalR;
 using Backend.Services;
+using System.Text.Json;
 
 namespace Backend.Hubs;
 
@@ -28,6 +29,24 @@ public class GeolocationHub(LetsMeetDbContext db, HubPersistence persistence) : 
         persistence.LogActiveUsers();
     }
 
+    public async Task RequestMeeting(DtoMeeting meeting)
+    {
+        persistence.LogActiveUsers();
+        var connectionId = persistence.ConnectionIdByUserId(meeting.TargetUser.ClerkId);
+        Console.WriteLine($"Sending out meeting request to {meeting.TargetUser.Username} [{connectionId}]");
+        await Clients.Client(connectionId).ReceiveMeetingRequest(meeting);
+        Console.WriteLine($"{meeting.RequestUser.Username} wants to meet {meeting.TargetUser.Username}");
+    }
+
+    public async Task CancelMeeting(DtoMeeting meeting)
+    {
+        persistence.LogActiveUsers();
+        var connectionId = persistence.ConnectionIdByUserId(meeting.TargetUser.ClerkId);
+        Console.WriteLine($"Sending out meeting cancellation to {meeting.TargetUser.Username} [{connectionId}]");
+        await Clients.Client(connectionId).ReceiveMeetingCancellation(meeting);
+        Console.WriteLine($"{meeting.RequestUser.Username} cancels meeting with {meeting.TargetUser.Username}");
+    }
+
     public async Task SendLocation(DtoGeolocation dto)
     {
         var user = db.UserByClerkId(dto.ClerkId);
@@ -38,6 +57,17 @@ public class GeolocationHub(LetsMeetDbContext db, HubPersistence persistence) : 
         Console.WriteLine($"{user!.Username} ({Context.ConnectionId})\n\tLatitude: {dto.Latitude}\n\tLongitude: {dto.Longitude}");
         Console.WriteLine($"Connected users: {string.Join(", ", persistence.ActiveUsers.Select(user => user!.Username))}");
 
-        await Clients.All.RecieveGeolocations(persistence.LastLocationPerUser);
+        await Clients.All.ReceiveGeolocations(persistence.LastLocationPerUser);
+    }
+
+    public async Task ConfirmMeeting(DtoMeeting meeting)
+    {
+        var requestConnectionId = persistence.ConnectionIdByUserId(meeting.RequestUser.ClerkId);
+        var targetConnectionId = persistence.ConnectionIdByUserId(meeting.TargetUser.ClerkId);
+
+        await Clients.Client(requestConnectionId).ReceiveMeetingConfirmation(meeting);
+        await Clients.Client(targetConnectionId).ReceiveMeetingConfirmation(meeting);
+
+        Console.WriteLine($"Confirm meeting between {meeting.TargetUser.Username} and {meeting.RequestUser.Username}");
     }
 }

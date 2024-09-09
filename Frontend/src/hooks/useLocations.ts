@@ -1,15 +1,14 @@
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 import { useEffect, useState } from "react";
-import { Geolocation, User } from '../api/types';
-import { useUser } from "@clerk/clerk-react";
-import { latLngLiteralToGeolocation } from "../utilities/conversations";
+import { UserLocation } from '../types/types';
+import { HubClient, HubServer } from "../api/hub";
+import useUserFromClerk from "./useLetsMeetUser";
 
-export default function useSignalRLocations(defaultLocation: google.maps.LatLngLiteral) {
-    const user = useUser().user!;
-    const [currentLocation, setCurrentLocationLocal] = useState<Geolocation>(latLngLiteralToGeolocation(defaultLocation, user.id, user.username!));
+export default function useLocations(defaultLocation: google.maps.LatLngLiteral) {
+    const user = useUserFromClerk();
+    const [location, setLocation] = useState<UserLocation>({ user: user, location: defaultLocation });
     const [connection, setConnection] = useState<HubConnection | null>(null);
-    const [locations, setLocations] = useState<Geolocation[]>([]);
-
+    const [locations, setLocations] = useState<UserLocation[]>([]);
 
     const initializeConnection = () => {
         if (connection) {
@@ -34,20 +33,19 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
         }
     }
 
-    const setConnectionCallbacks = (localConnection: HubConnection) => {
-        localConnection.on("RecieveGeolocations", (fetchedLocations: Geolocation[]) => {
-            fetchedLocations = fetchedLocations.filter(loc => loc.clerkId != user.id);
+    const setHubCallbacks = (localConnection: HubConnection) => {
+        HubClient.registerRecieveGeolocations(localConnection, fetchedLocations => {
+            fetchedLocations = fetchedLocations.filter(loc => loc.user.clerkId != user.clerkId);
             setLocations(fetchedLocations);
         });
     }
 
     const registerUser = async (localConnection: HubConnection) => {
-        await localConnection.invoke("RegisterUser", { username: user.username, clerkId: user.id } as User);
+        await HubServer.registerUser(localConnection, user);
     }
 
     const sendInitialLocation = async (localConnection: HubConnection) => {
-        const geolocation = latLngLiteralToGeolocation(defaultLocation, user.id, user.username!);
-        await localConnection.invoke("SendLocation", geolocation);
+        await HubServer.sendLocation(localConnection, location);
     }
 
     const stopConnection = () => {
@@ -67,12 +65,11 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
         let localConnection = initializeConnection();
 
         localConnection = (await startConnection(localConnection))!;
-
         if (!localConnection.connectionId) {
             return stopConnection;
         }
 
-        setConnectionCallbacks(localConnection);
+        setHubCallbacks(localConnection);
         registerUser(localConnection);
         sendInitialLocation(localConnection);
     }
@@ -82,20 +79,17 @@ export default function useSignalRLocations(defaultLocation: google.maps.LatLngL
         return stopConnection
     }, []);
 
-    const setCurrentLocation = async (location: Geolocation) => {
+    const setCurrentLocation = async (location: UserLocation) => {
         if (connection) {
-            await connection.invoke("SendLocation", location);
-            setCurrentLocationLocal(location);
+            await HubServer.sendLocation(connection, location);
+            setLocation(location);
         }
     }
 
-    const signalIsInitialized = !(!connection || !user || !user.username || !locations);
-
     return {
-        otherUserLocations: locations,
-        userLocation: currentLocation,
-        setUserLocation: setCurrentLocation,
-        user: user,
-        signalIsInitialized: signalIsInitialized
+        location: location,
+        setLocation: setCurrentLocation,
+        locations: locations,
+        connection: connection
     };
 }

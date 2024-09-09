@@ -1,9 +1,12 @@
 using Backend.Dto;
+using Backend.Models;
 
 namespace Backend.Hubs;
 
 public interface IGeolocationClient
 {
-    Task RecieveGeolocations(List<DtoGeolocation> locations);
-
+    Task ReceiveGeolocations(List<DtoGeolocation> locations);
+    Task ReceiveMeetingRequest(DtoMeeting meeting);
+    Task ReceiveMeetingCancellation(DtoMeeting meeting);
+    Task ReceiveMeetingConfirmation(DtoMeeting meeting);
 }
