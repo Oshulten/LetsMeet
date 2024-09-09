@@ -29,7 +29,10 @@ export default function GoogleMap({ defaultLocation }: Props) {
         meetingRequests,
         requestMeeting,
         cancelMeeting
-    } = useMeetings(connection, handleSuccessfulMeetingRequest);
+    } = useMeetings({
+        connection,
+        onSuccessfulMeetingRequest: handleSuccessfulMeetingRequest
+    });
 
     const handleDragEnd = (e: google.maps.MapMouseEvent) => {
         setLocation({ user: user, location: { lat: e.latLng!.lat(), lng: e.latLng!.lng() } });

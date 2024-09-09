@@ -4,10 +4,12 @@ import { User } from '../types/types';
 import { HubClient, HubServer } from "../api/hub";
 import useUserFromClerk from "./useLetsMeetUser";
 
-export default function useMeetings(
+interface Props {
     connection: HubConnection | null,
-    onSuccessfulMeetingRequest: (meetingUser: User) => void) {
+    onSuccessfulMeetingRequest: (meetingUser: User) => void
+}
 
+export default function useMeetings({ connection, onSuccessfulMeetingRequest }: Props) {
     const user = useUserFromClerk();
     const [meetingRequests, setMeetingRequests] = useState<User[]>([]);
 
