@@ -1,5 +1,5 @@
 /* eslint-disable react/react-in-jsx-scope */
-import { APIProvider, Map, MapProps, useMap, useMapsLibrary } from '@vis.gl/react-google-maps';
+import { Map, MapProps } from '@vis.gl/react-google-maps';
 import useLocations from '../hooks/useLocations';
 import OtherUserMarker from './OtherUserMarker';
 import UserMarker from './UserMarker';
@@ -14,14 +14,31 @@ interface Props {
 
 export default function GoogleMap({ defaultLocation }: Props) {
     const user = useLetsMeetUser();
-    const placesLib = useMapsLibrary('places');
-    const map = useMap(import.meta.env.VITE_GOOGLE_MAP_ID);
 
     useEffect(() => {
-        if (!placesLib || !map) return;
+        const loadLibraries = async () => {
+            const placesLibrary = await google.maps.importLibrary("places") as google.maps.PlacesLibrary;
+            const Place = placesLibrary.Place;
 
-        const svc = new placesLib.PlacesService(map);
-    }, [placesLib, map]);
+            const request = {
+                // required parameters
+                fields: ['displayName', 'location', 'businessStatus'],
+                locationRestriction: {
+                    center: new google.maps.LatLng(defaultLocation),
+                    radius: 500,
+                },
+                // optional parameters
+                includedPrimaryTypes: ['restaurant'],
+                maxResultCount: 5,
+                rankPreference: 'DISTANCE',
+                language: 'en-US',
+                region: 'us',
+            } as google.maps.places.SearchNearbyRequest;
+            const { places } = await Place.searchNearby(request);
+            console.log(places);
+        }
+        loadLibraries();
+    });
 
     const {
         location,
@@ -66,19 +83,17 @@ export default function GoogleMap({ defaultLocation }: Props) {
 
     return (
         <>
-            <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
-                <Map {...mapProps}>
-                    {locations.map(loc =>
-                        <OtherUserMarker
-                            key={loc.user.clerkId}
-                            position={loc}
-                            userPosition={location}
-                            handleRequestMeeting={() => requestMeeting(loc.user)}
-                            handleCancelMeeting={() => cancelMeeting(loc.user)}
-                            infoWindowIsOpen={meetingRequests.find(request => request.clerkId == loc.user.clerkId) != undefined} />)}
-                    <UserMarker location={location} onDragEnd={handleDragEnd} />
-                </Map>
-            </APIProvider>
+            <Map {...mapProps}>
+                {locations.map(loc =>
+                    <OtherUserMarker
+                        key={loc.user.clerkId}
+                        position={loc}
+                        userPosition={location}
+                        handleRequestMeeting={() => requestMeeting(loc.user)}
+                        handleCancelMeeting={() => cancelMeeting(loc.user)}
+                        infoWindowIsOpen={meetingRequests.find(request => request.clerkId == loc.user.clerkId) != undefined} />)}
+                <UserMarker location={location} onDragEnd={handleDragEnd} />
+            </Map>
         </>
     );
 }
