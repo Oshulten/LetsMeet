@@ -7,6 +7,7 @@ import useLetsMeetUser from '../hooks/useUserFromClerk';
 import useMeetings from '../hooks/useMeetings';
 import { User } from '../types/types';
 import { useEffect } from 'react';
+import usePlaces from '../hooks/usePlaces';
 
 interface Props {
     defaultLocation: google.maps.LatLngLiteral,
@@ -15,30 +16,7 @@ interface Props {
 export default function GoogleMap({ defaultLocation }: Props) {
     const user = useLetsMeetUser();
 
-    useEffect(() => {
-        const loadLibraries = async () => {
-            const placesLibrary = await google.maps.importLibrary("places") as google.maps.PlacesLibrary;
-            const Place = placesLibrary.Place;
-
-            const request = {
-                // required parameters
-                fields: ['displayName', 'location', 'businessStatus'],
-                locationRestriction: {
-                    center: new google.maps.LatLng(defaultLocation),
-                    radius: 500,
-                },
-                // optional parameters
-                includedPrimaryTypes: ['restaurant'],
-                maxResultCount: 5,
-                rankPreference: 'DISTANCE',
-                language: 'en-US',
-                region: 'us',
-            } as google.maps.places.SearchNearbyRequest;
-            const { places } = await Place.searchNearby(request);
-            console.log(places);
-        }
-        loadLibraries();
-    });
+    const { suggestMeetingPlaces } = usePlaces();
 
     const {
         location,
@@ -94,6 +72,7 @@ export default function GoogleMap({ defaultLocation }: Props) {
                         infoWindowIsOpen={meetingRequests.find(request => request.clerkId == loc.user.clerkId) != undefined} />)}
                 <UserMarker location={location} onDragEnd={handleDragEnd} />
             </Map>
+            <button onClick={() => suggestMeetingPlaces([user])}>Suggest Meeting Places</button>
         </>
     );
 }
