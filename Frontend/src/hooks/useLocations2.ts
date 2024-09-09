@@ -3,20 +3,17 @@ import { useEffect, useState } from "react";
 import { HubClient, HubServer } from "../api/hub";
 import { UserLocation, userLocationFromUser } from "../types/types";
 import { useUserContext } from "../components/UserContextProvider";
+import { ConnectionProgress } from "./useConnection";
 
-export default function useLocations(connection?: HubConnection) {
+export default function useLocations(connection: HubConnection | undefined, connectionProgress: ConnectionProgress) {
     const { user } = useUserContext();
     const [otherUsersLocations, setOtherUsersLocations] = useState<UserLocation[]>();
 
     useEffect(() => {
         console.log("useLocations");
-        console.log(connection);
-
-        if (connection)
-            console.log(connection.state);
 
         const registerCallbacks = async () => {
-            if (connection) {
+            if (connection && connectionProgress == `connected`) {
                 console.log("registerCallbacks")
                 HubClient.registerRecieveGeolocations(connection, fetchedLocations => {
                     console.log("Receiving locations");
@@ -26,15 +23,16 @@ export default function useLocations(connection?: HubConnection) {
         }
 
         const sendInitialLocation = async () => {
-            if (connection && connection.state == "Connected") {
+            if (connection && connectionProgress == `connected`) {
                 console.log("sendInitialLocation");
+                console.log(userLocationFromUser(user));
                 await HubServer.sendLocation(connection, userLocationFromUser(user));
             }
         }
 
         registerCallbacks();
         sendInitialLocation();
-    }, [connection]);
+    }, [connection, connectionProgress]);
 
     return {
         otherUsersLocations

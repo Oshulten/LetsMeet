@@ -57,6 +57,7 @@ public class Hub(LetsMeetDbContext db, HubPersistence persistence) : Hub<IHubCli
 
     public async Task SendLocation(DtoGeolocation dto)
     {
+        Console.WriteLine("SendLocation");
         var user = db.UserByClerkId(dto.ClerkId);
 
         if (user is null) Console.WriteLine("SendLocation: user is null");

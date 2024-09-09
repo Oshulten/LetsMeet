@@ -6,8 +6,8 @@ import { useUserContext } from './UserContextProvider';
 export default function GoogleMap() {
     const { user } = useUserContext();
     console.log(user);
-    const { connection } = UseConnection();
-    const { otherUsersLocations } = useLocations(connection);
+    const { connection, connectionProgress } = UseConnection();
+    const { otherUsersLocations } = useLocations(connection, connectionProgress);
 
     console.log(connection);
 
