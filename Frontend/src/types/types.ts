@@ -65,6 +65,13 @@ export const userLocationFromDto = (loc: DtoLocation) => {
     } as UserLocation;
 }
 
+export const userLocationFromUser = (user: User) => {
+    return {
+        user: user,
+        location: user.location
+    } as UserLocation;
+}
+
 export const meetingFromDto = (meeting: DtoMeeting) => {
     return {
         requestUser: {

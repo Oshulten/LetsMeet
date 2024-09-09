@@ -24,7 +24,7 @@ interface Props {
 
 export function UserContextProvider({ children }: Props) {
     const clerkUser = useUser().user!;
-    
+
     const [user, setUser] = useState<User>({
         username: clerkUser.username!,
         clerkId: clerkUser.id,

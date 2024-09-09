@@ -7,26 +7,34 @@ using System.Text.Json;
 
 namespace Backend.Hubs;
 
-public class GeolocationHub(LetsMeetDbContext db, HubPersistence persistence) : Hub<IGeolocationClient>
+public class Hub(LetsMeetDbContext db, HubPersistence persistence) : Hub<IHubClient>
 {
     public override Task OnConnectedAsync()
     {
+        if (Context.GetHttpContext() is HttpContext httpContext)
+        {
+            var username = httpContext.Request.Query["username"].ToString();
+            var clerkId = httpContext.Request.Query["clerkId"].ToString();
+            if (username is not null && clerkId is not null)
+            {
+                var user = new DtoUser(username, clerkId);
+                var registeredUser = persistence.RegisterUser(Context.ConnectionId, user, db);
+                Console.WriteLine($"Registered user {registeredUser.Username} on connectionId {Context.ConnectionId}");
+                persistence.LogActiveUsers();
+                Groups.AddToGroupAsync(Context.ConnectionId, username);
+                Console.WriteLine(Groups.ToString());
+            }
+        }
+
         Console.WriteLine($"Established connection with id {Context.ConnectionId}");
         return base.OnConnectedAsync();
     }
 
     public override Task OnDisconnectedAsync(Exception? exception)
     {
-        Console.WriteLine($"Disconnected id {Context.ConnectionId}");
         persistence.DeregisterUserByConnectionId(Context.ConnectionId);
+        Console.WriteLine($"Disconnected id {Context.ConnectionId}");
         return base.OnDisconnectedAsync(exception);
-    }
-
-    public void RegisterUser(DtoUser user)
-    {
-        var registeredUser = persistence.RegisterUser(Context.ConnectionId, user, db);
-        Console.WriteLine($"Registered user {registeredUser.Username}");
-        persistence.LogActiveUsers();
     }
 
     public async Task RequestMeeting(DtoMeeting meeting)
@@ -51,13 +59,14 @@ public class GeolocationHub(LetsMeetDbContext db, HubPersistence persistence) : 
     {
         var user = db.UserByClerkId(dto.ClerkId);
 
+        if (user is null) Console.WriteLine("SendLocation: user is null");
+
         var location = db.AddGeolocation(dto);
         persistence.AddToLastLocations(dto.ClerkId, location);
 
         Console.WriteLine($"{user!.Username} ({Context.ConnectionId})\n\tLatitude: {dto.Latitude}\n\tLongitude: {dto.Longitude}");
         Console.WriteLine($"Connected users: {string.Join(", ", persistence.ActiveUsers.Select(user => user!.Username))}");
-
-        await Clients.All.ReceiveGeolocations(persistence.LastLocationPerUser);
+        await Clients.Others.ReceiveGeolocations(persistence.LastLocationPerUser);
     }
 
     public async Task ConfirmMeeting(DtoMeeting meeting)

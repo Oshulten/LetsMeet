@@ -45,7 +45,10 @@ public class HubPersistence
         return _activeUsers[connectionId];
     }
 
-    public void DeregisterUserByConnectionId(string connectionId) => _activeUsers.Remove(connectionId);
+    public void DeregisterUserByConnectionId(string connectionId)
+    {
+        _activeUsers.Remove(connectionId);
+    }
 
     public List<User> ActiveUsers => [.. _activeUsers.Values];
 

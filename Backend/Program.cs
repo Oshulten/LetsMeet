@@ -62,7 +62,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHub<GeolocationHub>("/notifications");
+app.MapHub<Hub>("/notifications");
 
 app.Run();
 public partial class Program { }

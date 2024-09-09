@@ -1,5 +1,5 @@
 import { HubConnection } from "@microsoft/signalr";
-import { DtoLocation, Meeting, meetingFromDto, User, UserLocation, userLocationFromDto, DtoMeeting, dtoFromUser, dtoFromMeeting, dtoFromUserLocation } from '../types/types';
+import { DtoLocation, Meeting, meetingFromDto, UserLocation, userLocationFromDto, DtoMeeting, dtoFromMeeting, dtoFromUserLocation } from '../types/types';
 
 function checkConnection(connection: HubConnection) {
     if (!connection?.connectionId) {
@@ -32,11 +32,6 @@ export const HubClient = {
 }
 
 export const HubServer = {
-    registerUser: async function (connection: HubConnection, user: User) {
-        if (checkConnection(connection)) {
-            await connection.invoke("RegisterUser", dtoFromUser(user));
-        }
-    },
     requestMeeting: async function (connection: HubConnection, meeting: Meeting) {
         if (checkConnection(connection)) {
             await connection.invoke("RequestMeeting", dtoFromMeeting(meeting));

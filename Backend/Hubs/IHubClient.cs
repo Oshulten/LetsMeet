@@ -3,7 +3,7 @@ using Backend.Models;
 
 namespace Backend.Hubs;
 
-public interface IGeolocationClient
+public interface IHubClient
 {
     Task ReceiveGeolocations(List<DtoGeolocation> locations);
     Task ReceiveMeetingRequest(DtoMeeting meeting);
