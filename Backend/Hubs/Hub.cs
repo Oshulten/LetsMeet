@@ -55,7 +55,7 @@ public class Hub(LetsMeetDbContext db, HubPersistence persistence) : Hub<IHubCli
         var location = db.AddGeolocation(dto);
         persistence.AddToLastLocations(dto.ClerkId, location);
 
-        await Clients.Others.ReceiveGeolocations(persistence.LastLocationPerUser);
+        await Clients.All.ReceiveGeolocations(persistence.LastLocationPerUser);
     }
 
     public async Task ConfirmMeeting(DtoMeeting meeting)

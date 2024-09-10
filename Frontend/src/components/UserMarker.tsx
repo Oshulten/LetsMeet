@@ -1,17 +1,31 @@
 import { AdvancedMarker, Pin } from "@vis.gl/react-google-maps";
-import { UserLocation } from "../types/types";
+import { useUserContext } from "./UserContextProvider";
 
 /* eslint-disable react/react-in-jsx-scope */
 interface Props {
-    location: UserLocation,
-    onDragEnd: (e: google.maps.MapMouseEvent) => void
+    updateLocation: (newLocation: google.maps.LatLngLiteral) => Promise<void>
 }
 
-export default function UserMarker({ location, onDragEnd }: Props) {
+
+export default function UserMarker({ updateLocation }: Props) {
+    const { user } = useUserContext();
+
+    const handleDragEnd = (e: google.maps.MapMouseEvent) => {
+        if (!e.latLng) {
+            console.error("MapMouseEvent event does not have a defined location");
+            return;
+        }
+
+        updateLocation({
+            lat: e.latLng.lat(),
+            lng: e.latLng.lng()
+        });
+    }
+
     return (
         <AdvancedMarker
-            position={location.location}
-            onDragEnd={onDragEnd}>
+            position={user.location}
+            onDragEnd={e => handleDragEnd(e)}>
             <Pin
                 background={'#00AA00'}
                 glyphColor={'#000'}

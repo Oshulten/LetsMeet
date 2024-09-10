@@ -5,16 +5,23 @@ import haversine from 'haversine-distance';
 import readableDistance from "../utilities/readableDistance";
 import MeetingButton from "./MeetingButton";
 import { UserLocation } from "../types/types";
+import { useUserContext } from "./UserContextProvider";
 
 interface Props {
-    position: UserLocation,
-    userPosition: UserLocation,
-    handleRequestMeeting: () => Promise<void>,
-    handleCancelMeeting: () => Promise<void>,
+    location: UserLocation,
+    // handleRequestMeeting: () => Promise<void>,
+    // handleCancelMeeting: () => Promise<void>,
     infoWindowIsOpen: boolean
 }
 
-export default function OtherUserMarker({ position, userPosition, handleRequestMeeting, handleCancelMeeting, infoWindowIsOpen }: Props) {
+export default function OtherUserMarker({ location, infoWindowIsOpen }: Props) {
+    const { user } = useUserContext();
+
+    const thisLocation: google.maps.LatLngLiteral = {
+        lat: location.lat,
+        lng: location.lng
+    }
+
     const [markerRef, marker] = useAdvancedMarkerRef();
     const [infoWindowShown, setInfoWindowShown] = useState(infoWindowIsOpen);
 
@@ -23,23 +30,23 @@ export default function OtherUserMarker({ position, userPosition, handleRequestM
 
     const infoWindowHeaderContent =
         <div className="flex flex-row">
-            <h2 className="font-bold text-lg">{position.userIdentity.username}</h2>
+            <h2 className="font-bold text-lg">{location.username}</h2>
         </div>
 
-    const distanceToUser = haversine(position.location, userPosition.location);
+    const distanceToUser = haversine(thisLocation, user.location);
 
     const infoWindowMainContent =
         <div>
             <p>{readableDistance(distanceToUser)} away</p>
-            <MeetingButton
+            {/* <MeetingButton
                 handleRequestMeeting={handleRequestMeeting}
                 handleCancelMeeting={handleCancelMeeting}
                 otherUser={position.userIdentity}
-            />
+            /> */}
         </div>
 
     const markerProps: AdvancedMarkerProps = {
-        position: position.location,
+        position: location,
         onClick: handleMarkerClick
     }
 

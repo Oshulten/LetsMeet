@@ -1,135 +1,58 @@
-import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
+import { HubConnection } from "@microsoft/signalr";
 import { useEffect, useState } from "react";
-import { UserLocation } from '../types/types';
 import { HubClient, HubServer } from "../api/hub";
-import useUserFromClerk from "./useUserFromClerk";
+import { UserLocation, userLocationFromUser } from "../types/types";
+import { useUserContext } from "../components/UserContextProvider";
+import { ConnectionProgress } from "./useConnection";
 
-export default function useLocations(defaultLocation: google.maps.LatLngLiteral) {
-    const user = useUserFromClerk();
-    const [location, setLocation] = useState<UserLocation>({ userIdentity: user, location: defaultLocation });
-    const [connection, setConnection] = useState<HubConnection>();
-    const [locations, setLocations] = useState<UserLocation[]>([]);
-
-
-    // const startConnection = async (localConnection: HubConnection) => {
-    //     try {
-    //         await localConnection.start();
-    //         return localConnection;
-    //     } catch (err) {
-    //         console.error(err as Error);
-    //     }
-    // }
-
-    // const setHubCallbacks = (localConnection: HubConnection) => {
-    // HubClient.registerRecieveGeolocations(localConnection, fetchedLocations => {
-    //     fetchedLocations = fetchedLocations.filter(loc => loc.user.clerkId != user.clerkId);
-    //     setLocations(fetchedLocations);
-    // });
-    // }
-
-    // const registerUser = async (localConnection: HubConnection) => {
-    //     await HubServer.registerUser(localConnection, user);
-    // }
-
-    // const sendInitialLocation = async (localConnection: HubConnection) => {
-    //     console.log(location);
-    //     await HubServer.sendLocation(localConnection, location);
-    // }
-
-    // const stopConnection = () => {
-    //     if (!connection) {
-    //         return;
-    //     }
-
-    //     connection.stop();
-    //     setConnection(undefined);
-    // }
-
-    // const effectCallback = async () => {
-    //     if (connection) {
-    //         return stopConnection
-    //     }
-
-    //     let localConnection = initializeConnection();
-
-    //     localConnection = (await startConnection(localConnection))!;
-    //     if (!localConnection.connectionId) {
-    //         return stopConnection;
-    //     }
-
-    //     setHubCallbacks(localConnection);
-    //     registerUser(localConnection);
-    //     sendInitialLocation(localConnection);
-    // }
+export default function useLocations(connection: HubConnection | undefined, connectionProgress: ConnectionProgress,) {
+    const { user, setLocation: setUserLocation } = useUserContext();
+    const [otherUsersLocations, setOtherUsersLocations] = useState<UserLocation[]>();
 
     useEffect(() => {
-        const initializeConnection = async () => {
-            if (connection) {
-                return;
-            }
+        console.log("useLocations");
 
-            const localConnection =
-                new HubConnectionBuilder()
-                    .withUrl(`${import.meta.env.VITE_LOCAL_BASE_URL}/${import.meta.env.VITE_HUB_SEGMENT}`)
-                    .withAutomaticReconnect()
-                    .build();
-
-            setConnection(localConnection);
-
-            console.log("initializeConnection");
-            console.log(localConnection);
-        };
-
-        initializeConnection();
-    }, []);
-
-    useEffect(() => {
         const registerCallbacks = async () => {
-            if (connection) {
-                try {
-                    console.log("registerCallbacks");
-                    console.log(connection);
-                    await connection.start();
+            if (connection && connectionProgress == `connected`) {
+                HubClient.registerRecieveGeolocations(connection, fetchedLocations => {
+                    console.log("Receiving locations");
+                    console.log(fetchedLocations);
 
-                    HubClient.registerRecieveGeolocations(connection, fetchedLocations => {
-                        fetchedLocations = fetchedLocations.filter(loc => loc.userIdentity.clerkId != user.clerkId);
-                        setLocations(fetchedLocations);
-                    });
-                } catch (err) {
-                    console.error(err as Error);
-                }
+                    const otherUserLocations = fetchedLocations.filter(location => location.clerkId != user.clerkId);
+                    setOtherUsersLocations(otherUserLocations);
+
+                    const userLocation = fetchedLocations.find(location => location.clerkId == user.clerkId);
+
+                    if (userLocation) {
+                        setUserLocation({ lat: userLocation.lat, lng: userLocation.lng });
+                        return;
+                    }
+
+                    console.error("This user's location was not among the fetched locations");
+                });
             }
         }
 
-        const registerUser = async () => {
-            if (connection && connection.state == "Connected") {
-                console.log("registerUser");
-                console.log(connection);
-                await HubServer.registerUser(connection, user);
+        const sendInitialLocation = async () => {
+            if (connection && connectionProgress == `connected`) {
+                await HubServer.sendLocation(connection, userLocationFromUser(user));
             }
         }
 
-        // registerCallbacks();
-        // registerUser();
-    }, [connection]);
+        registerCallbacks();
+        sendInitialLocation();
+    }, [connection, connectionProgress]);
 
-    // useEffect(() => {
-    //     effectCallback();
-    //     return stopConnection
-    // }, []);
-
-    const setCurrentLocation = async (location: UserLocation) => {
-        if (connection) {
-            console.log(location);
-            await HubServer.sendLocation(connection, location);
-            setLocation(location);
+    const setLocation = async (newLocation: google.maps.LatLngLiteral) => {
+        if (connection && connectionProgress == `connected`) {
+            // setUserLocation(newLocation);
+            user.location = newLocation;
+            await HubServer.sendLocation(connection, userLocationFromUser(user));
         }
     }
 
     return {
-        location: location,
-        setLocation: setCurrentLocation,
-        locations: locations,
-        connection: connection
-    };
+        otherUsersLocations,
+        setLocation
+    }
 }

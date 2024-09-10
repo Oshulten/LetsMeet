@@ -23,25 +23,7 @@ public class HubPersistence
 
     public User RegisterUser(string connectionId, DtoUser dtoUser, LetsMeetDbContext db)
     {
-        Console.WriteLine("RegisterUser");
-        LogActiveUsers();
-
-        if (_activeUsers.ContainsKey(connectionId))
-        {
-            Console.WriteLine("1");
-            return _activeUsers[connectionId];
-        }
-
-        //Checks if a user with a specific clerkId exists in the dictionary
-        if (_activeUsers.Values.FirstOrDefault(u => u.Id == dtoUser.ClerkId) is null)
-        {
-            Console.WriteLine("2");
-            var existingUser = db.AddUser(dtoUser);
-            _activeUsers.TryAdd(connectionId, existingUser);
-            return existingUser;
-        }
-
-        Console.WriteLine("2");
+        _activeUsers.TryAdd(connectionId, db.AddUser(dtoUser));
         return _activeUsers[connectionId];
     }
 

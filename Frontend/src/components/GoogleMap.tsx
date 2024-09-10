@@ -1,22 +1,39 @@
 /* eslint-disable react/react-in-jsx-scope */
+import { MapProps, Map } from '@vis.gl/react-google-maps';
 import UseConnection from '../hooks/useConnection';
-import useLocations from '../hooks/useLocations2';
+import useLocations from '../hooks/useLocations';
 import { useUserContext } from './UserContextProvider';
+import UserMarker from './UserMarker';
+import OtherUserMarker from './OtherUserMarker';
 
 export default function GoogleMap() {
     const { user } = useUserContext();
-    console.log(user);
     const { connection, connectionProgress } = UseConnection();
-    const { otherUsersLocations } = useLocations(connection, connectionProgress);
+    const { otherUsersLocations, setLocation } = useLocations(connection, connectionProgress);
 
-    console.log(connection);
+    const mapProps: MapProps = {
+        defaultCenter: user.location,
+        defaultZoom: 10,
+        gestureHandling: 'greedy',
+        disableDefaultUI: true,
+        mapId: import.meta.env.VITE_GOOGLE_MAP_ID,
+    }
 
     return (
         <>
-            <p>{`connectionState: ${connection?.state}`}</p>
-            <button onClick={() => console.log(connection)}>Print Connection</button>
-        </>)
-    // const user = useLetsMeetUser();
+            <Map {...mapProps} className="w-96 h-96">
+                {otherUsersLocations && otherUsersLocations.map(otherLocation =>
+                    <OtherUserMarker
+                        key={otherLocation.clerkId}
+                        location={otherLocation}
+                        infoWindowIsOpen={true} />)}
+                <UserMarker updateLocation={setLocation} />
+            </Map>
+            <p>{JSON.stringify(otherUsersLocations)}</p>
+        </>
+    );
+
+
 
     // const { suggestMeetingPlaces } = usePlaces();
 
@@ -55,28 +72,7 @@ export default function GoogleMap() {
     //     return <p>{connection.state}</p>;
     // }
 
-    // const mapProps: MapProps = {
-    //     style: { width: '100vw', height: '100vh' },
-    //     defaultCenter: defaultLocation,
-    //     defaultZoom: 5,
-    //     gestureHandling: 'greedy',
-    //     disableDefaultUI: true,
-    //     mapId: import.meta.env.VITE_GOOGLE_MAP_ID,
-    // }
 
-    // return (
-    //     <>
-    //         <Map {...mapProps} className="w-96 h-96">
-    //             {locations.map(loc =>
-    //                 <OtherUserMarker
-    //                     key={loc.user.clerkId}
-    //                     position={loc}
-    //                     userPosition={location}
-    //                     handleRequestMeeting={() => requestMeeting(loc.user)}
-    //                     handleCancelMeeting={() => cancelMeeting(loc.user)}
-    //                     infoWindowIsOpen={true}/>)}
-    //             <UserMarker location={location} onDragEnd={handleDragEnd} />
-    //         </Map>
-    //     </>
-    // );
+
+
 }
