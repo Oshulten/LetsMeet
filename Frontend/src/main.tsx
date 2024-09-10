@@ -8,6 +8,15 @@ import { DefaultCatchBoundary } from './components/DefaultCatchBoundary.tsx';
 import { NotFound } from './components/NotFound.tsx';
 import './css/index.css'
 
+import { Clerk } from '@clerk/clerk-js'
+
+const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+
+export const clerk = new Clerk(clerkPubKey)
+await clerk.load({
+  // Set load options here
+})
+
 const queryClient = new QueryClient();
 
 const router = createRouter({
