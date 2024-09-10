@@ -80,6 +80,8 @@ export default function useMeetings() {
                     user: meeting.requestUser,
                     state: 'awaitingUserConfirmation'
                 }
+                console.log("adding new meeting");
+                console.log(newMeeting);
                 addMeeting(newMeeting);
                 return;
             }
