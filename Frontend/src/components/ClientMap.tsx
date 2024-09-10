@@ -2,11 +2,13 @@
 import { MapProps, Map } from '@vis.gl/react-google-maps';
 import ClientUserMarker from './ClientUserMarker';
 import useClientUser from '../hooks/useClientUser';
+import useConnection from '../hooks/useConnection';
+import useLocations from '../hooks/useLocations';
 
 export default function ClientMap() {
     // const { clientUser, meetings } = useClientContext();
     const clientUser = useClientUser();
-    // useConnection();
+    const connection = useConnection();
     // const { remoteUserLocations } = useLocations();
 
     if (!clientUser) {

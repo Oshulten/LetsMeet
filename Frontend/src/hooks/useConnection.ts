@@ -19,7 +19,6 @@ export default function useConnection() {
         enabled: queryClient.getQueryData(["clientUser"]) != undefined
     });
 
-    return {
-        connection: connectionQuery.data
-    }
+    return connectionQuery.data
+
 }
