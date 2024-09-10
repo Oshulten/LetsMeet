@@ -4,20 +4,17 @@ import { useState } from "react";
 import haversine from 'haversine-distance';
 import readableDistance from "../utilities/readableDistance";
 import MeetingButton from "./MeetingButton";
-import { MeetingState, UserLocation } from "../types/types";
+import { UserLocation } from "../types/types";
 import { useUserContext } from "./UserContextProvider";
 
 export interface OtherUserMarkerProps {
     location: UserLocation,
-    state: MeetingState,
-    handleRequestMeeting: () => Promise<void>,
-    handleCancelMeeting: () => Promise<void>,
 }
 
-export default function OtherUserMarker({ location, state, handleRequestMeeting, handleCancelMeeting }: OtherUserMarkerProps) {
+export default function OtherUserMarker({ location }: OtherUserMarkerProps) {
     const { user } = useUserContext();
     const [markerRef, marker] = useAdvancedMarkerRef();
-    const [infoWindowShown, setInfoWindowShown] = useState(state == 'awaitingUserConfirmation');
+    const [infoWindowShown, setInfoWindowShown] = useState(false);
 
     const thisLocation: google.maps.LatLngLiteral = {
         lat: location.lat,
@@ -34,11 +31,7 @@ export default function OtherUserMarker({ location, state, handleRequestMeeting,
     const infoWindowMainContent =
         <div>
             <p>{readableDistance(distanceToUser)} away</p>
-            <MeetingButton
-                handleRequestMeeting={handleRequestMeeting}
-                handleCancelMeeting={handleCancelMeeting}
-                otherUser={{ username: location.username, clerkId: location.clerkId }}
-            />
+            <MeetingButton otherUser={{ username: location.username, clerkId: location.clerkId }} />
         </div>
 
     const markerProps: AdvancedMarkerProps = {

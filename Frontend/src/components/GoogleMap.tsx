@@ -5,24 +5,12 @@ import useLocations from '../hooks/useLocations';
 import { useUserContext } from './UserContextProvider';
 import UserMarker from './UserMarker';
 import OtherUserMarker, { OtherUserMarkerProps } from './OtherUserMarker';
-import useMeetings from '../hooks/useMeetings';
-import { UserIdentity, UserLocation } from '../types/types';
+import { UserLocation } from '../types/types';
 
 export default function GoogleMap() {
-    const { user } = useUserContext();
+    const { user, meetings } = useUserContext();
     const { connection, connectionProgress } = UseConnection();
     const { otherUsersLocations, setLocation } = useLocations(connection, connectionProgress);
-    const {
-        meetingRequests,
-        requestMeeting,
-        cancelMeeting
-    } = useMeetings({
-        connection,
-        connectionProgress,
-        onSuccessfulMeetingRequest: (meetingUser: UserIdentity) => {
-            console.log(meetingUser);
-        }
-    });
 
     const mapProps: MapProps = {
         defaultCenter: user.location,
@@ -35,11 +23,6 @@ export default function GoogleMap() {
     const otherUserMarkerProps = (location: UserLocation) => {
         return {
             location: location,
-            state: meetingRequests.find(m => m.clerkId == location.clerkId) != undefined
-                ? 'awaitingUserConfirmation'
-                : 'none',
-            handleRequestMeeting: () => requestMeeting({ clerkId: location.clerkId, username: location.username }),
-            handleCancelMeeting: () => cancelMeeting({ clerkId: location.clerkId, username: location.username })
         } as OtherUserMarkerProps;
     }
 
@@ -52,7 +35,7 @@ export default function GoogleMap() {
                 <UserMarker updateLocation={setLocation} />
             </Map>
             <p>{JSON.stringify(otherUsersLocations)}</p>
-            <p>{JSON.stringify(meetingRequests ?? "meetingRequests is undefined")}</p>
+            <p>{JSON.stringify(meetings ?? "meetingRequests is undefined")}</p>
         </>
     );
 }

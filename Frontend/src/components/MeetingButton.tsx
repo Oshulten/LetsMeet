@@ -1,35 +1,34 @@
 /* eslint-disable react/react-in-jsx-scope */
-import { useState } from "react";
-import { MeetingState, UserIdentity } from "../types/types";
+import { UserIdentity } from "../types/types";
+import { useUserContext } from "./UserContextProvider";
+import useMeetings from "../hooks/useMeetings";
 
 interface Props {
-    state?: MeetingState,
-    handleRequestMeeting: () => Promise<void>,
-    handleCancelMeeting: () => Promise<void>,
     otherUser: UserIdentity
 }
 
-export default function MeetingButton({ state, handleRequestMeeting, handleCancelMeeting, otherUser }: Props) {
-    const [meetButtonState, setMeetButtonState] = useState<MeetingState>(state ?? 'neutral');
+export default function MeetingButton({ otherUser }: Props) {
+    const { getMeetingByUser } = useUserContext();
+    const { requestMeeting, cancelMeeting} = useMeetings(); 
 
-    switch (meetButtonState) {
-        case 'neutral':
-            return (
-                <button
-                    onClick={() => {
-                        setMeetButtonState('awaitingOtherUserConfirmation');
-                        handleRequestMeeting();
-                    }}
-                    className="btn btn-info text-white font-normal w-full">
-                    {`Let's Meet!`}
-                </button>)
+    const meeting = getMeetingByUser(otherUser);
 
+    if (!meeting)
+        return (
+            <button
+                onClick={() => {
+                    requestMeeting(otherUser);
+                }}
+                className="btn btn-info text-white font-normal w-full">
+                {`Let's Meet!`}
+            </button>)
+
+    switch (meeting.state) {
         case 'awaitingOtherUserConfirmation':
             return (
                 <button
                     onClick={() => {
-                        setMeetButtonState('neutral');
-                        handleCancelMeeting();
+                        requestMeeting(otherUser);
                     }}
                     className="btn btn-info text-white font-normal w-full">
                     Waiting for response
@@ -39,10 +38,18 @@ export default function MeetingButton({ state, handleRequestMeeting, handleCance
         case 'awaitingUserConfirmation':
             return (<>
                 <p>{`${otherUser.username} wants to meet you!`}</p>
-                <button className="btn btn-info text-white font-normal w-full">
-                    {`Let's meet!`}
+                <button 
+                    onClick={() => {
+                        requestMeeting(otherUser);
+                    }}
+                    className="btn btn-info text-white font-normal w-full">
+                    {`Someone wants to meet you`}
                 </button>)
-                <button className="btn btn-info text-white font-normal w-full" >
+                <button 
+                    onClick={() => {
+                        cancelMeeting(otherUser);
+                    }}
+                    className="btn btn-info text-white font-normal w-full" >
                     {`Not a good time...`}
                 </button>
             </ >)
