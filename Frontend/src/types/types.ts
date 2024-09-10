@@ -8,11 +8,19 @@ export type Meeting = {
     targetUser: UserIdentity
 }
 
+export type ActiveMeeting = Meeting & {
+    state: MeetingState
+}
+
 export type UserLocation = UserIdentity & google.maps.LatLngLiteral;
 
 export type User = UserIdentity & {
     location: google.maps.LatLngLiteral
 }
+
+export type MeetingState =
+    "none" | "awaitingOtherUserConfirmation" | "awaitingUserConfirmation"
+    | 'confirmed'
 
 export function userLocationFromUser(user: User) {
     const userLocation: UserLocation = {

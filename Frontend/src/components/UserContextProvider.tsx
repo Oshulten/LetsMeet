@@ -1,6 +1,6 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { createContext, useContext, useEffect, useState } from "react";
-import { User } from "../types/types";
+import { ActiveMeeting, User } from "../types/types";
 import { useUser } from "@clerk/clerk-react";
 
 const defaultLocation: google.maps.LatLngLiteral = {
@@ -10,12 +10,14 @@ const defaultLocation: google.maps.LatLngLiteral = {
 
 interface UserContext {
     user: User
-    setLocation: (newLocation: google.maps.LatLngLiteral) => void
+    setLocation: (newLocation: google.maps.LatLngLiteral) => void,
+    meetings: ActiveMeeting[]
 }
 
 export const UserContext = createContext<UserContext>({
     user: { username: "null", clerkId: "null", location: defaultLocation },
-    setLocation: () => { }
+    setLocation: () => { },
+    meetings: []
 });
 
 interface Props {
@@ -30,8 +32,8 @@ export function UserContextProvider({ children }: Props) {
         clerkId: clerkUser.id,
         location: defaultLocation
     });
-
     const [location, setLocation] = useState<google.maps.LatLngLiteral>(defaultLocation);
+    const [meetings, setMeetings] = useState<ActiveMeeting[]>([]);
 
     useEffect(() => {
         setUser({
@@ -46,6 +48,7 @@ export function UserContextProvider({ children }: Props) {
             value={{
                 user: user!,
                 setLocation,
+                meetings
             }}>
             {children}
         </UserContext.Provider>

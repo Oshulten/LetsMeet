@@ -1,6 +1,6 @@
 import { HubConnection } from "@microsoft/signalr";
 import { useEffect, useState } from "react";
-import { User, UserIdentity, userIdentityFromUser } from '../types/types';
+import { UserIdentity, userIdentityFromUser } from '../types/types';
 import { HubClient, HubServer } from "../api/hub";
 import { useUserContext } from "../components/UserContextProvider";
 import { ConnectionProgress } from './useConnection';

@@ -25,11 +25,13 @@ export default function UserMarker({ updateLocation }: Props) {
     return (
         <AdvancedMarker
             position={user.location}
-            onDragEnd={e => handleDragEnd(e)}>
+            onDragEnd={e => handleDragEnd(e)}
+            zIndex={1}>
             <Pin
                 background={'#00AA00'}
                 glyphColor={'#000'}
                 borderColor={'#000'}
+
             />
         </AdvancedMarker>
     );

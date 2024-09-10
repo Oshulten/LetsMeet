@@ -35,7 +35,9 @@ export default function GoogleMap() {
     const otherUserMarkerProps = (location: UserLocation) => {
         return {
             location: location,
-            infoWindowIsOpen: false,
+            state: meetingRequests.find(m => m.clerkId == location.clerkId) != undefined
+                ? 'awaitingUserConfirmation'
+                : 'none',
             handleRequestMeeting: () => requestMeeting({ clerkId: location.clerkId, username: location.username }),
             handleCancelMeeting: () => cancelMeeting({ clerkId: location.clerkId, username: location.username })
         } as OtherUserMarkerProps;
@@ -50,6 +52,7 @@ export default function GoogleMap() {
                 <UserMarker updateLocation={setLocation} />
             </Map>
             <p>{JSON.stringify(otherUsersLocations)}</p>
+            <p>{JSON.stringify(meetingRequests ?? "meetingRequests is undefined")}</p>
         </>
     );
 }

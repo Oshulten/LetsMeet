@@ -1,23 +1,23 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { AdvancedMarker, AdvancedMarkerProps, InfoWindow, InfoWindowProps, Pin, PinProps, useAdvancedMarkerRef } from "@vis.gl/react-google-maps";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import haversine from 'haversine-distance';
 import readableDistance from "../utilities/readableDistance";
 import MeetingButton from "./MeetingButton";
-import { UserLocation } from "../types/types";
+import { MeetingState, UserLocation } from "../types/types";
 import { useUserContext } from "./UserContextProvider";
 
 export interface OtherUserMarkerProps {
     location: UserLocation,
-    infoWindowIsOpen: boolean
+    state: MeetingState,
     handleRequestMeeting: () => Promise<void>,
     handleCancelMeeting: () => Promise<void>,
 }
 
-export default function OtherUserMarker({ location, infoWindowIsOpen, handleRequestMeeting, handleCancelMeeting }: OtherUserMarkerProps) {
+export default function OtherUserMarker({ location, state, handleRequestMeeting, handleCancelMeeting }: OtherUserMarkerProps) {
     const { user } = useUserContext();
     const [markerRef, marker] = useAdvancedMarkerRef();
-    const [infoWindowShown, setInfoWindowShown] = useState(infoWindowIsOpen);
+    const [infoWindowShown, setInfoWindowShown] = useState(state == 'awaitingUserConfirmation');
 
     const thisLocation: google.maps.LatLngLiteral = {
         lat: location.lat,
