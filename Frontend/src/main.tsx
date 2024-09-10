@@ -13,11 +13,9 @@ import { Clerk } from '@clerk/clerk-js'
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 
 export const clerk = new Clerk(clerkPubKey)
-await clerk.load({
-  // Set load options here
-})
+await clerk.load({})
 
-const queryClient = new QueryClient();
+export const queryClient = new QueryClient();
 
 const router = createRouter({
   routeTree,

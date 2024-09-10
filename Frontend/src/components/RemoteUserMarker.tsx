@@ -3,18 +3,19 @@ import { AdvancedMarker, AdvancedMarkerProps, InfoWindow, InfoWindowProps, Pin, 
 import { useState } from "react";
 import haversine from 'haversine-distance';
 import readableDistance from "../utilities/readableDistance";
-import Meeting from "./Meeting";
 import { UserLocation } from "../types/types";
-import { useClientContext } from "./ClientContextProvider";
+import useClientUser from "../hooks/useClientUser";
 
 export interface RemoteUserMarkerProps {
     remoteLocation: UserLocation,
 }
 
 export default function RemoteUserMarker({ remoteLocation }: RemoteUserMarkerProps) {
-    const { clientUser } = useClientContext();
+    const clientUser = useClientUser();
     const [markerRef, marker] = useAdvancedMarkerRef();
     const [infoWindowShown, setInfoWindowShown] = useState(false);
+
+    if (!clientUser) return <></>
 
     const location = {
         lat: remoteLocation.lat,
@@ -29,7 +30,7 @@ export default function RemoteUserMarker({ remoteLocation }: RemoteUserMarkerPro
     const infoWindowMainContent = (
         <div>
             <p>{readableDistance(haversine(location, clientUser.location))} away</p>
-            <Meeting remoteUser={{ username: remoteLocation.username, clerkId: remoteLocation.clerkId }} />
+            {/* <Meeting remoteUser={{ username: remoteLocation.username, clerkId: remoteLocation.clerkId }} /> */}
         </div>);
 
     const markerProps: AdvancedMarkerProps = {

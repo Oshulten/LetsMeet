@@ -2,13 +2,13 @@
 import { MapProps, Map } from '@vis.gl/react-google-maps';
 import ClientUserMarker from './ClientUserMarker';
 import useClientUser from '../hooks/useClientUser';
-import useConnection from '../hooks/useConnection';
 import useLocations from '../hooks/useLocations';
+import { UserLocation } from '../types/types';
+import RemoteUserMarker, { RemoteUserMarkerProps } from './RemoteUserMarker';
 
 export default function ClientMap() {
-    // const { clientUser, meetings } = useClientContext();
     const clientUser = useClientUser();
-    useLocations();
+    const { remoteUserLocations } = useLocations();
 
     if (!clientUser) {
         console.log("clientUser is undefined");
@@ -23,18 +23,18 @@ export default function ClientMap() {
         mapId: import.meta.env.VITE_GOOGLE_MAP_ID,
     }
 
-    // const remoteUserMarkerProps = (location: UserLocation) => {
-    //     return {
-    //         remoteLocation: location,
-    //     } as RemoteUserMarkerProps;
-    // }
+    const remoteUserMarkerProps = (location: UserLocation) => {
+        return {
+            remoteLocation: location,
+        } as RemoteUserMarkerProps;
+    }
 
     return (
         <>
             <Map {...mapProps} className="w-96 h-96">
-                {/* {remoteUserLocations && remoteUserLocations.map(location =>
+                {remoteUserLocations && remoteUserLocations.map(location =>
                     <RemoteUserMarker key={location.clerkId} {...remoteUserMarkerProps(location)} />)
-                } */}
+                }
                 <ClientUserMarker />
             </Map>
             {/* <p>{JSON.stringify(remoteUserLocations)}</p>
