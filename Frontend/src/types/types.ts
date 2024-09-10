@@ -8,7 +8,8 @@ export type Meeting = {
     targetUser: UserIdentity
 }
 
-export type ActiveMeeting = Meeting & {
+export type ActiveMeeting = {
+    user: UserIdentity,
     state: MeetingState
 }
 
@@ -19,8 +20,7 @@ export type User = UserIdentity & {
 }
 
 export type MeetingState =
-    "none" | "awaitingOtherUserConfirmation" | "awaitingUserConfirmation"
-    | 'confirmed'
+    'awaitingOtherUserConfirmation' | 'awaitingUserConfirmation' | 'confirmed'
 
 export function userLocationFromUser(user: User) {
     const userLocation: UserLocation = {

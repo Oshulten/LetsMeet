@@ -1,6 +1,6 @@
 /* eslint-disable react/react-in-jsx-scope */
-import { createContext, useContext, useEffect, useState } from "react";
-import { ActiveMeeting, User } from "../types/types";
+import { createContext, useContext, useState } from "react";
+import { ActiveMeeting, MeetingState, User, UserIdentity } from "../types/types";
 import { useUser } from "@clerk/clerk-react";
 
 const defaultLocation: google.maps.LatLngLiteral = {
@@ -11,14 +11,28 @@ const defaultLocation: google.maps.LatLngLiteral = {
 interface UserContext {
     user: User
     setLocation: (newLocation: google.maps.LatLngLiteral) => void,
-    meetings: ActiveMeeting[]
+    meetings: ActiveMeeting[],
+    setMeetings: (newMeetings: ActiveMeeting[]) => ActiveMeeting[],
+    getMeetingByUser: (user: UserIdentity) => ActiveMeeting | undefined,
+    addMeeting: (meeting: ActiveMeeting) => ActiveMeeting,
+    setMeetingState: (user: UserIdentity, state: MeetingState) => ActiveMeeting | undefined,
+    removeMeeting: (user: UserIdentity) => void
 }
 
-export const UserContext = createContext<UserContext>({
-    user: { username: "null", clerkId: "null", location: defaultLocation },
+const nullUser: User = { username: "null", clerkId: "null", location: defaultLocation };
+const nullMeeting: ActiveMeeting = { user: nullUser, state: 'confirmed' };
+const nullUserContext: UserContext = {
+    user: nullUser,
     setLocation: () => { },
-    meetings: []
-});
+    meetings: [],
+    setMeetings: () => [],
+    getMeetingByUser: () => nullMeeting,
+    addMeeting: () => nullMeeting,
+    setMeetingState: () => nullMeeting,
+    removeMeeting: () => { }
+};
+
+const UserContext = createContext<UserContext>(nullUserContext);
 
 interface Props {
     children?: React.ReactNode
@@ -27,28 +41,64 @@ interface Props {
 export function UserContextProvider({ children }: Props) {
     const clerkUser = useUser().user!;
 
-    const [user, setUser] = useState<User>({
+    const user = useState<User>({
         username: clerkUser.username!,
         clerkId: clerkUser.id,
         location: defaultLocation
-    });
-    const [location, setLocation] = useState<google.maps.LatLngLiteral>(defaultLocation);
+    })[0];
+    const setLocation = useState<google.maps.LatLngLiteral>(defaultLocation)[1];
     const [meetings, setMeetings] = useState<ActiveMeeting[]>([]);
 
-    useEffect(() => {
-        setUser({
-            clerkId: clerkUser.id,
-            username: clerkUser.username,
-            location
-        } as User)
-    }, []);
+    const localMeetingByUser = (user: UserIdentity) =>
+        meetings.find(m => m.user.clerkId == user.clerkId);
+
+    const meetingsWithoutMeetingByUser = (user: UserIdentity) =>
+        meetings.filter(m => m.user.clerkId == user.clerkId);
+
+    const meetingsWithAddedMeeting = (meeting: ActiveMeeting) =>
+        [...meetings, meeting];
 
     return (
         <UserContext.Provider
             value={{
                 user: user!,
                 setLocation,
-                meetings
+                meetings,
+
+                setMeetings: (newMeetings: ActiveMeeting[]) => {
+                    setMeetings(newMeetings);
+                    return newMeetings;
+                },
+
+                getMeetingByUser: localMeetingByUser,
+
+                addMeeting: (meeting: ActiveMeeting) => {
+                    if (localMeetingByUser(meeting.user))
+                        return meeting;
+
+                    const newMeetings = meetingsWithAddedMeeting(meeting);
+                    setMeetings(newMeetings);
+                    return meeting;
+                },
+
+                setMeetingState: (user: UserIdentity, state: MeetingState) => {
+                    const existingMeeting = localMeetingByUser(user);
+                    if (!existingMeeting) return;
+
+                    const newMeeting = { ...existingMeeting, state: state };
+
+                    const newMeetings = meetings.map(m =>
+                        m.user.clerkId == user.clerkId
+                            ? newMeeting
+                            : m);
+
+                    setMeetings(newMeetings)
+                    return newMeeting;
+                },
+
+                removeMeeting: (user: UserIdentity) => {
+                    setMeetings(meetingsWithoutMeetingByUser(user));
+                }
             }}>
             {children}
         </UserContext.Provider>
