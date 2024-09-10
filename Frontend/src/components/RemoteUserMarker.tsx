@@ -5,6 +5,7 @@ import haversine from 'haversine-distance';
 import readableDistance from "../utilities/readableDistance";
 import { UserLocation } from "../types/types";
 import useClientUser from "../hooks/useClientUser";
+import Meeting from "./Meeting";
 
 export interface RemoteUserMarkerProps {
     remoteLocation: UserLocation,
@@ -30,7 +31,7 @@ export default function RemoteUserMarker({ remoteLocation }: RemoteUserMarkerPro
     const infoWindowMainContent = (
         <div>
             <p>{readableDistance(haversine(location, clientUser.location))} away</p>
-            {/* <Meeting remoteUser={{ username: remoteLocation.username, clerkId: remoteLocation.clerkId }} /> */}
+            <Meeting remoteUser={{ username: remoteLocation.username, clerkId: remoteLocation.clerkId }} />
         </div>);
 
     const markerProps: AdvancedMarkerProps = {

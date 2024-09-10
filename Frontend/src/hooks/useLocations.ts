@@ -22,7 +22,8 @@ export default function useLocations() {
         console.log("Receiving locations");
         console.log(fetchedLocations);
         console.log(queryClient);
-        queryClient.setQueryData([queryKey], fetchedLocations.filter(location => location.clerkId != clientUser.clerkId));
+        const remoteLocations = fetchedLocations.filter(location => location.clerkId != clientUser.clerkId)
+        queryClient.setQueryData([queryKey], remoteLocations);
         const queryData = queryClient.getQueryData([queryKey]);
         console.log(queryData);
     }
