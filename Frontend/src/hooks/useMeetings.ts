@@ -3,7 +3,6 @@ import { ActiveMeeting, UserIdentity, userIdentityFromUser } from '../types/type
 import { HubClient, HubServer } from "../api/hub";
 import { useUserContext } from "../components/UserContextProvider";
 
-
 export default function useMeetings() {
     const {
         user,
