@@ -3,7 +3,6 @@ using Backend.Models;
 using Backend.Dto;
 using Microsoft.AspNetCore.SignalR;
 using Backend.Services;
-using System.Text.Json;
 
 namespace Backend.Hubs;
 
@@ -55,19 +54,19 @@ public class Hub(LetsMeetDbContext db, HubPersistence persistence) : Hub<IHubCli
         Console.WriteLine($"{meeting.RequestUser.Username} cancels meeting with {meeting.TargetUser.Username}");
     }
 
-    public async Task SendLocation(DtoGeolocation dto)
+    public void SendLocation(DtoGeolocation location)
     {
         Console.WriteLine("SendLocation");
-        var user = db.UserByClerkId(dto.ClerkId);
+        // var user = db.UserByClerkId(dto.ClerkId);
 
-        if (user is null) Console.WriteLine("SendLocation: user is null");
+        // if (user is null) Console.WriteLine("SendLocation: user is null");
 
-        var location = db.AddGeolocation(dto);
-        persistence.AddToLastLocations(dto.ClerkId, location);
+        // var location = db.AddGeolocation(dto);
+        // persistence.AddToLastLocations(dto.ClerkId, location);
 
-        Console.WriteLine($"{user!.Username} ({Context.ConnectionId})\n\tLatitude: {dto.Lat}\n\tLongitude: {dto.Lng}");
-        Console.WriteLine($"Connected users: {string.Join(", ", persistence.ActiveUsers.Select(user => user!.Username))}");
-        await Clients.Others.ReceiveGeolocations(persistence.LastLocationPerUser);
+        // Console.WriteLine($"{user!.Username} ({Context.ConnectionId})\n\tLatitude: {dto.Lat}\n\tLongitude: {dto.Lng}");
+        // Console.WriteLine($"Connected users: {string.Join(", ", persistence.ActiveUsers.Select(user => user!.Username))}");
+        // await Clients.Others.ReceiveGeolocations(persistence.LastLocationPerUser);
     }
 
     public async Task ConfirmMeeting(DtoMeeting meeting)

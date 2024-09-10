@@ -15,9 +15,11 @@ export default function UseConnection() {
         const initializeConnection = async () => {
             if (connectionProgress != 'uninitialized') return;
 
+            const queryString = `?username=${user.username}&clerkId=${user.clerkId}`
+
             const localConnection =
                 new HubConnectionBuilder()
-                    .withUrl(`${import.meta.env.VITE_LOCAL_BASE_URL}/${import.meta.env.VITE_HUB_SEGMENT}?username=${user.username}&clerkId=${user.clerkId}`)
+                    .withUrl(`${import.meta.env.VITE_LOCAL_BASE_URL}/${import.meta.env.VITE_HUB_SEGMENT}${queryString}`)
                     .withAutomaticReconnect()
                     .build();
 

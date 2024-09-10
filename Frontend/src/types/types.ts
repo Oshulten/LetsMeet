@@ -1,6 +1,6 @@
 export type UserIdentity = {
-    username: string,
     clerkId: string
+    username: string,
 }
 
 export type Meeting = {
@@ -16,8 +16,8 @@ export type User = UserIdentity & {
 
 export function userLocationFromUser(user: User) {
     const userLocation: UserLocation = {
-        username: user.username,
         clerkId: user.clerkId,
+        username: user.username,
         lat: user.location.lat,
         lng: user.location.lng
     };
