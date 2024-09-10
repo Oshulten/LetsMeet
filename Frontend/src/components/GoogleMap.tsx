@@ -10,7 +10,7 @@ import { UserLocation } from '../types/types';
 export default function GoogleMap() {
     const { user, meetings } = useUserContext();
     const { connection, connectionProgress } = useConnection();
-    const { otherUsersLocations, setLocation } = useLocations(connection, connectionProgress);
+    const { otherUsersLocations, setLocation } = useLocations();
 
     const mapProps: MapProps = {
         defaultCenter: user.location,

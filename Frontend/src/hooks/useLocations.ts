@@ -1,12 +1,15 @@
-import { HubConnection } from "@microsoft/signalr";
 import { useEffect, useState } from "react";
 import { HubClient, HubServer } from "../api/hub";
 import { UserLocation, userLocationFromUser } from "../types/types";
 import { useUserContext } from "../components/UserContextProvider";
-import { ConnectionProgress } from "./useConnection";
 
-export default function useLocations(connection: HubConnection | undefined, connectionProgress: ConnectionProgress,) {
-    const { user, setLocation: setUserLocation } = useUserContext();
+export default function useLocations() {
+    const { 
+        user, 
+        setLocation: setUserLocation, 
+        connection, connectionProgress 
+    } = useUserContext();
+    
     const [otherUsersLocations, setOtherUsersLocations] = useState<UserLocation[]>();
 
     useEffect(() => {
