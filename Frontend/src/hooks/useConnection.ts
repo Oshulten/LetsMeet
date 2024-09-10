@@ -9,8 +9,6 @@ export default function UseConnection() {
     const [connectionProgress, setConnectionProgress] = useState<ConnectionProgress>('uninitialized');
     const [connection, setConnection] = useState<HubConnection>();
 
-    console.log(connectionProgress);
-
     useEffect(() => {
         const initializeConnection = async () => {
             if (connectionProgress != 'uninitialized') return;
@@ -26,7 +24,6 @@ export default function UseConnection() {
             setConnection(localConnection);
             setConnectionProgress('initialized');
             console.log("initializeConnection");
-            console.log(localConnection);
         };
 
         initializeConnection();
@@ -38,7 +35,6 @@ export default function UseConnection() {
                 try {
                     console.log("startConnection");
                     await connection.start();
-                    console.log(connection);
                     setConnectionProgress('connected');
 
                 } catch (err) {

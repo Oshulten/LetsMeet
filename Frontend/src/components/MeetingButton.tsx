@@ -1,17 +1,20 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { useState } from "react";
-import { User } from "../types/types";
+import { UserIdentity } from "../types/types";
+import { useUserContext } from "./UserContextProvider";
 
 interface Props {
     state?: MeetButtonState,
     handleRequestMeeting: () => Promise<void>,
     handleCancelMeeting: () => Promise<void>,
-    otherUser: User
+    otherUser: UserIdentity
 }
 
 type MeetButtonState = "neutral" | "awaitingOtherUserConfirmation" | "awaitingUserConfirmation";
 
 export default function MeetingButton({ state, handleRequestMeeting, handleCancelMeeting, otherUser }: Props) {
+    const { user } = useUserContext();
+    
     const [meetButtonState, setMeetButtonState] = useState<MeetButtonState>(state ?? 'neutral');
 
     switch (meetButtonState) {

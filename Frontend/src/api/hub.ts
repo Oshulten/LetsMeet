@@ -48,7 +48,6 @@ export const HubServer = {
 
     sendLocation: async function (connection: HubConnection, location: UserLocation) {
         if (checkConnection(connection)) {
-            console.log(location);
             await connection.invoke("SendLocation", location);
         }
     },

@@ -45,7 +45,6 @@ export default function useLocations(connection: HubConnection | undefined, conn
 
     const setLocation = async (newLocation: google.maps.LatLngLiteral) => {
         if (connection && connectionProgress == `connected`) {
-            // setUserLocation(newLocation);
             user.location = newLocation;
             await HubServer.sendLocation(connection, userLocationFromUser(user));
         }

@@ -23,3 +23,10 @@ export function userLocationFromUser(user: User) {
     };
     return userLocation;
 }
+
+export function userIdentityFromUser(user: User) {
+    return {
+        clerkId: user.clerkId,
+        username: user.username
+    } as UserIdentity;
+}

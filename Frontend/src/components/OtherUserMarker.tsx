@@ -7,26 +7,22 @@ import MeetingButton from "./MeetingButton";
 import { UserLocation } from "../types/types";
 import { useUserContext } from "./UserContextProvider";
 
-interface Props {
+export interface OtherUserMarkerProps {
     location: UserLocation,
-    // handleRequestMeeting: () => Promise<void>,
-    // handleCancelMeeting: () => Promise<void>,
     infoWindowIsOpen: boolean
+    handleRequestMeeting: () => Promise<void>,
+    handleCancelMeeting: () => Promise<void>,
 }
 
-export default function OtherUserMarker({ location, infoWindowIsOpen }: Props) {
+export default function OtherUserMarker({ location, infoWindowIsOpen, handleRequestMeeting, handleCancelMeeting }: OtherUserMarkerProps) {
     const { user } = useUserContext();
+    const [markerRef, marker] = useAdvancedMarkerRef();
+    const [infoWindowShown, setInfoWindowShown] = useState(infoWindowIsOpen);
 
     const thisLocation: google.maps.LatLngLiteral = {
         lat: location.lat,
         lng: location.lng
     }
-
-    const [markerRef, marker] = useAdvancedMarkerRef();
-    const [infoWindowShown, setInfoWindowShown] = useState(infoWindowIsOpen);
-
-    const handleMarkerClick = useCallback(() => setInfoWindowShown(isShown => !isShown), []);
-    const handleClose = useCallback(() => setInfoWindowShown(false), []);
 
     const infoWindowHeaderContent =
         <div className="flex flex-row">
@@ -38,16 +34,16 @@ export default function OtherUserMarker({ location, infoWindowIsOpen }: Props) {
     const infoWindowMainContent =
         <div>
             <p>{readableDistance(distanceToUser)} away</p>
-            {/* <MeetingButton
+            <MeetingButton
                 handleRequestMeeting={handleRequestMeeting}
                 handleCancelMeeting={handleCancelMeeting}
-                otherUser={position.userIdentity}
-            /> */}
+                otherUser={{ username: location.username, clerkId: location.clerkId }}
+            />
         </div>
 
     const markerProps: AdvancedMarkerProps = {
         position: location,
-        onClick: handleMarkerClick
+        onClick: () => setInfoWindowShown(isShown => !isShown),
     }
 
     const pinProps: PinProps = {
@@ -58,7 +54,7 @@ export default function OtherUserMarker({ location, infoWindowIsOpen }: Props) {
 
     const infoWindowProps: InfoWindowProps = {
         anchor: marker,
-        onClose: handleClose,
+        onClose: () => setInfoWindowShown(false),
         headerContent: infoWindowHeaderContent
     }
 

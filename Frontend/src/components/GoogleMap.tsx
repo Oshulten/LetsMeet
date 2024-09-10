@@ -4,12 +4,25 @@ import UseConnection from '../hooks/useConnection';
 import useLocations from '../hooks/useLocations';
 import { useUserContext } from './UserContextProvider';
 import UserMarker from './UserMarker';
-import OtherUserMarker from './OtherUserMarker';
+import OtherUserMarker, { OtherUserMarkerProps } from './OtherUserMarker';
+import useMeetings from '../hooks/useMeetings';
+import { UserIdentity, UserLocation } from '../types/types';
 
 export default function GoogleMap() {
     const { user } = useUserContext();
     const { connection, connectionProgress } = UseConnection();
     const { otherUsersLocations, setLocation } = useLocations(connection, connectionProgress);
+    const {
+        meetingRequests,
+        requestMeeting,
+        cancelMeeting
+    } = useMeetings({
+        connection,
+        connectionProgress,
+        onSuccessfulMeetingRequest: (meetingUser: UserIdentity) => {
+            console.log(meetingUser);
+        }
+    });
 
     const mapProps: MapProps = {
         defaultCenter: user.location,
@@ -19,60 +32,24 @@ export default function GoogleMap() {
         mapId: import.meta.env.VITE_GOOGLE_MAP_ID,
     }
 
+    const otherUserMarkerProps = (location: UserLocation) => {
+        return {
+            location: location,
+            infoWindowIsOpen: false,
+            handleRequestMeeting: () => requestMeeting({ clerkId: location.clerkId, username: location.username }),
+            handleCancelMeeting: () => cancelMeeting({ clerkId: location.clerkId, username: location.username })
+        } as OtherUserMarkerProps;
+    }
+
     return (
         <>
             <Map {...mapProps} className="w-96 h-96">
-                {otherUsersLocations && otherUsersLocations.map(otherLocation =>
-                    <OtherUserMarker
-                        key={otherLocation.clerkId}
-                        location={otherLocation}
-                        infoWindowIsOpen={true} />)}
+                {otherUsersLocations && otherUsersLocations.map(location =>
+                    <OtherUserMarker key={location.clerkId} {...otherUserMarkerProps(location)} />)
+                }
                 <UserMarker updateLocation={setLocation} />
             </Map>
             <p>{JSON.stringify(otherUsersLocations)}</p>
         </>
     );
-
-
-
-    // const { suggestMeetingPlaces } = usePlaces();
-
-    // const {
-    //     location,
-    //     setLocation,
-    //     locations,
-    //     connection,
-    // } = useLocations({
-    //     lat: import.meta.env.VITE_DEFAULT_LOCATION_LAT,
-    //     lng: import.meta.env.VITE_DEFAULT_LOCATION_LNG
-    // });
-
-    // const {
-    //     meetingRequests,
-    //     requestMeeting,
-    //     cancelMeeting
-    // } = useMeetings({
-    //     connection,
-    //     onSuccessfulMeetingRequest: (meetingUser: User) => {
-    //         console.log(`You have a meeting with ${meetingUser.username}!`);
-    //     }
-    // });
-
-    // const handleDragEnd = (e: google.maps.MapMouseEvent) => {
-    //     setLocation({ user: user, location: { lat: e.latLng!.lat(), lng: e.latLng!.lng() } });
-    // }
-
-    // if (!connection) {
-    //     console.log('No connection is initialized');
-    //     return <p>Establishing connection...</p>;
-    // }
-
-    // if (connection.state != "Connected") {
-    //     console.log(connection.state);
-    //     return <p>{connection.state}</p>;
-    // }
-
-
-
-
 }

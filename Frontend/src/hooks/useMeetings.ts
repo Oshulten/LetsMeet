@@ -1,32 +1,37 @@
 import { HubConnection } from "@microsoft/signalr";
 import { useEffect, useState } from "react";
-import { User } from '../types/types';
+import { User, UserIdentity, userIdentityFromUser } from '../types/types';
 import { HubClient, HubServer } from "../api/hub";
-import useUserFromClerk from "./useUserFromClerk";
+import { useUserContext } from "../components/UserContextProvider";
+import { ConnectionProgress } from './useConnection';
 
 interface Props {
-    connection: HubConnection | null,
-    onSuccessfulMeetingRequest: (meetingUser: User) => void
+    connection?: HubConnection,
+    connectionProgress: ConnectionProgress,
+    onSuccessfulMeetingRequest: (meetingUser: UserIdentity) => void
 }
 
-export default function useMeetings({ connection, onSuccessfulMeetingRequest }: Props) {
-    const user = useUserFromClerk();
-    const [meetingRequests, setMeetingRequests] = useState<User[]>([]);
+export default function useMeetings({ connection, connectionProgress, onSuccessfulMeetingRequest }: Props) {
+    const { user } = useUserContext();
+    const [meetingRequests, setMeetingRequests] = useState<UserIdentity[]>([]);
 
-    const requestMeeting = async (targetUser: User) => {
-        if (!connection) return;
+    const userIdentity = userIdentityFromUser(user);
+
+    const requestMeeting = async (targetUser: UserIdentity) => {
+        if (!(connection && connectionProgress == 'connected')) return;
+
         console.log(`You request a meeting with ${targetUser.username}`);
 
         if (meetingRequests.find(u => u.clerkId == targetUser.clerkId)) {
             HubServer.confirmMeeting(connection, {
-                requestUser: user,
-                targetUser: targetUser
+                requestUser: userIdentity,
+                targetUser: targetUser,
             });
             return;
         }
 
         await HubServer.requestMeeting(connection, {
-            requestUser: user,
+            requestUser: userIdentity,
             targetUser: targetUser
         });
 
@@ -34,13 +39,13 @@ export default function useMeetings({ connection, onSuccessfulMeetingRequest }: 
         setMeetingRequests(requestsWithTargetUser);
     }
 
-    const cancelMeeting = async (targetUser: User) => {
-        if (!connection) return;
+    const cancelMeeting = async (targetUser: UserIdentity) => {
+        if (!(connection && connectionProgress == 'connected')) return;
 
         console.log(`You cancel a meeting with ${targetUser.username}`);
 
         await HubServer.cancelMeeting(connection, {
-            requestUser: user,
+            requestUser: userIdentity,
             targetUser: targetUser
         });
 
@@ -49,16 +54,18 @@ export default function useMeetings({ connection, onSuccessfulMeetingRequest }: 
     }
 
     useEffect(() => {
-        if (!connection) return;
+        if (!(connection && connectionProgress == 'connected')) return;
 
         HubClient.registerReceiveMeetingRequest(connection, meeting => {
             console.log(`${meeting.requestUser.username} wants to meet you!`);
+
             const requestsWithRequestUser = [...meetingRequests, meeting.requestUser];
             setMeetingRequests(requestsWithRequestUser);
         });
 
         HubClient.registerRecieveMeetingCancellation(connection, meeting => {
             console.log(`${meeting.requestUser.username} cancelled a meeting with you`);
+
             const requestsWithoutRequestUser = meetingRequests.filter(u => u.clerkId != meeting.requestUser.clerkId);
             setMeetingRequests(requestsWithoutRequestUser);
             console.log(requestsWithoutRequestUser);
@@ -72,7 +79,7 @@ export default function useMeetings({ connection, onSuccessfulMeetingRequest }: 
                 : meeting.requestUser
             onSuccessfulMeetingRequest(meetingWith);
         });
-    }, [connection]);
+    }, [connection, connectionProgress]);
 
     return {
         meetingRequests,
