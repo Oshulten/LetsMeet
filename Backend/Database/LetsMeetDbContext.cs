@@ -16,7 +16,7 @@ namespace Backend.Database
         {
             var user = Users.Find(dto.ClerkId)
                 ?? throw new Exception($"A user with clerkId of {dto.ClerkId} was not found");
-            var geolocation = new Geolocation(user, dto.Latitude, dto.Longitude);
+            var geolocation = new Geolocation(user, dto.Lat, dto.Lng);
             user.Locations.Add(geolocation);
             Locations.Add(geolocation);
             SaveChanges();

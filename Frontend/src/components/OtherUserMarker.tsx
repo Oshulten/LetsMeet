@@ -23,7 +23,7 @@ export default function OtherUserMarker({ position, userPosition, handleRequestM
 
     const infoWindowHeaderContent =
         <div className="flex flex-row">
-            <h2 className="font-bold text-lg">{position.user.username}</h2>
+            <h2 className="font-bold text-lg">{position.userIdentity.username}</h2>
         </div>
 
     const distanceToUser = haversine(position.location, userPosition.location);
@@ -34,7 +34,7 @@ export default function OtherUserMarker({ position, userPosition, handleRequestM
             <MeetingButton
                 handleRequestMeeting={handleRequestMeeting}
                 handleCancelMeeting={handleCancelMeeting}
-                otherUser={position.user}
+                otherUser={position.userIdentity}
             />
         </div>
 

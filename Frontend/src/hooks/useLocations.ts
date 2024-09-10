@@ -6,7 +6,7 @@ import useUserFromClerk from "./useUserFromClerk";
 
 export default function useLocations(defaultLocation: google.maps.LatLngLiteral) {
     const user = useUserFromClerk();
-    const [location, setLocation] = useState<UserLocation>({ user: user, location: defaultLocation });
+    const [location, setLocation] = useState<UserLocation>({ userIdentity: user, location: defaultLocation });
     const [connection, setConnection] = useState<HubConnection>();
     const [locations, setLocations] = useState<UserLocation[]>([]);
 
@@ -92,7 +92,7 @@ export default function useLocations(defaultLocation: google.maps.LatLngLiteral)
                     await connection.start();
 
                     HubClient.registerRecieveGeolocations(connection, fetchedLocations => {
-                        fetchedLocations = fetchedLocations.filter(loc => loc.user.clerkId != user.clerkId);
+                        fetchedLocations = fetchedLocations.filter(loc => loc.userIdentity.clerkId != user.clerkId);
                         setLocations(fetchedLocations);
                     });
                 } catch (err) {

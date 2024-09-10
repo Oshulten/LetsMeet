@@ -65,7 +65,7 @@ public class Hub(LetsMeetDbContext db, HubPersistence persistence) : Hub<IHubCli
         var location = db.AddGeolocation(dto);
         persistence.AddToLastLocations(dto.ClerkId, location);
 
-        Console.WriteLine($"{user!.Username} ({Context.ConnectionId})\n\tLatitude: {dto.Latitude}\n\tLongitude: {dto.Longitude}");
+        Console.WriteLine($"{user!.Username} ({Context.ConnectionId})\n\tLatitude: {dto.Lat}\n\tLongitude: {dto.Lng}");
         Console.WriteLine($"Connected users: {string.Join(", ", persistence.ActiveUsers.Select(user => user!.Username))}");
         await Clients.Others.ReceiveGeolocations(persistence.LastLocationPerUser);
     }

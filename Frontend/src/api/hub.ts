@@ -1,5 +1,5 @@
 import { HubConnection } from "@microsoft/signalr";
-import { DtoLocation, Meeting, meetingFromDto, UserLocation, userLocationFromDto, DtoMeeting, dtoFromMeeting, dtoFromUserLocation } from '../types/types';
+import { UserLocation, Meeting } from '../types/types';
 
 function checkConnection(connection: HubConnection) {
     if (!connection) {
@@ -17,52 +17,44 @@ function checkConnection(connection: HubConnection) {
 
 export const HubClient = {
     registerRecieveGeolocations: function (connection: HubConnection, callback: (fetchedLocations: UserLocation[]) => void) {
-        connection.on("ReceiveGeolocations", (fetchedLocations: DtoLocation[]) =>
-            callback(fetchedLocations.map(loc => userLocationFromDto(loc))))
+        connection.on("ReceiveGeolocations", callback);
     },
 
     registerReceiveMeetingRequest: function (connection: HubConnection, callback: (meeting: Meeting) => void) {
-        connection.on("ReceiveMeetingRequest", (meeting: DtoMeeting) => {
-            callback(meetingFromDto(meeting));
-        });
+        connection.on("ReceiveMeetingRequest", callback);
     },
 
     registerRecieveMeetingCancellation: function (connection: HubConnection, callback: (meeting: Meeting) => void) {
-        connection.on("ReceiveMeetingCancellation", (meeting: DtoMeeting) => {
-            callback(meetingFromDto(meeting));
-        });
+        connection.on("ReceiveMeetingCancellation", callback);
     },
 
     registerReceiveMeetingConfirmation: function (connection: HubConnection, callback: (meeting: Meeting) => void) {
-        connection.on("ReceiveMeetingConfirmation", (meeting: DtoMeeting) => {
-            callback(meetingFromDto(meeting));
-        });
+        connection.on("ReceiveMeetingConfirmation", callback);
     }
 }
 
 export const HubServer = {
     requestMeeting: async function (connection: HubConnection, meeting: Meeting) {
         if (checkConnection(connection)) {
-            await connection.invoke("RequestMeeting", dtoFromMeeting(meeting));
+            await connection.invoke("RequestMeeting", meeting);
         }
     },
 
     cancelMeeting: async function (connection: HubConnection, meeting: Meeting) {
         if (checkConnection(connection)) {
-            await connection.invoke("CancelMeeting", dtoFromMeeting(meeting));
+            await connection.invoke("CancelMeeting", meeting);
         }
     },
 
     sendLocation: async function (connection: HubConnection, location: UserLocation) {
         if (checkConnection(connection)) {
-            console.log(dtoFromUserLocation(location));
-            await connection.invoke("SendLocation", dtoFromUserLocation(location));
+            await connection.invoke("SendLocation", location);
         }
     },
 
     confirmMeeting: async function (connection: HubConnection, meeting: Meeting) {
         if (checkConnection(connection)) {
-            await connection.invoke("ConfirmMeeting", dtoFromMeeting(meeting));
+            await connection.invoke("ConfirmMeeting", meeting);
         }
     },
 }
