@@ -2,6 +2,8 @@
 import { createContext, useContext, useState } from "react";
 import { ActiveMeeting, MeetingState, User, UserIdentity } from "../types/types";
 import { useUser } from "@clerk/clerk-react";
+import { HubConnection } from "@microsoft/signalr";
+import { ConnectionProgress } from "../hooks/useConnection";
 
 const defaultLocation: google.maps.LatLngLiteral = {
     lat: parseFloat(import.meta.env.VITE_DEFAULT_LOCATION_LAT),
@@ -16,7 +18,11 @@ interface UserContext {
     getMeetingByUser: (user: UserIdentity) => ActiveMeeting | undefined,
     addMeeting: (meeting: ActiveMeeting) => ActiveMeeting,
     setMeetingState: (user: UserIdentity, state: MeetingState) => ActiveMeeting | undefined,
-    removeMeeting: (user: UserIdentity) => void
+    removeMeeting: (user: UserIdentity) => void,
+    connection: HubConnection | undefined,
+    setConnection: (newConnection: HubConnection) => void,
+    connectionProgress: ConnectionProgress,
+    setConnectionProgress: (newProgress: ConnectionProgress) => void
 }
 
 const nullUser: User = { username: "null", clerkId: "null", location: defaultLocation };
@@ -29,7 +35,11 @@ const nullUserContext: UserContext = {
     getMeetingByUser: () => nullMeeting,
     addMeeting: () => nullMeeting,
     setMeetingState: () => nullMeeting,
-    removeMeeting: () => { }
+    removeMeeting: () => { },
+    connection: undefined,
+    setConnection: () => { },
+    connectionProgress: 'uninitialized',
+    setConnectionProgress: () => { }
 };
 
 const UserContext = createContext<UserContext>(nullUserContext);
@@ -48,6 +58,8 @@ export function UserContextProvider({ children }: Props) {
     })[0];
     const setLocation = useState<google.maps.LatLngLiteral>(defaultLocation)[1];
     const [meetings, setMeetings] = useState<ActiveMeeting[]>([]);
+    const [connection, setConnection] = useState<HubConnection>();
+    const [connectionProgress, setConnectionProgress] = useState<ConnectionProgress>('uninitialized');
 
     const localMeetingByUser = (user: UserIdentity) =>
         meetings.find(m => m.user.clerkId == user.clerkId);
@@ -64,7 +76,11 @@ export function UserContextProvider({ children }: Props) {
                 user: user!,
                 setLocation,
                 meetings,
-
+                connection,
+                setConnection,
+                connectionProgress,
+                setConnectionProgress,
+                
                 setMeetings: (newMeetings: ActiveMeeting[]) => {
                     setMeetings(newMeetings);
                     return newMeetings;
