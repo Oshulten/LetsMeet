@@ -1,23 +1,23 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { UserIdentity } from "../types/types";
-import { useUserContext } from "./UserContextProvider";
+import { useClientContext } from "./ClientContextProvider";
 import useMeetings from "../hooks/useMeetings";
 
 interface Props {
-    otherUser: UserIdentity
+    remoteUser: UserIdentity
 }
 
-export default function MeetingButton({ otherUser }: Props) {
-    const { getMeetingByUser } = useUserContext();
-    const { requestMeeting, cancelMeeting} = useMeetings(); 
+export default function Meeting({ remoteUser }: Props) {
+    const { getMeetingByUser } = useClientContext();
+    const { requestMeeting, cancelMeeting } = useMeetings();
 
-    const meeting = getMeetingByUser(otherUser);
+    const meeting = getMeetingByUser(remoteUser);
 
     if (!meeting)
         return (
             <button
                 onClick={() => {
-                    requestMeeting(otherUser);
+                    requestMeeting(remoteUser);
                 }}
                 className="btn btn-info text-white font-normal w-full">
                 {`Let's Meet!`}
@@ -28,7 +28,7 @@ export default function MeetingButton({ otherUser }: Props) {
             return (
                 <button
                     onClick={() => {
-                        requestMeeting(otherUser);
+                        requestMeeting(remoteUser);
                     }}
                     className="btn btn-info text-white font-normal w-full">
                     Waiting for response
@@ -37,17 +37,17 @@ export default function MeetingButton({ otherUser }: Props) {
 
         case 'awaitingUserConfirmation':
             return (<>
-                <p>{`${otherUser.username} wants to meet you!`}</p>
-                <button 
+                <p>{`${remoteUser.username} wants to meet you!`}</p>
+                <button
                     onClick={() => {
-                        requestMeeting(otherUser);
+                        requestMeeting(remoteUser);
                     }}
                     className="btn btn-info text-white font-normal w-full">
                     {`Someone wants to meet you`}
                 </button>)
-                <button 
+                <button
                     onClick={() => {
-                        cancelMeeting(otherUser);
+                        cancelMeeting(remoteUser);
                     }}
                     className="btn btn-info text-white font-normal w-full" >
                     {`Not a good time...`}

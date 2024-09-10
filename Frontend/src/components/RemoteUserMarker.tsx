@@ -3,39 +3,39 @@ import { AdvancedMarker, AdvancedMarkerProps, InfoWindow, InfoWindowProps, Pin, 
 import { useState } from "react";
 import haversine from 'haversine-distance';
 import readableDistance from "../utilities/readableDistance";
-import MeetingButton from "./MeetingButton";
+import Meeting from "./Meeting";
 import { UserLocation } from "../types/types";
-import { useUserContext } from "./UserContextProvider";
+import { useClientContext } from "./ClientContextProvider";
 
-export interface OtherUserMarkerProps {
-    location: UserLocation,
+export interface RemoteUserMarkerProps {
+    remoteLocation: UserLocation,
 }
 
-export default function OtherUserMarker({ location }: OtherUserMarkerProps) {
-    const { user } = useUserContext();
+export default function RemoteUserMarker({ remoteLocation }: RemoteUserMarkerProps) {
+    const { clientUser } = useClientContext();
     const [markerRef, marker] = useAdvancedMarkerRef();
     const [infoWindowShown, setInfoWindowShown] = useState(false);
 
-    const thisLocation: google.maps.LatLngLiteral = {
-        lat: location.lat,
-        lng: location.lng
+    const location = {
+        lat: remoteLocation.lat,
+        lng: remoteLocation.lng
     }
 
-    const infoWindowHeaderContent =
+    const infoWindowHeaderContent = (
         <div className="flex flex-row">
-            <h2 className="font-bold text-lg">{location.username}</h2>
-        </div>
+            <h2 className="font-bold text-lg">{remoteLocation.username}</h2>
+        </div>);
 
-    const distanceToUser = haversine(thisLocation, user.location);
+    const distanceToUser = haversine(location, clientUser.location);
 
-    const infoWindowMainContent =
+    const infoWindowMainContent = (
         <div>
             <p>{readableDistance(distanceToUser)} away</p>
-            <MeetingButton otherUser={{ username: location.username, clerkId: location.clerkId }} />
-        </div>
+            <Meeting remoteUser={{ username: remoteLocation.username, clerkId: remoteLocation.clerkId }} />
+        </div>);
 
     const markerProps: AdvancedMarkerProps = {
-        position: location,
+        position: remoteLocation,
         onClick: () => setInfoWindowShown(isShown => !isShown),
     }
 

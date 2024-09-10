@@ -39,7 +39,6 @@ public class Hub(LetsMeetDbContext db, HubPersistence persistence) : Hub<IHubCli
         var connectionId = persistence.ConnectionIdByUserId(meeting.TargetUser.ClerkId);
         Console.WriteLine($"Sending out meeting request to {meeting.TargetUser.Username} [{connectionId}]");
         await Clients.Client(connectionId).ReceiveMeetingRequest(meeting);
-        await Clients.Client(Context.ConnectionId).ReceiveMeetingRequest(meeting);
         Console.WriteLine($"{meeting.RequestUser.Username} wants to meet {meeting.TargetUser.Username}");
     }
 

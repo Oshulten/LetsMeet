@@ -10,8 +10,8 @@ const defaultLocation: google.maps.LatLngLiteral = {
     lng: parseFloat(import.meta.env.VITE_DEFAULT_LOCATION_LNG)
 }
 
-interface UserContext {
-    user: User
+interface ClientContext {
+    clientUser: User
     setLocation: (newLocation: google.maps.LatLngLiteral) => void,
     meetings: ActiveMeeting[],
     setMeetings: (newMeetings: ActiveMeeting[]) => ActiveMeeting[],
@@ -27,8 +27,8 @@ interface UserContext {
 
 const nullUser: User = { username: "null", clerkId: "null", location: defaultLocation };
 const nullMeeting: ActiveMeeting = { user: nullUser, state: 'confirmed' };
-const nullUserContext: UserContext = {
-    user: nullUser,
+const nullUserContext: ClientContext = {
+    clientUser: nullUser,
     setLocation: () => { },
     meetings: [],
     setMeetings: () => [],
@@ -42,20 +42,21 @@ const nullUserContext: UserContext = {
     setConnectionProgress: () => { }
 };
 
-const UserContext = createContext<UserContext>(nullUserContext);
+const UserContext = createContext<ClientContext>(nullUserContext);
 
 interface Props {
     children?: React.ReactNode
 }
 
-export function UserContextProvider({ children }: Props) {
+export function ClientContextProvider({ children }: Props) {
     const clerkUser = useUser().user!;
 
-    const user = useState<User>({
+    const clientUser = useState<User>({
         username: clerkUser.username!,
         clerkId: clerkUser.id,
         location: defaultLocation
     })[0];
+
     const setLocation = useState<google.maps.LatLngLiteral>(defaultLocation)[1];
     const [meetings, setMeetings] = useState<ActiveMeeting[]>([]);
     const [connection, setConnection] = useState<HubConnection>();
@@ -73,14 +74,14 @@ export function UserContextProvider({ children }: Props) {
     return (
         <UserContext.Provider
             value={{
-                user: user!,
+                clientUser: clientUser!,
                 setLocation,
                 meetings,
                 connection,
                 setConnection,
                 connectionProgress,
                 setConnectionProgress,
-                
+
                 setMeetings: (newMeetings: ActiveMeeting[]) => {
                     setMeetings(newMeetings);
                     return newMeetings;
@@ -121,6 +122,6 @@ export function UserContextProvider({ children }: Props) {
     )
 }
 
-export function useUserContext() {
+export function useClientContext() {
     return useContext(UserContext);
 }

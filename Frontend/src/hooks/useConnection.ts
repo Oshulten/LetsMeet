@@ -1,17 +1,17 @@
 import { HubConnectionBuilder } from "@microsoft/signalr";
 import { useEffect } from "react";
-import { useUserContext } from "../components/UserContextProvider";
+import { useClientContext } from "../components/ClientContextProvider";
 
 export type ConnectionProgress = "uninitialized" | "initialized" | "connected";
 
 export default function useConnection() {
     const {
-        user,
+        clientUser: user,
         connection,
         setConnection,
         connectionProgress,
         setConnectionProgress
-    } = useUserContext();
+    } = useClientContext();
 
     useEffect(() => {
         const initializeConnection = async () => {
@@ -40,6 +40,7 @@ export default function useConnection() {
                     console.log("startConnection");
                     await connection.start();
                     setConnectionProgress('connected');
+                    console.log(`Connection ID: ${connection.connectionId}`)
 
                 } catch (err) {
                     console.error(err as Error);

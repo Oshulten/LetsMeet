@@ -1,11 +1,11 @@
 import { useEffect } from "react";
-import { ActiveMeeting, UserIdentity, userIdentityFromUser } from '../types/types';
+import { ActiveMeeting, Meeting, UserIdentity, userIdentityFromUser } from '../types/types';
 import { HubClient, HubServer } from "../api/hub";
-import { useUserContext } from "../components/UserContextProvider";
+import { useClientContext } from "../components/ClientContextProvider";
 
 export default function useMeetings() {
     const {
-        user,
+        clientUser: user,
         meetings,
         getMeetingByUser,
         addMeeting,
@@ -13,7 +13,7 @@ export default function useMeetings() {
         removeMeeting,
         connection,
         connectionProgress
-    } = useUserContext();
+    } = useClientContext();
 
     const userIdentity = userIdentityFromUser(user);
 
@@ -38,15 +38,20 @@ export default function useMeetings() {
                 user: targetUser,
                 state: 'awaitingOtherUserConfirmation'
             }
+            console.log(newMeeting);
             addMeeting(newMeeting);
 
-            await HubServer.requestMeeting(connection, {
+            const meetingRequest: Meeting = {
                 requestUser: userIdentity,
                 targetUser: targetUser
-            });
+            }
+
+            await HubServer.requestMeeting(connection, meetingRequest);
 
             return;
         }
+
+        console.log(existingMeeting);
 
         if (existingMeeting.state == 'awaitingUserConfirmation') {
             await confirmMeeting(existingMeeting);

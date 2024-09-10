@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { HubClient, HubServer } from "../api/hub";
 import { UserLocation, userLocationFromUser } from "../types/types";
-import { useUserContext } from "../components/UserContextProvider";
+import { useClientContext } from "../components/ClientContextProvider";
 
 export default function useLocations() {
-    const { 
-        user, 
-        setLocation: setUserLocation, 
-        connection, connectionProgress 
-    } = useUserContext();
-    
-    const [otherUsersLocations, setOtherUsersLocations] = useState<UserLocation[]>();
+    const {
+        clientUser,
+        setLocation: setUserLocation,
+        connection, connectionProgress
+    } = useClientContext();
+
+    const [remoteUserLocations, setRemoteUserLocations] = useState<UserLocation[]>();
 
     useEffect(() => {
         console.log("useLocations");
@@ -21,24 +21,21 @@ export default function useLocations() {
                     console.log("Receiving locations");
                     console.log(fetchedLocations);
 
-                    const otherUserLocations = fetchedLocations.filter(location => location.clerkId != user.clerkId);
-                    setOtherUsersLocations(otherUserLocations);
+                    const otherUserLocations = fetchedLocations.filter(location => location.clerkId != clientUser.clerkId);
+                    setRemoteUserLocations(otherUserLocations);
 
-                    const userLocation = fetchedLocations.find(location => location.clerkId == user.clerkId);
+                    const userLocation = fetchedLocations.find(location => location.clerkId == clientUser.clerkId);
 
                     if (userLocation) {
                         setUserLocation({ lat: userLocation.lat, lng: userLocation.lng });
-                        return;
                     }
-
-                    console.error("This user's location was not among the fetched locations");
                 });
             }
         }
 
         const sendInitialLocation = async () => {
             if (connection && connectionProgress == `connected`) {
-                await HubServer.sendLocation(connection, userLocationFromUser(user));
+                await HubServer.sendLocation(connection, userLocationFromUser(clientUser));
             }
         }
 
@@ -48,13 +45,13 @@ export default function useLocations() {
 
     const setLocation = async (newLocation: google.maps.LatLngLiteral) => {
         if (connection && connectionProgress == `connected`) {
-            user.location = newLocation;
-            await HubServer.sendLocation(connection, userLocationFromUser(user));
+            clientUser.location = newLocation;
+            await HubServer.sendLocation(connection, userLocationFromUser(clientUser));
         }
     }
 
     return {
-        otherUsersLocations,
+        remoteUserLocations,
         setLocation
     }
 }

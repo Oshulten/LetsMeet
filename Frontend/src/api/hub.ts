@@ -21,7 +21,10 @@ export const HubClient = {
     },
 
     registerReceiveMeetingRequest: function (connection: HubConnection, callback: (meeting: Meeting) => void) {
-        connection.on("ReceiveMeetingRequest", callback);
+        connection.on("ReceiveMeetingRequest", (meeting: Meeting) => {
+            console.log("ReceiveMeetingRequest");
+            callback(meeting);
+        });
     },
 
     registerRecieveMeetingCancellation: function (connection: HubConnection, callback: (meeting: Meeting) => void) {
