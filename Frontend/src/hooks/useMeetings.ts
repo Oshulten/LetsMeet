@@ -161,6 +161,7 @@ export default function useMeetings() {
 
     return {
         meetings: meetingsQuery.data,
+        getMeetingByUser,
         requestMeeting,
         cancelMeeting,
         confirmMeeting,

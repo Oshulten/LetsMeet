@@ -1,6 +1,5 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { UserIdentity } from "../types/types";
-import { useClientContext } from "./ClientContextProvider";
 import useMeetings from "../hooks/useMeetings";
 
 interface Props {
@@ -8,8 +7,7 @@ interface Props {
 }
 
 export default function Meeting({ remoteUser }: Props) {
-    const { getMeetingByUser } = useClientContext();
-    const { requestMeeting, cancelMeeting } = useMeetings();
+    const { getMeetingByUser, requestMeeting, cancelMeeting } = useMeetings();
 
     const meeting = getMeetingByUser(remoteUser);
 
