@@ -8,8 +8,7 @@ import useLocations from '../hooks/useLocations';
 export default function ClientMap() {
     // const { clientUser, meetings } = useClientContext();
     const clientUser = useClientUser();
-    const connection = useConnection();
-    // const { remoteUserLocations } = useLocations();
+    useLocations();
 
     if (!clientUser) {
         console.log("clientUser is undefined");
