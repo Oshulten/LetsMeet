@@ -6,7 +6,6 @@ interface Props {
     updateLocation: (newLocation: google.maps.LatLngLiteral) => Promise<void>
 }
 
-
 export default function UserMarker({ updateLocation }: Props) {
     const { user } = useUserContext();
 

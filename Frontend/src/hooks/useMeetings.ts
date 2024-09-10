@@ -1,23 +1,19 @@
-import { HubConnection } from "@microsoft/signalr";
 import { useEffect } from "react";
 import { ActiveMeeting, UserIdentity, userIdentityFromUser } from '../types/types';
 import { HubClient, HubServer } from "../api/hub";
 import { useUserContext } from "../components/UserContextProvider";
-import { ConnectionProgress } from './useConnection';
 
-interface Props {
-    connection?: HubConnection,
-    connectionProgress: ConnectionProgress,
-}
 
-export default function useMeetings({ connection, connectionProgress }: Props) {
+export default function useMeetings() {
     const {
         user,
         meetings,
         getMeetingByUser,
         addMeeting,
         setMeetingState,
-        removeMeeting
+        removeMeeting,
+        connection,
+        connectionProgress
     } = useUserContext();
 
     const userIdentity = userIdentityFromUser(user);
