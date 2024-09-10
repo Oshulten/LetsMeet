@@ -48,13 +48,7 @@ export const HubServer = {
 
     sendLocation: async function (connection: HubConnection, location: UserLocation) {
         if (checkConnection(connection)) {
-            const loc = {
-                ClerkId: "-1",
-                Username: "fjdslk",
-                Lat: 0,
-                Lng: 0
-            }
-            console.log(loc);
+            console.log(location);
             await connection.invoke("SendLocation", location);
         }
     },
