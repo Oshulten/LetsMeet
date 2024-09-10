@@ -1,13 +1,17 @@
-import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
-import { useEffect, useState } from "react";
+import { HubConnectionBuilder } from "@microsoft/signalr";
+import { useEffect } from "react";
 import { useUserContext } from "../components/UserContextProvider";
 
 export type ConnectionProgress = "uninitialized" | "initialized" | "connected";
 
-export default function UseConnection() {
-    const { user } = useUserContext();
-    const [connectionProgress, setConnectionProgress] = useState<ConnectionProgress>('uninitialized');
-    const [connection, setConnection] = useState<HubConnection>();
+export default function useConnection() {
+    const {
+        user,
+        connection,
+        setConnection,
+        connectionProgress,
+        setConnectionProgress
+    } = useUserContext();
 
     useEffect(() => {
         const initializeConnection = async () => {

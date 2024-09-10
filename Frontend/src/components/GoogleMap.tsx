@@ -1,6 +1,6 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { MapProps, Map } from '@vis.gl/react-google-maps';
-import UseConnection from '../hooks/useConnection';
+import useConnection from '../hooks/useConnection';
 import useLocations from '../hooks/useLocations';
 import { useUserContext } from './UserContextProvider';
 import UserMarker from './UserMarker';
@@ -9,7 +9,7 @@ import { UserLocation } from '../types/types';
 
 export default function GoogleMap() {
     const { user, meetings } = useUserContext();
-    const { connection, connectionProgress } = UseConnection();
+    const { connection, connectionProgress } = useConnection();
     const { otherUsersLocations, setLocation } = useLocations(connection, connectionProgress);
 
     const mapProps: MapProps = {
