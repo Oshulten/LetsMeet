@@ -8,14 +8,18 @@ export type Meeting = {
     targetUser: UserIdentity
 }
 
-export type UserLocation = UserIdentity & {
-    location: google.maps.LatLngLiteral
-}
+export type UserLocation = UserIdentity & google.maps.LatLngLiteral;
 
 export type User = UserIdentity & {
     location: google.maps.LatLngLiteral
 }
 
 export function userLocationFromUser(user: User) {
-    return user as UserLocation;
+    const userLocation: UserLocation = {
+        username: user.username,
+        clerkId: user.clerkId,
+        lat: user.location.lat,
+        lng: user.location.lng
+    };
+    return userLocation;
 }

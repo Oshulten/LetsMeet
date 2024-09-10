@@ -26,7 +26,7 @@ export default function useLocations(connection: HubConnection | undefined, conn
             if (connection && connectionProgress == `connected`) {
                 console.log("sendInitialLocation");
                 console.log(userLocationFromUser(user));
-                await HubServer.sendLocation(connection, user);
+                await HubServer.sendLocation(connection, userLocationFromUser(user));
             }
         }
 

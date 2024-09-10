@@ -4,8 +4,8 @@ import { User } from "../types/types";
 import { useUser } from "@clerk/clerk-react";
 
 const defaultLocation: google.maps.LatLngLiteral = {
-    lat: import.meta.env.VITE_DEFAULT_LOCATION_LAT,
-    lng: import.meta.env.VITE_DEFAULT_LOCATION_LNG
+    lat: parseFloat(import.meta.env.VITE_DEFAULT_LOCATION_LAT),
+    lng: parseFloat(import.meta.env.VITE_DEFAULT_LOCATION_LNG)
 }
 
 interface UserContext {
