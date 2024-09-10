@@ -1,16 +1,18 @@
 import { AdvancedMarker, AdvancedMarkerProps, Pin, PinProps } from "@vis.gl/react-google-maps";
 import { useClientContext } from "./ClientContextProvider";
+import useLocations from "../hooks/useLocations";
 
 /* eslint-disable react/react-in-jsx-scope */
 
 export default function ClientUserMarker() {
-    const { clientUser, setLocation } = useClientContext();
+    const { clientUser } = useClientContext();
+    const { setLocationSyncWithServer } = useLocations()
 
     const advancedMarkerProps: AdvancedMarkerProps = {
         position: clientUser.location,
         onDragEnd: (e: google.maps.MapMouseEvent) => {
             if (!e.latLng) return;
-            setLocation({ lat: e.latLng.lat(), lng: e.latLng.lng() });
+            setLocationSyncWithServer({ lat: e.latLng.lat(), lng: e.latLng.lng() });
         },
         zIndex: 1
     }

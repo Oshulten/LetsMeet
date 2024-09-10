@@ -26,11 +26,9 @@ export default function RemoteUserMarker({ remoteLocation }: RemoteUserMarkerPro
             <h2 className="font-bold text-lg">{remoteLocation.username}</h2>
         </div>);
 
-    const distanceToUser = haversine(location, clientUser.location);
-
     const infoWindowMainContent = (
         <div>
-            <p>{readableDistance(distanceToUser)} away</p>
+            <p>{readableDistance(haversine(location, clientUser.location))} away</p>
             <Meeting remoteUser={{ username: remoteLocation.username, clerkId: remoteLocation.clerkId }} />
         </div>);
 

@@ -11,7 +11,7 @@ namespace Backend.Services;
 public class HubPersistence
 {
     private Dictionary<string /* ClerkId */, Geolocation> _lastLocations = [];
-    private Dictionary<string /* ConnectionId */, User> _activeUsers = [];
+    private Dictionary<string /* ConnectionId */, User> _registeredUsers = [];
 
     public List<DtoGeolocation> LastLocationPerUser =>
         _lastLocations
@@ -19,25 +19,53 @@ public class HubPersistence
             .ToList();
 
     public string ConnectionIdByUserId(string userId) =>
-        _activeUsers.FirstOrDefault(item => item.Value.Id == userId).Key;
+        _registeredUsers.FirstOrDefault(item => item.Value.Id == userId).Key;
 
     public User RegisterUser(string connectionId, DtoUser dtoUser, LetsMeetDbContext db)
     {
-        _activeUsers.TryAdd(connectionId, db.AddUser(dtoUser));
-        return _activeUsers[connectionId];
+        _registeredUsers.TryAdd(connectionId, db.AddUser(dtoUser));
+        return _registeredUsers[connectionId];
     }
 
     public void DeregisterUserByConnectionId(string connectionId)
     {
-        _activeUsers.Remove(connectionId);
+        _registeredUsers.TryGetValue(connectionId, out var user);
+
+        if (user is null)
+        {
+            Console.WriteLine($"ERROR: user with connectionId [{connectionId}] is not registered");
+            return;
+        }
+
+        _lastLocations.Remove(user.Id);
+
+        Console.WriteLine($"Deregistered {user.Username}");
     }
 
-    public List<User> ActiveUsers => [.. _activeUsers.Values];
+    public List<User> RegisteredUsers => [.. _registeredUsers.Values];
 
-    public void LogActiveUsers()
+    public void LogRegisteredUsers()
     {
-        var itemStrings = _activeUsers.Select(item => $"{item.Value.Username} [{item.Key}]: {item.Value.Id}");
-        Console.WriteLine($"Connected users:\n\t{string.Join("\n\t", itemStrings)}");
+        if (_registeredUsers.Count == 0)
+        {
+            Console.WriteLine("[No registered users]");
+            return;
+        }
+
+        var itemStrings = _registeredUsers.Select(item => $"{item.Value.Username} [{item.Key}]: {item.Value.Id}");
+        Console.WriteLine($"Registered users:\n\t{string.Join("\n\t", itemStrings)}");
+    }
+
+    public void LogLastLocations()
+    {
+        if (_lastLocations.Count == 0)
+        {
+            Console.WriteLine("[No last locations]");
+            return;
+        }
+
+        var itemStrings = _lastLocations.Values.Select(location => $"{location.User.Username}: [{location.Latitude}, {location.Longitude}]");
+        Console.WriteLine($"Last locations:\n\t{string.Join("\n\t", itemStrings)}");
     }
 
     public void AddToLastLocations(string clerkId, Geolocation location)

@@ -15,24 +15,55 @@ function checkConnection(connection: HubConnection) {
     return true;
 }
 
+const hubRegistrations: string[] = [];
+
 export const HubClient = {
     registerRecieveGeolocations: function (connection: HubConnection, callback: (fetchedLocations: UserLocation[]) => void) {
-        connection.on("ReceiveGeolocations", callback);
+        const serverMethodName = 'ReceiveGeolocations';
+
+        if (hubRegistrations.includes(serverMethodName)) {
+            console.error(`${serverMethodName} has already been registered`);
+            return;
+        }
+
+        connection.on(serverMethodName, callback);
+        hubRegistrations.push(serverMethodName);
     },
 
     registerReceiveMeetingRequest: function (connection: HubConnection, callback: (meeting: Meeting) => void) {
-        connection.on("ReceiveMeetingRequest", (meeting: Meeting) => {
-            console.log("ReceiveMeetingRequest");
-            callback(meeting);
-        });
+        const serverMethodName = 'ReceiveMeetingRequest';
+
+        if (hubRegistrations.includes(serverMethodName)) {
+            console.error(`${serverMethodName} has already been registered`);
+            return;
+        }
+
+        connection.on(serverMethodName, callback);
+        hubRegistrations.push(serverMethodName);
     },
 
     registerRecieveMeetingCancellation: function (connection: HubConnection, callback: (meeting: Meeting) => void) {
-        connection.on("ReceiveMeetingCancellation", callback);
+        const serverMethodName = 'RecieveMeetingCancellation';
+
+        if (hubRegistrations.includes(serverMethodName)) {
+            console.error(`${serverMethodName} has already been registered`);
+            return;
+        }
+
+        connection.on(serverMethodName, callback);
+        hubRegistrations.push(serverMethodName);
     },
 
     registerReceiveMeetingConfirmation: function (connection: HubConnection, callback: (meeting: Meeting) => void) {
-        connection.on("ReceiveMeetingConfirmation", callback);
+        const serverMethodName = 'ReceiveMeetingConfirmation';
+
+        if (hubRegistrations.includes(serverMethodName)) {
+            console.error(`${serverMethodName} has already been registered`);
+            return;
+        }
+
+        connection.on(serverMethodName, callback);
+        hubRegistrations.push(serverMethodName);
     }
 }
 

@@ -3,9 +3,11 @@ import { ActiveMeeting, Meeting, UserIdentity, userIdentityFromUser } from '../t
 import { HubClient, HubServer } from "../api/hub";
 import { useClientContext } from "../components/ClientContextProvider";
 
+let callbacksHaveBeenRegistered = false;
+
 export default function useMeetings() {
     const {
-        clientUser: user,
+        clientUser,
         meetings,
         getMeetingByUser,
         addMeeting,
@@ -15,7 +17,7 @@ export default function useMeetings() {
         connectionProgress
     } = useClientContext();
 
-    const userIdentity = userIdentityFromUser(user);
+    const userIdentity = userIdentityFromUser(clientUser);
 
     const confirmMeeting = async (meeting: ActiveMeeting) => {
         if (!(connection && connectionProgress == 'connected')) return;
@@ -74,6 +76,7 @@ export default function useMeetings() {
 
     useEffect(() => {
         if (!(connection && connectionProgress == 'connected')) return;
+        if (callbacksHaveBeenRegistered) return;
 
         HubClient.registerReceiveMeetingRequest(connection, meeting => {
             console.log(`${meeting.requestUser.username} wants to meet you!`);
@@ -122,6 +125,8 @@ export default function useMeetings() {
 
             setMeetingState(meeting.requestUser, 'confirmed');
         });
+
+        callbacksHaveBeenRegistered = true;
     }, [connection, connectionProgress]);
 
     return {

@@ -4,6 +4,7 @@ import { ActiveMeeting, MeetingState, User, UserIdentity } from "../types/types"
 import { useUser } from "@clerk/clerk-react";
 import { HubConnection } from "@microsoft/signalr";
 import { ConnectionProgress } from "../hooks/useConnection";
+import { LocationsProgress } from "../hooks/useLocations";
 
 const defaultLocation: google.maps.LatLngLiteral = {
     lat: parseFloat(import.meta.env.VITE_DEFAULT_LOCATION_LAT),
@@ -22,7 +23,9 @@ interface ClientContext {
     connection: HubConnection | undefined,
     setConnection: (newConnection: HubConnection) => void,
     connectionProgress: ConnectionProgress,
-    setConnectionProgress: (newProgress: ConnectionProgress) => void
+    setConnectionProgress: (newProgress: ConnectionProgress) => void,
+    locationsProgress: LocationsProgress
+    setLocationsProgress: (newProgress: LocationsProgress) => void,
 }
 
 const nullUser: User = { username: "null", clerkId: "null", location: defaultLocation };
@@ -39,7 +42,9 @@ const nullUserContext: ClientContext = {
     connection: undefined,
     setConnection: () => { },
     connectionProgress: 'uninitialized',
-    setConnectionProgress: () => { }
+    setConnectionProgress: () => { },
+    locationsProgress: 'uninitialized',
+    setLocationsProgress: () => { },
 };
 
 const UserContext = createContext<ClientContext>(nullUserContext);
@@ -61,6 +66,7 @@ export function ClientContextProvider({ children }: Props) {
     const [meetings, setMeetings] = useState<ActiveMeeting[]>([]);
     const [connection, setConnection] = useState<HubConnection>();
     const [connectionProgress, setConnectionProgress] = useState<ConnectionProgress>('uninitialized');
+    const [locationsProgress, setLocationsProgress] = useState<LocationsProgress>('uninitialized');
 
     const localMeetingByUser = (user: UserIdentity) =>
         meetings.find(m => m.user.clerkId == user.clerkId);
@@ -81,6 +87,8 @@ export function ClientContextProvider({ children }: Props) {
                 setConnection,
                 connectionProgress,
                 setConnectionProgress,
+                locationsProgress,
+                setLocationsProgress,
 
                 setMeetings: (newMeetings: ActiveMeeting[]) => {
                     setMeetings(newMeetings);
