@@ -22,7 +22,7 @@ export default function useMeetings() {
         queryKey: [...queryKey, "registerCallbacks"],
         queryFn: (): boolean => {
             if (!connection) return false;
-            HubClient.registerReceiveMeetingRequest(connection, receiveMeetingCallback);
+            HubClient.registerReceiveMeetingRequest(connection, receiveMeetingRequest);
             HubClient.registerRecieveMeetingCancellation(connection, receiveMeetingCancellation);
             HubClient.registerReceiveMeetingConfirmation(connection, receiveMeetingConfirmation);
             return true;
@@ -39,7 +39,7 @@ export default function useMeetings() {
     const removeMeeting = (user: UserIdentity): void => {
         if (!meetings) return;
 
-        queryClient.setQueryData(queryKey, [...meetings].filter(m => m.user.id == user.id));
+        queryClient.setQueryData(queryKey, [...meetings].filter(m => m.user.id != user.id));
     }
 
     const getMeetingByUser = (user: UserIdentity): ActiveMeeting | undefined => {
@@ -115,8 +115,8 @@ export default function useMeetings() {
         }
     }
 
-    const receiveMeetingCallback = (meeting: Meeting) => {
-        if (!meetings) return;
+    const receiveMeetingRequest = (meeting: Meeting) => {
+        console.log(`${meeting.requestUser.username} wants a meeting with you`);
 
         const existingMeeting = getMeetingByUser(meeting.requestUser);
 
@@ -140,7 +140,7 @@ export default function useMeetings() {
     }
 
     const receiveMeetingCancellation = (meeting: Meeting) => {
-        console.debug(`${meeting.requestUser.username} cancelled a meeting with you`);
+        console.log(`${meeting.requestUser.username} cancelled a meeting with you`);
 
         const existingMeeting = getMeetingByUser(meeting.requestUser);
 

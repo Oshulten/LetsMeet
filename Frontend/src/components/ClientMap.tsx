@@ -6,12 +6,10 @@ import useRemoteUsers from '../hooks/useRemoteUsers';
 import { UserLocation } from '../types/types';
 import RemoteUserMarker, { RemoteUserMarkerProps } from './RemoteUserMarker';
 import ClientUserMarker from './ClientUserMarker';
-import useMeetings from '../hooks/useMeetings';
 
 export default function ClientMap() {
     const { clientUser } = useClientUser();
     const { remoteUserLocations } = useRemoteUsers();
-    useMeetings();
 
     if (!clientUser) {
         console.log("clientUser is undefined");
@@ -20,7 +18,7 @@ export default function ClientMap() {
 
     const mapProps: MapProps = {
         defaultCenter: clientUser.location,
-        defaultZoom: 10,
+        defaultZoom: 14,
         gestureHandling: 'greedy',
         disableDefaultUI: true,
         mapId: import.meta.env.VITE_GOOGLE_MAP_ID,

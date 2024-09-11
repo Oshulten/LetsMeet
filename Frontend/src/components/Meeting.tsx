@@ -18,7 +18,7 @@ export default function Meeting({ remoteUser }: Props) {
                     requestMeeting(remoteUser);
                 }}
                 className="btn btn-info text-white font-normal w-full">
-                {`Let's Meet!`}
+                <p>{`Let's meet!`}</p>
             </button>)
 
     switch (meeting.state) {
@@ -26,10 +26,12 @@ export default function Meeting({ remoteUser }: Props) {
             return (
                 <button
                     onClick={() => {
-                        requestMeeting(remoteUser);
+                        cancelMeeting(remoteUser);
                     }}
                     className="btn btn-info text-white font-normal w-full">
                     Waiting for response
+                    <hr />
+                    Click to cancel
                     <span className="loading loading-spinner text-white"></span>
                 </button>)
 
@@ -41,7 +43,7 @@ export default function Meeting({ remoteUser }: Props) {
                         requestMeeting(remoteUser);
                     }}
                     className="btn btn-info text-white font-normal w-full">
-                    {`Someone wants to meet you`}
+                    {`Let's meet!`}
                 </button>
                 <button
                     onClick={() => {

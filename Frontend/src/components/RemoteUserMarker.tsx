@@ -14,10 +14,9 @@ export interface RemoteUserMarkerProps {
 export default function RemoteUserMarker({ remoteLocation }: RemoteUserMarkerProps) {
     const { clientUser } = useClientUser();
     const [markerRef, marker] = useAdvancedMarkerRef();
-    const [infoWindowShown, setInfoWindowShown] = useState(false);
+    const [infoWindowShown, setInfoWindowShown] = useState(true);
 
     if (!clientUser) return <></>
-
 
     const infoWindowHeaderContent = (
         <div className="flex flex-row">
