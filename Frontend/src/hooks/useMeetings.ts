@@ -65,6 +65,10 @@ export default function useMeetings() {
     const confirmMeeting = async (meeting: ActiveMeeting) => {
         if (!connection || !clientUser) return;
 
+        console.log("confirm meeting");
+        
+        //TODO: pass a callback function into here somehow and get some process going in ClientMap
+
         await HubServer.confirmMeeting(connection, {
             requestUser: userIdentityFromUser(clientUser),
             targetUser: meeting.user
@@ -167,13 +171,7 @@ export default function useMeetings() {
 
     const receiveMeetingConfirmation = (meeting: Meeting) => {
         console.debug(`Meeting confirmed between ${meeting.requestUser.username} and ${meeting.targetUser.username}`);
-
-        const existingMeeting = getMeetingByUser(meeting.requestUser);
-
-        if (!existingMeeting)
-            return;
-
-        setMeetingState(meeting.requestUser, 'confirmed');
+        console.log(meeting);
     }
 
     return {
