@@ -6,16 +6,10 @@ import useConnection from "./useConnection";
 import { queryClient } from "../main";
 
 export default function useRemoteUsers() {
-    const { clientUser, setClientUserLocation } = useClientUser();
+    const { clientUser } = useClientUser();
     const connection = useConnection();
 
     const queryKey = ["remoteUserLocations"];
-
-    const sendInitialLocation = async () => {
-        if (!connection || !clientUser) return;
-        console.log("sendInitialLocation");
-        await setClientUserLocation(clientUser.location);
-    }
 
     const receiveUserLocationsCallback = (fetchedLocations: UserLocation[]) => {
         if (!connection || !clientUser) return;
@@ -48,7 +42,6 @@ export default function useRemoteUsers() {
     const remoteUsersQuery = useQuery({
         queryKey: queryKey,
         queryFn: async (): Promise<UserLocation[]> => {
-            await sendInitialLocation();
             return (queryClient.getQueryData(queryKey) && []) as UserLocation[];
         },
         enabled:

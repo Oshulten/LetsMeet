@@ -1,33 +1,31 @@
-import { useEffect, useState } from "react";
-import { User } from "../types/types";
+import { UserLocation } from "../types/types";
 import { mean, max } from 'mathjs/number'
 import haversine from 'haversine-distance';
+import { useQuery } from "@tanstack/react-query";
 
 export default function usePlaces() {
-    const [library, setLibrary] = useState<google.maps.PlacesLibrary>();
+    const queryKey = ["placesLibrary"];
 
-    useEffect(() => {
-        const loadLibraries = async () => {
-            const placesLibrary = await google.maps.importLibrary("places") as google.maps.PlacesLibrary;
-            setLibrary(placesLibrary);
-        }
+    const library = useQuery({
+        queryKey: queryKey,
+        queryFn: async (): Promise<google.maps.PlacesLibrary> => {
+            return await google.maps.importLibrary("places") as google.maps.PlacesLibrary;;
+        },
+    }).data;
 
+    const suggestMeetingPlaces = async (userLocations: UserLocation[]) => {
         if (!library) {
-            loadLibraries();
-            console.log("loading libraries");
+            console.log("Library is not loaded");
+            return;
         }
-    });
-
-    const suggestMeetingPlaces = async (users: User[]) => {
-        if (!library) return;
 
         const meanLocation: google.maps.LatLngLiteral = {
-            lat: mean(users.map(user => user.location.lat)),
-            lng: mean(users.map(user => user.location.lng)),
+            lat: mean(userLocations.map(user => user.location.lat)),
+            lng: mean(userLocations.map(user => user.location.lng)),
         };
 
 
-        const maxDistanceFromMeanLocation = max(users.map(user =>
+        const maxDistanceFromMeanLocation = max(userLocations.map(user =>
             haversine(user.location, meanLocation)
         ));
 
@@ -47,8 +45,7 @@ export default function usePlaces() {
         } as google.maps.places.SearchNearbyRequest;
 
         const { places } = await library.Place.searchNearby(request);
-
-        console.log(places);
+        return places;
     }
 
     return {

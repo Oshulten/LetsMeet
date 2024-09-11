@@ -4,10 +4,12 @@ import useConnection from "./useConnection";
 import { ActiveMeeting, Meeting, MeetingConfirmation, MeetingState, UserIdentity, userIdentityFromUser } from "../types/types";
 import { queryClient } from "../main";
 import { HubClient, HubServer } from "../api/hub";
+import usePlaces from "./usePlaces";
 
 export default function useMeetings() {
     const { clientUser } = useClientUser();
     const connection = useConnection();
+    const { suggestMeetingPlaces } = usePlaces();
 
     const queryKey = ["meetings"];
 
@@ -167,11 +169,12 @@ export default function useMeetings() {
         removeMeeting(meeting.requestUser);
     }
 
-    const receiveMeetingConfirmation = (meeting: MeetingConfirmation) => {
+    const receiveMeetingConfirmation = async (meeting: MeetingConfirmation) => {
         console.debug(`Meeting confirmed between ${meeting.participants[0].user.username} and ${meeting.participants[1].user.username}`);
         console.log(meeting);
 
-        //TODO: pass a callback function into here somehow and get some process going in ClientMap
+        const places = await suggestMeetingPlaces(meeting.participants);
+        console.log(places);
     }
 
     return {
