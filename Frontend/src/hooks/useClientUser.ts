@@ -35,7 +35,7 @@ export default function useClientUser() {
     });
 
     const sendInitialLocationQuery = useQuery({
-        queryKey: ["sendInitialLocation"],
+        queryKey: [...queryKey, "sendInitialLocation"],
         queryFn: async (): Promise<boolean> => {
             if (!connection) return false;
             if (sendInitialLocationQuery.data) return true;

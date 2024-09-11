@@ -14,7 +14,6 @@ export default function useMeetings() {
     const meetingsQuery = useQuery({
         queryKey: queryKey,
         queryFn: (): ActiveMeeting[] => {
-            console.log("init meetings");
             return [];
         },
     })
@@ -22,7 +21,6 @@ export default function useMeetings() {
     const registerCallbacksQuery = useQuery({
         queryKey: [...queryKey, "registerCallbacks"],
         queryFn: (): boolean => {
-            console.log("registering callbacks");
             registerCallbacks();
             return true;
         },
