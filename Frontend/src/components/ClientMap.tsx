@@ -6,10 +6,12 @@ import useRemoteUsers from '../hooks/useRemoteUsers';
 import { UserLocation } from '../types/types';
 import RemoteUserMarker, { RemoteUserMarkerProps } from './RemoteUserMarker';
 import ClientUserMarker from './ClientUserMarker';
+import useMeetings from '../hooks/useMeetings';
 
 export default function ClientMap() {
     const { clientUser } = useClientUser();
     const { remoteUserLocations } = useRemoteUsers();
+    useMeetings();
 
     if (!clientUser) {
         console.log("clientUser is undefined");

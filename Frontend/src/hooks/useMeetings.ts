@@ -11,11 +11,31 @@ export default function useMeetings() {
 
     const queryKey = ["meetings"];
 
+    const meetingsQuery = useQuery({
+        queryKey: queryKey,
+        queryFn: (): ActiveMeeting[] => {
+            console.log("init meetings");
+            return [];
+        },
+    })
+
+    const registerCallbacksQuery = useQuery({
+        queryKey: [...queryKey, "registerCallbacks"],
+        queryFn: (): boolean => {
+            console.log("registering callbacks");
+            registerCallbacks();
+            return true;
+        },
+        enabled: (!!connection && !!clientUser)
+    })
+
     const registerCallbacks = () => {
         if (!connection) return;
 
         HubClient.registerReceiveMeetingRequest(connection, meeting => {
             console.log(`${meeting.requestUser.username} wants to meet you!`);
+
+            if (!meetingsQuery.data) queryClient.setQueryData(queryKey, []);
 
             const existingMeeting = getMeetingByUser(meeting.requestUser);
 
@@ -64,6 +84,7 @@ export default function useMeetings() {
     }
 
     const confirmMeeting = async (meeting: ActiveMeeting) => {
+        if (!meetingsQuery.data) queryClient.setQueryData(queryKey, []);
         if (!connection || !clientUser) return;
 
         const userIdentity = userIdentityFromUser(clientUser);
@@ -74,7 +95,9 @@ export default function useMeetings() {
     }
 
     const requestMeeting = async (targetUser: UserIdentity) => {
+        if (!meetingsQuery.data) queryClient.setQueryData(queryKey, []);
         if (!connection || !clientUser) return;
+
         const userIdentity = userIdentityFromUser(clientUser);
         console.log(`You request a meeting with ${targetUser.username}`);
 
@@ -107,6 +130,7 @@ export default function useMeetings() {
     }
 
     const cancelMeeting = async (targetUser: UserIdentity) => {
+        if (!meetingsQuery.data) return;
         if (!connection || !clientUser) return;
         const userIdentity = userIdentityFromUser(clientUser);
 
@@ -120,26 +144,26 @@ export default function useMeetings() {
         });
     }
 
-    const meetingsQuery = useQuery({
-        queryKey: [queryKey],
-        queryFn: async (): Promise<ActiveMeeting[]> => {
-            registerCallbacks();
-            return [];
-        },
-        enabled: (!!connection && !!clientUser)
-    });
-
     const getMeetingByUser = (user: UserIdentity): ActiveMeeting | undefined => {
+        if (!meetingsQuery.data) return;
+
         const meetings = queryClient.getQueryData(queryKey) as ActiveMeeting[];
+        console.log(meetings);
         return meetings.find(m => m.user.id == user.id);
     }
 
     const addMeeting = (meeting: ActiveMeeting) => {
+        if (!(meetingsQuery.data)) {
+            console.log("no meeting data")
+            return;
+        }
         const meetings = queryClient.getQueryData(queryKey) as ActiveMeeting[];
         queryClient.setQueryData(queryKey, [...meetings, meeting]);
     }
 
     const setMeetingState = (user: UserIdentity, state: MeetingState): ActiveMeeting | undefined => {
+        if (!meetingsQuery.data) return;
+
         const meeting = getMeetingByUser(user);
         if (!meeting) return;
 
@@ -154,6 +178,8 @@ export default function useMeetings() {
     }
 
     const removeMeeting = (user: UserIdentity): void => {
+        if (!meetingsQuery.data) return;
+
         const meetings = queryClient.getQueryData(queryKey) as ActiveMeeting[];
         const meetingsWithoutMeeting = meetings.filter(m => m.user.id == user.id);
         queryClient.setQueryData(queryKey, [meetingsWithoutMeeting]);
