@@ -1,19 +1,22 @@
 import { UserLocation } from "../types/types";
 import { mean, max } from 'mathjs/number'
 import haversine from 'haversine-distance';
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function usePlaces() {
+    const queryClient = useQueryClient();
     const queryKey = ["placesLibrary"];
 
-    const library = useQuery({
+    const libraryQuery = useQuery({
         queryKey: queryKey,
         queryFn: async (): Promise<google.maps.PlacesLibrary> => {
+            console.log("load places library");
             return await google.maps.importLibrary("places") as google.maps.PlacesLibrary;;
         },
-    }).data;
+    });
 
     const suggestMeetingPlaces = async (userLocations: UserLocation[]) => {
+        const library = queryClient.getQueryData(queryKey);
         if (!library) {
             console.log("Library is not loaded");
             return;
