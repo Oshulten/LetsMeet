@@ -1,20 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
-import { HubClient, HubServer } from "../api/hub";
-import { User, UserLocation, userLocationFromUser } from "../types/types";
-import useClientUser, { ClientUser } from "./useClientUser";
+import { HubClient } from "../api/hub";
+import { UserLocation, userLocationFromUser } from "../types/types";
+import useClientUser from "./useClientUser";
 import useConnection from "./useConnection";
 import { queryClient } from "../main";
 
-export default function useLocations() {
-    const clientUser = useClientUser();
+export default function useRemoteUsers() {
+    const { clientUser, setClientUserLocation } = useClientUser();
     const connection = useConnection();
 
-    const queryKey = "locations";
+    const queryKey = ["locations"];
 
     const sendInitialLocation = async () => {
         if (!connection || !clientUser) return;
         console.log("sendInitialLocation");
-        await HubServer.sendLocation(connection, userLocationFromUser(clientUser));
+        await setClientUserLocation(userLocationFromUser(clientUser));
     }
 
     const receiveGeolocationsCallback = (fetchedLocations: UserLocation[]) => {
@@ -23,8 +23,8 @@ export default function useLocations() {
         console.log(fetchedLocations);
         console.log(queryClient);
         const remoteLocations = fetchedLocations.filter(location => location.clerkId != clientUser.clerkId)
-        queryClient.setQueryData([queryKey], remoteLocations);
-        const queryData = queryClient.getQueryData([queryKey]);
+        queryClient.setQueryData(queryKey, remoteLocations);
+        const queryData = queryClient.getQueryData(queryKey);
         console.log(queryData);
     }
 
@@ -35,11 +35,11 @@ export default function useLocations() {
     }
 
     const locationsQuery = useQuery({
-        queryKey: [queryKey],
+        queryKey: queryKey,
         queryFn: async (): Promise<UserLocation[]> => {
             console.log(connection);
-            await registerCallbacks();
             await sendInitialLocation();
+            await registerCallbacks();
             return [] as UserLocation[];
         },
         enabled:
@@ -47,26 +47,17 @@ export default function useLocations() {
             connection != undefined
     });
 
-    const setClientUserLocation = async (newLocation: google.maps.LatLngLiteral) => {
-        console.log("sendLocation");
-
-        if (!(connection && clientUser)) {
-            console.log("Not ready");
-            return;
-        }
-
-        const newClientUser: User = {
-            ...clientUser,
-            location: newLocation
-        }
-
-        queryClient.setQueryData([ClientUser.queryKey], newClientUser);
-
-        await HubServer.sendLocation(connection, userLocationFromUser(newClientUser));
-    }
+    const locationsPostSetupQuery = useQuery({
+        queryKey: [queryKey],
+        queryFn: async (): Promise<UserLocation[]> => {
+            await sendInitialLocation();
+            return (queryClient.getQueryData(queryKey) && []) as UserLocation[];
+        },
+        enabled:
+            locationsQuery.status == 'success'
+    });
 
     return {
-        remoteUserLocations: locationsQuery.data,
-        setClientUserLocation
+        remoteUserLocations: locationsPostSetupQuery.data,
     }
 }

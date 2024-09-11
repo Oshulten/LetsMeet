@@ -6,7 +6,7 @@ import { queryClient } from "../main";
 import { HubClient, HubServer } from "../api/hub";
 
 export default function useMeetings() {
-    const clientUser = useClientUser();
+    const { clientUser } = useClientUser();
     const connection = useConnection();
 
     const queryKey = ["meetings"];
@@ -164,6 +164,5 @@ export default function useMeetings() {
         getMeetingByUser,
         requestMeeting,
         cancelMeeting,
-        confirmMeeting,
     }
 }

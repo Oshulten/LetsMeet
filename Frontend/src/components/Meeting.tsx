@@ -42,7 +42,7 @@ export default function Meeting({ remoteUser }: Props) {
                     }}
                     className="btn btn-info text-white font-normal w-full">
                     {`Someone wants to meet you`}
-                </button>)
+                </button>
                 <button
                     onClick={() => {
                         cancelMeeting(remoteUser);
@@ -50,6 +50,6 @@ export default function Meeting({ remoteUser }: Props) {
                     className="btn btn-info text-white font-normal w-full" >
                     {`Not a good time...`}
                 </button>
-            </ >)
+            </>)
     }
 }

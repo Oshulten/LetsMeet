@@ -1,12 +1,10 @@
 import { AdvancedMarker, AdvancedMarkerProps, Pin, PinProps } from "@vis.gl/react-google-maps";
-import useLocations from "../hooks/useLocations";
 import useClientUser from "../hooks/useClientUser";
 
 /* eslint-disable react/react-in-jsx-scope */
 
 export default function ClientUserMarker() {
-    const clientUser = useClientUser();
-    const { setClientUserLocation } = useLocations();
+    const { clientUser, setClientUserLocation } = useClientUser();
 
     if (!clientUser)
         return <></>

@@ -2,13 +2,13 @@
 import { MapProps, Map } from '@vis.gl/react-google-maps';
 import ClientUserMarker from './ClientUserMarker';
 import useClientUser from '../hooks/useClientUser';
-import useLocations from '../hooks/useLocations';
+import useRemoteUsers from '../hooks/useRemoteUsers';
 import { UserLocation } from '../types/types';
 import RemoteUserMarker, { RemoteUserMarkerProps } from './RemoteUserMarker';
 
 export default function ClientMap() {
-    const clientUser = useClientUser();
-    const { remoteUserLocations } = useLocations();
+    const { clientUser } = useClientUser();
+    const { remoteUserLocations } = useRemoteUsers();
 
     if (!clientUser) {
         console.log("clientUser is undefined");
