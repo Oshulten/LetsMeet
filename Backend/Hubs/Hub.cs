@@ -17,48 +17,49 @@ public class Hub(LetsMeetDbContext db, HubPersistence persistence) : Hub<IHubCli
         {
             var username = httpContext.Request.Query["username"].ToString();
             var clerkId = httpContext.Request.Query["clerkId"].ToString();
+
             if (username is not null && clerkId is not null)
             {
                 var user = new DtoUser(username, clerkId);
-                var registeredUser = persistence.RegisterUser(Context.ConnectionId, user, db);
-                Console.WriteLine($"Registered user {registeredUser.Username} on connectionId {Context.ConnectionId}");
+
+                persistence.RegisterUser(Context.ConnectionId, user, db);
                 persistence.LogRegisteredUsers();
-                persistence.LogLastLocations();
+
                 Console.WriteLine("---");
+
                 return base.OnConnectedAsync();
             }
         }
 
-        Console.WriteLine($"[User not registered]");
-        Console.WriteLine("---");
         return base.OnConnectedAsync();
     }
 
     public override Task OnDisconnectedAsync(Exception? exception)
     {
         Console.WriteLine("\nOnDisconnectedAsync\n---");
+
         persistence.DeregisterUserByConnectionId(Context.ConnectionId);
 
         Console.WriteLine($"Disconnected id {Context.ConnectionId}");
 
         persistence.LogRegisteredUsers();
-        persistence.LogLastLocations();
 
-        Clients.All.ReceiveGeolocations(persistence.LastLocationPerUser);
+        Clients.All.ReceiveUserLocations(persistence.LastLocations);
+
         Console.WriteLine("---");
 
         return base.OnDisconnectedAsync(exception);
     }
 
-    public async Task SendLocation(DtoGeolocation dto)
+    public async Task UpdateLocation(DtoUserLocation dto)
     {
         Console.WriteLine("\nSendLocation\n---");
 
-        var location = db.AddGeolocation(dto);
-        persistence.AddToLastLocations(dto.ClerkId, location);
+        persistence.UpdateLastLocation(dto, db);
         persistence.LogRegisteredUsers();
-        persistence.LogLastLocations();
-        await Clients.All.ReceiveGeolocations(persistence.LastLocationPerUser);
+
+        await Clients.All.ReceiveUserLocations(persistence.LastLocations);
+
         Console.WriteLine("---");
     }
 
@@ -66,20 +67,26 @@ public class Hub(LetsMeetDbContext db, HubPersistence persistence) : Hub<IHubCli
     {
         Console.WriteLine("\nRequestMeeting\n---");
 
-        var connectionId = persistence.ConnectionIdByUserId(meeting.TargetUser.ClerkId);
-        Console.WriteLine($"Sending out meeting request to {meeting.TargetUser.Username} [{connectionId}]");
-        await Clients.Client(connectionId).ReceiveMeetingRequest(meeting);
-        Console.WriteLine($"{meeting.RequestUser.Username} wants to meet {meeting.TargetUser.Username}");
+        if (persistence.ConnectionIdByUser(meeting.TargetUser) is string targetConnectionId)
+        {
+            Console.WriteLine($"Sending out meeting request to {meeting.TargetUser.Username} [{targetConnectionId}]");
+            await Clients.Client(targetConnectionId).ReceiveMeetingRequest(meeting);
+            Console.WriteLine($"{meeting.RequestUser.Username} wants to meet {meeting.TargetUser.Username}");
+        }
+
+        Console.WriteLine("---");
     }
 
     public async Task CancelMeeting(DtoMeeting meeting)
     {
         Console.WriteLine("\nCancelMeeting\n---");
 
-        var connectionId = persistence.ConnectionIdByUserId(meeting.TargetUser.ClerkId);
-        Console.WriteLine($"Sending out meeting cancellation to {meeting.TargetUser.Username} [{connectionId}]");
-        await Clients.Client(connectionId).ReceiveMeetingCancellation(meeting);
-        Console.WriteLine($"{meeting.RequestUser.Username} cancels meeting with {meeting.TargetUser.Username}");
+        if (persistence.ConnectionIdByUser(meeting.TargetUser) is string targetConnectionId)
+        {
+            Console.WriteLine($"Sending out meeting cancellation to {meeting.TargetUser.Username} [{targetConnectionId}]");
+            await Clients.Client(targetConnectionId).ReceiveMeetingCancellation(meeting);
+            Console.WriteLine($"{meeting.RequestUser.Username} cancels meeting with {meeting.TargetUser.Username}");
+        }
 
         Console.WriteLine("---");
     }
@@ -88,13 +95,15 @@ public class Hub(LetsMeetDbContext db, HubPersistence persistence) : Hub<IHubCli
     {
         Console.WriteLine("\nConfirmMeeting\n---");
 
-        var requestConnectionId = persistence.ConnectionIdByUserId(meeting.RequestUser.ClerkId);
-        var targetConnectionId = persistence.ConnectionIdByUserId(meeting.TargetUser.ClerkId);
+        var requestConnectionId = persistence.ConnectionIdByUser(meeting.RequestUser);
+        var targetConnectionId = persistence.ConnectionIdByUser(meeting.TargetUser);
 
-        await Clients.Client(requestConnectionId).ReceiveMeetingConfirmation(meeting);
-        await Clients.Client(targetConnectionId).ReceiveMeetingConfirmation(meeting);
-
-        Console.WriteLine($"Confirm meeting between {meeting.TargetUser.Username} and {meeting.RequestUser.Username}");
+        if (requestConnectionId != null && targetConnectionId != null)
+        {
+            await Clients.Client(requestConnectionId).ReceiveMeetingConfirmation(meeting);
+            await Clients.Client(targetConnectionId).ReceiveMeetingConfirmation(meeting);
+            Console.WriteLine($"Confirm meeting between {meeting.TargetUser.Username} and {meeting.RequestUser.Username}");
+        }
 
         Console.WriteLine("---");
     }

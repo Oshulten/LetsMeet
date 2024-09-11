@@ -131,7 +131,7 @@ export default function useMeetings() {
 
     const getMeetingByUser = (user: UserIdentity): ActiveMeeting | undefined => {
         const meetings = queryClient.getQueryData(queryKey) as ActiveMeeting[];
-        return meetings.find(m => m.user.clerkId == user.clerkId);
+        return meetings.find(m => m.user.id == user.id);
     }
 
     const addMeeting = (meeting: ActiveMeeting) => {
@@ -148,14 +148,14 @@ export default function useMeetings() {
         const meetings = queryClient.getQueryData(queryKey) as ActiveMeeting[];
 
         const newMeetings = meetings.map(m =>
-            m.user.clerkId == user.clerkId ? newMeeting : m);
+            m.user.id == user.id ? newMeeting : m);
 
         queryClient.setQueryData(queryKey, [newMeetings]);
     }
 
     const removeMeeting = (user: UserIdentity): void => {
         const meetings = queryClient.getQueryData(queryKey) as ActiveMeeting[];
-        const meetingsWithoutMeeting = meetings.filter(m => m.user.clerkId == user.clerkId);
+        const meetingsWithoutMeeting = meetings.filter(m => m.user.id == user.id);
         queryClient.setQueryData(queryKey, [meetingsWithoutMeeting]);
     }
 

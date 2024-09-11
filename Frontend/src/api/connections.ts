@@ -5,7 +5,7 @@ export const Connection = {
     initializeConnection: (clientUser: User) => {
         console.log("initializeConnection");
 
-        const queryString = `?username=${clientUser.username}&clerkId=${clientUser.clerkId}`
+        const queryString = `?username=${clientUser.username}&clerkId=${clientUser.id}`
 
         const localConnection =
             new HubConnectionBuilder()

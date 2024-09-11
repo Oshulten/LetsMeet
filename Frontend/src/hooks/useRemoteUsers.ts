@@ -22,7 +22,7 @@ export default function useRemoteUsers() {
         console.log("Receiving locations");
         console.log(fetchedLocations);
         console.log(queryClient);
-        const remoteLocations = fetchedLocations.filter(location => location.clerkId != clientUser.clerkId)
+        const remoteLocations = fetchedLocations.filter(location => location.clerkId != clientUser.id)
         queryClient.setQueryData(queryKey, remoteLocations);
         const queryData = queryClient.getQueryData(queryKey);
         console.log(queryData);
@@ -31,14 +31,13 @@ export default function useRemoteUsers() {
     const registerCallbacks = async () => {
         if (!connection || !clientUser) return;
         console.log("registerCallbacks");
-        HubClient.registerRecieveGeolocations(connection, receiveGeolocationsCallback);
+        HubClient.registerReceiveUserLocations(connection, receiveGeolocationsCallback);
     }
 
-    const locationsQuery = useQuery({
+    const registrationQuery = useQuery({
         queryKey: queryKey,
         queryFn: async (): Promise<UserLocation[]> => {
             console.log(connection);
-            await sendInitialLocation();
             await registerCallbacks();
             return [] as UserLocation[];
         },
@@ -47,17 +46,17 @@ export default function useRemoteUsers() {
             connection != undefined
     });
 
-    const locationsPostSetupQuery = useQuery({
-        queryKey: [queryKey],
+    const remoteUsersQuery = useQuery({
+        queryKey: queryKey,
         queryFn: async (): Promise<UserLocation[]> => {
             await sendInitialLocation();
             return (queryClient.getQueryData(queryKey) && []) as UserLocation[];
         },
         enabled:
-            locationsQuery.status == 'success'
+            registrationQuery.status == 'success'
     });
 
     return {
-        remoteUserLocations: locationsPostSetupQuery.data,
+        remoteUserLocations: remoteUsersQuery.data,
     }
 }

@@ -18,8 +18,8 @@ function checkConnection(connection: HubConnection) {
 const hubRegistrations: string[] = [];
 
 export const HubClient = {
-    registerRecieveGeolocations: function (connection: HubConnection, callback: (fetchedLocations: UserLocation[]) => void) {
-        const serverMethodName = 'ReceiveGeolocations';
+    registerReceiveUserLocations: function (connection: HubConnection, callback: (fetchedLocations: UserLocation[]) => void) {
+        const serverMethodName = 'ReceiveUserLocations';
 
         if (hubRegistrations.includes(serverMethodName)) {
             console.error(`${serverMethodName} has already been registered`);
@@ -80,9 +80,9 @@ export const HubServer = {
         }
     },
 
-    sendLocation: async function (connection: HubConnection, location: UserLocation) {
+    updateLocation: async function (connection: HubConnection, location: UserLocation) {
         if (checkConnection(connection)) {
-            await connection.invoke("SendLocation", location);
+            await connection.invoke("UpdateLocation", location);
         }
     },
 

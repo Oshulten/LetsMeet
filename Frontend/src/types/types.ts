@@ -1,8 +1,10 @@
+//Backend: DtoUser
 export type UserIdentity = {
-    clerkId: string
+    id: string
     username: string,
 }
 
+//Backend: DtoMeeting
 export type Meeting = {
     requestUser: UserIdentity,
     targetUser: UserIdentity
@@ -13,28 +15,31 @@ export type ActiveMeeting = {
     state: MeetingState
 }
 
-export type UserLocation = UserIdentity & google.maps.LatLngLiteral;
+//Backend: DtoUserLocation
+export type UserLocation = {
+    user: UserIdentity,
+    location: google.maps.LatLngLiteral
+}
 
 export type User = UserIdentity & {
     location: google.maps.LatLngLiteral
 }
 
-export type MeetingState =
-    'awaitingOtherUserConfirmation' | 'awaitingUserConfirmation' | 'confirmed'
+export type MeetingState = 'awaitingOtherUserConfirmation' | 'awaitingUserConfirmation' | 'confirmed'
 
 export function userLocationFromUser(user: User) {
-    const userLocation: UserLocation = {
-        clerkId: user.clerkId,
-        username: user.username,
-        lat: user.location.lat,
-        lng: user.location.lng
-    };
-    return userLocation;
+    return {
+        user: {
+            id: user.id,
+            username: user.username
+        },
+        location: user.location
+    } as UserLocation;
 }
 
 export function userIdentityFromUser(user: User) {
     return {
-        clerkId: user.clerkId,
+        id: user.id,
         username: user.username
     } as UserIdentity;
 }

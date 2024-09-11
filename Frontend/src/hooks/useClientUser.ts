@@ -6,8 +6,8 @@ import { HubServer } from "../api/hub";
 
 export default function useClientUser() {
     const defaultLocation: google.maps.LatLngLiteral = {
-        lat: parseFloat(import.meta.env.VITE_DEFAULT_LOCATION_LAT),
-        lng: parseFloat(import.meta.env.VITE_DEFAULT_LOCATION_LNG)
+        lat: parseFloat(import.meta.env.VITE_DEFAULT_LOCATION_LAT) + Math.random() * 0.01,
+        lng: parseFloat(import.meta.env.VITE_DEFAULT_LOCATION_LNG) + Math.random() * 0.01
     }
 
     const queryKey = ["clientUser"];
@@ -26,7 +26,7 @@ export default function useClientUser() {
 
             const clientUser: User = {
                 username: clerkUser.username!,
-                clerkId: clerkUser.id,
+                id: clerkUser.id,
                 location: defaultLocation
             }
 
@@ -46,7 +46,7 @@ export default function useClientUser() {
 
         queryClient.setQueryData(queryKey, newClientUser);
 
-        await HubServer.sendLocation(connection, userLocationFromUser(newClientUser));
+        await HubServer.UpdateLocation(connection, userLocationFromUser(newClientUser));
     }
 
     return {

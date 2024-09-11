@@ -3,8 +3,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { User } from "../types/types";
 import { Connection } from "../api/connections";
 
-export type ConnectionProgress = "uninitialized" | "initialized" | "connected";
-
 export default function useConnection() {
     const queryClient = useQueryClient();
 
