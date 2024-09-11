@@ -101,8 +101,9 @@ public class Hub(LetsMeetDbContext db, HubPersistence persistence) : Hub<IHubCli
 
         if (requestConnectionId != null && targetConnectionId != null)
         {
-            await Clients.Client(requestConnectionId).ReceiveMeetingConfirmation(meeting);
-            await Clients.Client(targetConnectionId).ReceiveMeetingConfirmation(meeting);
+            var meetingConfirmation = persistence.MeetingConfirmation(meeting);
+            await Clients.Client(requestConnectionId).ReceiveMeetingConfirmation(meetingConfirmation);
+            await Clients.Client(targetConnectionId).ReceiveMeetingConfirmation(meetingConfirmation);
             Console.WriteLine($"Confirm meeting between {meeting.TargetUser.Username} and {meeting.RequestUser.Username}");
         }
 

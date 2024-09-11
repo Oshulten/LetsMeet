@@ -1,5 +1,5 @@
 import { HubConnection } from "@microsoft/signalr";
-import { UserLocation, Meeting } from '../types/types';
+import { UserLocation, Meeting, MeetingConfirmation } from '../types/types';
 
 function checkConnection(connection: HubConnection) {
     if (!connection) {
@@ -50,15 +50,12 @@ export const HubClient = {
             return;
         }
 
-        connection.on(serverMethodName, (meeting: Meeting) => {
-            console.log("!");
-            callback(meeting);
-        });
+        connection.on(serverMethodName, callback);
 
         hubRegistrations.push(serverMethodName);
     },
 
-    registerReceiveMeetingConfirmation: function (connection: HubConnection, callback: (meeting: Meeting) => void) {
+    registerReceiveMeetingConfirmation: function (connection: HubConnection, callback: (meeting: MeetingConfirmation) => void) {
         const serverMethodName = 'ReceiveMeetingConfirmation';
 
         if (hubRegistrations.includes(serverMethodName)) {

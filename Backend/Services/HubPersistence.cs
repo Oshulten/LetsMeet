@@ -80,4 +80,15 @@ public class HubPersistence
             $"{registration.User.Username} [{registration.ConnectionId}]: {(registration.LastLocation is null ? "(No last location)" : registration.LastLocation)}");
         Console.WriteLine($"Registered users:\n\t{string.Join("\n\t", itemStrings)}");
     }
+
+    public DtoMeetingConfirmation MeetingConfirmation(DtoMeeting meeting)
+    {
+        List<string> participantIds = [meeting.RequestUser.Id, meeting.TargetUser.Id];
+
+        var includedLocations = LastLocations
+            .Where(location => participantIds.Contains(location.User.Id))
+            .ToList();
+            
+        return new(includedLocations);
+    }
 }

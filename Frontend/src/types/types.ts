@@ -10,6 +10,11 @@ export type Meeting = {
     targetUser: UserIdentity
 }
 
+//Backend: DtoMeetingConfirmation
+export type MeetingConfirmation = {
+    participants: UserLocation[]
+}
+
 export type ActiveMeeting = {
     user: UserIdentity,
     state: MeetingState

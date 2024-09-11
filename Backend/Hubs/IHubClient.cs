@@ -8,5 +8,5 @@ public interface IHubClient
     Task ReceiveUserLocations(List<DtoUserLocation> locations);
     Task ReceiveMeetingRequest(DtoMeeting meeting);
     Task ReceiveMeetingCancellation(DtoMeeting meeting);
-    Task ReceiveMeetingConfirmation(DtoMeeting meeting);
+    Task ReceiveMeetingConfirmation(DtoMeetingConfirmation meetingConfirmation);
 }

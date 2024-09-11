@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import useClientUser from "./useClientUser";
 import useConnection from "./useConnection";
-import { ActiveMeeting, Meeting, MeetingState, UserIdentity, userIdentityFromUser } from "../types/types";
+import { ActiveMeeting, Meeting, MeetingConfirmation, MeetingState, UserIdentity, userIdentityFromUser } from "../types/types";
 import { queryClient } from "../main";
 import { HubClient, HubServer } from "../api/hub";
 
@@ -66,8 +66,6 @@ export default function useMeetings() {
         if (!connection || !clientUser) return;
 
         console.log("confirm meeting");
-        
-        //TODO: pass a callback function into here somehow and get some process going in ClientMap
 
         await HubServer.confirmMeeting(connection, {
             requestUser: userIdentityFromUser(clientUser),
@@ -169,9 +167,11 @@ export default function useMeetings() {
         removeMeeting(meeting.requestUser);
     }
 
-    const receiveMeetingConfirmation = (meeting: Meeting) => {
-        console.debug(`Meeting confirmed between ${meeting.requestUser.username} and ${meeting.targetUser.username}`);
+    const receiveMeetingConfirmation = (meeting: MeetingConfirmation) => {
+        console.debug(`Meeting confirmed between ${meeting.participants[0].user.username} and ${meeting.participants[1].user.username}`);
         console.log(meeting);
+
+        //TODO: pass a callback function into here somehow and get some process going in ClientMap
     }
 
     return {
