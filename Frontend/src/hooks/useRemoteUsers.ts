@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { HubClient } from "../api/hub";
-import { UserLocation, userLocationFromUser } from "../types/types";
+import { UserLocation } from "../types/types";
 import useClientUser from "./useClientUser";
 import useConnection from "./useConnection";
 import { queryClient } from "../main";
@@ -9,20 +9,19 @@ export default function useRemoteUsers() {
     const { clientUser, setClientUserLocation } = useClientUser();
     const connection = useConnection();
 
-    const queryKey = ["locations"];
+    const queryKey = ["remoteUserLocations"];
 
     const sendInitialLocation = async () => {
         if (!connection || !clientUser) return;
         console.log("sendInitialLocation");
-        await setClientUserLocation(userLocationFromUser(clientUser));
+        await setClientUserLocation(clientUser.location);
     }
 
-    const receiveGeolocationsCallback = (fetchedLocations: UserLocation[]) => {
+    const receiveUserLocationsCallback = (fetchedLocations: UserLocation[]) => {
         if (!connection || !clientUser) return;
         console.log("Receiving locations");
         console.log(fetchedLocations);
-        console.log(queryClient);
-        const remoteLocations = fetchedLocations.filter(location => location.clerkId != clientUser.id)
+        const remoteLocations = fetchedLocations.filter(location => location.user.id != clientUser.id)
         queryClient.setQueryData(queryKey, remoteLocations);
         const queryData = queryClient.getQueryData(queryKey);
         console.log(queryData);
@@ -31,7 +30,7 @@ export default function useRemoteUsers() {
     const registerCallbacks = async () => {
         if (!connection || !clientUser) return;
         console.log("registerCallbacks");
-        HubClient.registerReceiveUserLocations(connection, receiveGeolocationsCallback);
+        HubClient.registerReceiveUserLocations(connection, receiveUserLocationsCallback);
     }
 
     const registrationQuery = useQuery({

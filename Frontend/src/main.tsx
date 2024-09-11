@@ -15,7 +15,14 @@ const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 export const clerk = new Clerk(clerkPubKey)
 await clerk.load({})
 
-export const queryClient = new QueryClient();
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      staleTime: Infinity
+    },
+  },
+})
 
 const router = createRouter({
   routeTree,

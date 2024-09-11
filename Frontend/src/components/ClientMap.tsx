@@ -1,10 +1,11 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { MapProps, Map } from '@vis.gl/react-google-maps';
-import ClientUserMarker from './ClientUserMarker';
+// import ClientUserMarker from './ClientUserMarker';
 import useClientUser from '../hooks/useClientUser';
 import useRemoteUsers from '../hooks/useRemoteUsers';
 import { UserLocation } from '../types/types';
 import RemoteUserMarker, { RemoteUserMarkerProps } from './RemoteUserMarker';
+import ClientUserMarker from './ClientUserMarker';
 
 export default function ClientMap() {
     const { clientUser } = useClientUser();
@@ -32,8 +33,8 @@ export default function ClientMap() {
     return (
         <>
             <Map {...mapProps} className="w-96 h-96">
-                {remoteUserLocations && remoteUserLocations.map(location =>
-                    <RemoteUserMarker key={location.clerkId} {...remoteUserMarkerProps(location)} />)
+                {remoteUserLocations && remoteUserLocations.map(userLocation =>
+                    <RemoteUserMarker key={userLocation.user.id} {...remoteUserMarkerProps(userLocation)} />)
                 }
                 <ClientUserMarker />
             </Map>

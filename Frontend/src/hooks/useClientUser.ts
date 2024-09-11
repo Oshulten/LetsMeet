@@ -16,7 +16,7 @@ export default function useClientUser() {
 
     const clientUserQuery = useQuery({
         queryKey: queryKey,
-        queryFn: (): User | undefined => {
+        queryFn: async (): Promise<User | undefined> => {
             const clerkUser = clerk.user;
 
             if (!clerkUser) {
@@ -34,6 +34,24 @@ export default function useClientUser() {
         },
     });
 
+    const sendInitialLocationQuery = useQuery({
+        queryKey: ["sendInitialLocation"],
+        queryFn: async (): Promise<boolean> => {
+            if (!connection) return false;
+            if (sendInitialLocationQuery.data) return true;
+
+            console.log("Sending initial location");
+            const clientUser = clientUserQuery.data as User;
+            connection.onreconnected(() => {
+                console.log("Reconnection from client user");
+            });
+            await HubServer.updateLocation(connection, userLocationFromUser(clientUser));
+
+            return true;
+        },
+        enabled: connection != undefined && clientUserQuery.isSuccess
+    });
+
     const setClientUserLocation = async (newLocation: google.maps.LatLngLiteral) => {
         if (!(connection)) return;
 
@@ -46,11 +64,11 @@ export default function useClientUser() {
 
         queryClient.setQueryData(queryKey, newClientUser);
 
-        await HubServer.UpdateLocation(connection, userLocationFromUser(newClientUser));
+        await HubServer.updateLocation(connection, userLocationFromUser(newClientUser));
     }
 
     return {
         clientUser: clientUserQuery.data,
-        setClientUserLocation
+        setClientUserLocation,
     }
 }

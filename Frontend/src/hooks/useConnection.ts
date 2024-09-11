@@ -1,22 +1,56 @@
-import { HubConnection } from "@microsoft/signalr";
+import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { User } from "../types/types";
-import { Connection } from "../api/connections";
 
 export default function useConnection() {
     const queryClient = useQueryClient();
 
+    const queryKey = ["connection"];
+
     const connectionQuery = useQuery({
-        queryKey: [Connection.queryKey],
+        queryKey,
         queryFn: async (): Promise<HubConnection> => {
             const clientUser = queryClient.getQueryData(["clientUser"]) as User;
-            const connection = Connection.initializeConnection(clientUser);
-            await Connection.startConnection(connection);
+            const connection = initializeConnection(clientUser);
+
+            connection.onclose((error?: Error) => {
+                console.log(`Connection closed${error ? " with error" : ''}`);
+                if (error) console.log(error);
+            });
+
+            connection.onreconnected((connectionId?: string) => {
+                console.log(`Connection reconnected${connectionId ? ` with connectionId  ${connectionId}` : ''}`);
+            });
+
+            await startConnection(connection);
             return connection;
         },
-        enabled: queryClient.getQueryData(["clientUser"]) != undefined
+        enabled: queryClient.getQueryData(["clientUser"]) != undefined,
     });
 
-    return connectionQuery.data
+    const initializeConnection = (clientUser?: User) => {
 
+        const queryString = clientUser ? `?username=${clientUser.username}&clerkId=${clientUser.id}` : '';
+
+        const connection =
+            new HubConnectionBuilder()
+                .withUrl(`${import.meta.env.VITE_LOCAL_BASE_URL}/${import.meta.env.VITE_HUB_SEGMENT}${queryString}`)
+                .withAutomaticReconnect()
+                .build();
+
+        return connection;
+    }
+
+    const startConnection = async (connection: HubConnection) => {
+        try {
+            if (connection.state == "Connected") return;
+
+            await connection.start();
+            console.log(`Started connection with connection ID: ${connection.connectionId}`);
+        } catch (err) {
+            console.error(err as Error);
+        }
+    }
+
+    return connectionQuery.data
 }

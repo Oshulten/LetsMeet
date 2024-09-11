@@ -18,24 +18,20 @@ export default function RemoteUserMarker({ remoteLocation }: RemoteUserMarkerPro
 
     if (!clientUser) return <></>
 
-    const location = {
-        lat: remoteLocation.lat,
-        lng: remoteLocation.lng
-    }
 
     const infoWindowHeaderContent = (
         <div className="flex flex-row">
-            <h2 className="font-bold text-lg">{remoteLocation.username}</h2>
+            <h2 className="font-bold text-lg">{remoteLocation.user.username}</h2>
         </div>);
 
     const infoWindowMainContent = (
         <div>
-            <p>{readableDistance(haversine(location, clientUser.location))} away</p>
-            <Meeting remoteUser={{ username: remoteLocation.username, id: remoteLocation.clerkId }} />
+            <p>{readableDistance(haversine(remoteLocation.location, clientUser.location))} away</p>
+            <Meeting remoteUser={{ username: remoteLocation.user.username, id: remoteLocation.user.id }} />
         </div>);
 
     const markerProps: AdvancedMarkerProps = {
-        position: remoteLocation,
+        position: remoteLocation.location,
         onClick: () => setInfoWindowShown(isShown => !isShown),
     }
 

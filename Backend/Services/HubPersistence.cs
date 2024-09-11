@@ -24,6 +24,12 @@ public class HubPersistence
         _userRegistrations.Add(new UserRegistration((DtoUser)db.AddUser(user), connectionId, null));
     }
 
+    public List<string> ConnectionIdsExceptUser(DtoUser user) =>
+        _userRegistrations
+            .Where(registration => registration.User.Id != user.Id)
+            .Select(registration => registration.ConnectionId)
+            .ToList();
+
     public void DeregisterUserByConnectionId(string connectionId)
     {
         var user = _userRegistrations.FirstOrDefault(registration => registration.ConnectionId == connectionId);
@@ -70,7 +76,8 @@ public class HubPersistence
             return;
         }
 
-        var itemStrings = _userRegistrations.Select(registration => $"{registration.User.Username} [{registration.ConnectionId}]: {registration.ConnectionId ?? "[No last location]"}");
+        var itemStrings = _userRegistrations.Select(registration =>
+            $"{registration.User.Username} [{registration.ConnectionId}]: {(registration.LastLocation is null ? "(No last location)" : registration.LastLocation)}");
         Console.WriteLine($"Registered users:\n\t{string.Join("\n\t", itemStrings)}");
     }
 }

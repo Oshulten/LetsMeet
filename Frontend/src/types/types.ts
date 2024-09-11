@@ -1,7 +1,7 @@
 //Backend: DtoUser
 export type UserIdentity = {
-    id: string
     username: string,
+    id: string
 }
 
 //Backend: DtoMeeting
