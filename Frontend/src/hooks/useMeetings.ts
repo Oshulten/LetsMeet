@@ -11,93 +11,83 @@ export default function useMeetings() {
 
     const queryKey = ["meetings"];
 
-    const meetingsQuery = useQuery({
+    const meetings = useQuery({
         queryKey: queryKey,
         queryFn: (): ActiveMeeting[] => {
             return [];
         },
-    })
+    }).data;
 
-    const registerCallbacksQuery = useQuery({
+    useQuery({
         queryKey: [...queryKey, "registerCallbacks"],
         queryFn: (): boolean => {
-            registerCallbacks();
+            if (!connection) return false;
+            HubClient.registerReceiveMeetingRequest(connection, receiveMeetingCallback);
+            HubClient.registerRecieveMeetingCancellation(connection, receiveMeetingCancellation);
+            HubClient.registerReceiveMeetingConfirmation(connection, receiveMeetingConfirmation);
             return true;
         },
         enabled: (!!connection && !!clientUser)
-    })
+    });
 
-    const registerCallbacks = () => {
-        if (!connection) return;
+    const addMeeting = (meeting: ActiveMeeting) => {
+        if (!meetings) return;
 
-        HubClient.registerReceiveMeetingRequest(connection, meeting => {
-            console.log(`${meeting.requestUser.username} wants to meet you!`);
+        queryClient.setQueryData(queryKey, [...meetings, meeting]);
+    }
 
-            if (!meetingsQuery.data) queryClient.setQueryData(queryKey, []);
+    const removeMeeting = (user: UserIdentity): void => {
+        if (!meetings) return;
 
-            const existingMeeting = getMeetingByUser(meeting.requestUser);
+        queryClient.setQueryData(queryKey, [...meetings].filter(m => m.user.id == user.id));
+    }
 
-            if (!existingMeeting) {
-                const newMeeting: ActiveMeeting = {
-                    user: meeting.requestUser,
-                    state: 'awaitingUserConfirmation'
-                }
-                console.log("adding new meeting");
-                console.log(newMeeting);
-                addMeeting(newMeeting);
-                return;
-            }
+    const getMeetingByUser = (user: UserIdentity): ActiveMeeting | undefined => {
+        if (!meetings) return;
 
-            if (existingMeeting.state == 'awaitingOtherUserConfirmation') {
-                const meeting = setMeetingState(existingMeeting.user, 'confirmed');
-                if (!meeting)
-                    return;
-
-                confirmMeeting(meeting);
-                return;
-            }
-        });
-
-        HubClient.registerRecieveMeetingCancellation(connection, meeting => {
-            console.log(`${meeting.requestUser.username} cancelled a meeting with you`);
-
-            const existingMeeting = getMeetingByUser(meeting.requestUser);
-
-            if (!existingMeeting)
-                return;
-
-            removeMeeting(meeting.requestUser);
-        });
-
-        HubClient.registerReceiveMeetingConfirmation(connection, meeting => {
-            console.log(`Meeting confirmed between ${meeting.requestUser.username} and ${meeting.targetUser.username}`);
-
-            const existingMeeting = getMeetingByUser(meeting.requestUser);
-
-            if (!existingMeeting)
-                return;
-
-            setMeetingState(meeting.requestUser, 'confirmed');
-        });
+        return meetings.find(meeting => meeting.user.id == user.id);
     }
 
     const confirmMeeting = async (meeting: ActiveMeeting) => {
-        if (!meetingsQuery.data) queryClient.setQueryData(queryKey, []);
         if (!connection || !clientUser) return;
 
-        const userIdentity = userIdentityFromUser(clientUser);
         await HubServer.confirmMeeting(connection, {
-            requestUser: userIdentity,
+            requestUser: userIdentityFromUser(clientUser),
             targetUser: meeting.user
         });
     }
 
-    const requestMeeting = async (targetUser: UserIdentity) => {
-        if (!meetingsQuery.data) queryClient.setQueryData(queryKey, []);
+    const setMeetingState = (user: UserIdentity, state: MeetingState): ActiveMeeting | undefined => {
+        if (!meetings) return;
+
+        const meeting = getMeetingByUser(user);
+        if (!meeting) return;
+
+        const newMeeting = { ...meeting, state: state };
+
+        const newMeetings = meetings.map(meeting =>
+            meeting.user.id == user.id ? newMeeting : meeting);
+
+        queryClient.setQueryData(queryKey, [newMeetings]);
+    }
+
+    const cancelMeeting = async (targetUser: UserIdentity) => {
         if (!connection || !clientUser) return;
 
-        const userIdentity = userIdentityFromUser(clientUser);
-        console.log(`You request a meeting with ${targetUser.username}`);
+        console.log(`You cancel a meeting with ${targetUser.username}`);
+
+        removeMeeting(targetUser);
+
+        await HubServer.cancelMeeting(connection, {
+            requestUser: userIdentityFromUser(clientUser),
+            targetUser: targetUser
+        });
+    }
+
+    const requestMeeting = async (targetUser: UserIdentity) => {
+        if (!connection || !clientUser) return;
+
+        console.debug(`You request a meeting with ${targetUser.username}`);
 
         const existingMeeting = getMeetingByUser(targetUser);
 
@@ -106,11 +96,11 @@ export default function useMeetings() {
                 user: targetUser,
                 state: 'awaitingOtherUserConfirmation'
             }
-            console.log(newMeeting);
+
             addMeeting(newMeeting);
 
             const meetingRequest: Meeting = {
-                requestUser: userIdentity,
+                requestUser: userIdentityFromUser(clientUser),
                 targetUser: targetUser
             }
 
@@ -119,72 +109,60 @@ export default function useMeetings() {
             return;
         }
 
-        console.log(existingMeeting);
-
         if (existingMeeting.state == 'awaitingUserConfirmation') {
             await confirmMeeting(existingMeeting);
             return;
         }
     }
 
-    const cancelMeeting = async (targetUser: UserIdentity) => {
-        if (!meetingsQuery.data) return;
-        if (!connection || !clientUser) return;
-        const userIdentity = userIdentityFromUser(clientUser);
+    const receiveMeetingCallback = (meeting: Meeting) => {
+        if (!meetings) return;
 
-        console.log(`You cancel a meeting with ${targetUser.username}`);
+        const existingMeeting = getMeetingByUser(meeting.requestUser);
 
-        removeMeeting(targetUser);
-
-        await HubServer.cancelMeeting(connection, {
-            requestUser: userIdentity,
-            targetUser: targetUser
-        });
-    }
-
-    const getMeetingByUser = (user: UserIdentity): ActiveMeeting | undefined => {
-        if (!meetingsQuery.data) return;
-
-        const meetings = queryClient.getQueryData(queryKey) as ActiveMeeting[];
-        console.log(meetings);
-        return meetings.find(m => m.user.id == user.id);
-    }
-
-    const addMeeting = (meeting: ActiveMeeting) => {
-        if (!(meetingsQuery.data)) {
-            console.log("no meeting data")
+        if (!existingMeeting) {
+            const newMeeting: ActiveMeeting = {
+                user: meeting.requestUser,
+                state: 'awaitingUserConfirmation'
+            }
+            addMeeting(newMeeting);
             return;
         }
-        const meetings = queryClient.getQueryData(queryKey) as ActiveMeeting[];
-        queryClient.setQueryData(queryKey, [...meetings, meeting]);
+
+        if (existingMeeting.state == 'awaitingOtherUserConfirmation') {
+            const meeting = setMeetingState(existingMeeting.user, 'confirmed');
+            if (!meeting)
+                return;
+
+            confirmMeeting(meeting);
+            return;
+        }
     }
 
-    const setMeetingState = (user: UserIdentity, state: MeetingState): ActiveMeeting | undefined => {
-        if (!meetingsQuery.data) return;
+    const receiveMeetingCancellation = (meeting: Meeting) => {
+        console.debug(`${meeting.requestUser.username} cancelled a meeting with you`);
 
-        const meeting = getMeetingByUser(user);
-        if (!meeting) return;
+        const existingMeeting = getMeetingByUser(meeting.requestUser);
 
-        const newMeeting = { ...meeting, state: state };
+        if (!existingMeeting)
+            return;
 
-        const meetings = queryClient.getQueryData(queryKey) as ActiveMeeting[];
-
-        const newMeetings = meetings.map(m =>
-            m.user.id == user.id ? newMeeting : m);
-
-        queryClient.setQueryData(queryKey, [newMeetings]);
+        removeMeeting(meeting.requestUser);
     }
 
-    const removeMeeting = (user: UserIdentity): void => {
-        if (!meetingsQuery.data) return;
+    const receiveMeetingConfirmation = (meeting: Meeting) => {
+        console.debug(`Meeting confirmed between ${meeting.requestUser.username} and ${meeting.targetUser.username}`);
 
-        const meetings = queryClient.getQueryData(queryKey) as ActiveMeeting[];
-        const meetingsWithoutMeeting = meetings.filter(m => m.user.id == user.id);
-        queryClient.setQueryData(queryKey, [meetingsWithoutMeeting]);
+        const existingMeeting = getMeetingByUser(meeting.requestUser);
+
+        if (!existingMeeting)
+            return;
+
+        setMeetingState(meeting.requestUser, 'confirmed');
     }
 
     return {
-        meetings: meetingsQuery.data,
+        meetings,
         getMeetingByUser,
         requestMeeting,
         cancelMeeting,
