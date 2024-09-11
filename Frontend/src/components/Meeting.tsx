@@ -30,8 +30,6 @@ export default function Meeting({ remoteUser }: Props) {
                     }}
                     className="btn btn-info text-white font-normal w-full">
                     Waiting for response
-                    <hr />
-                    Click to cancel
                     <span className="loading loading-spinner text-white"></span>
                 </button>)
 

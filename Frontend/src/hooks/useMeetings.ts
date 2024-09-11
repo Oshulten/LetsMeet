@@ -11,38 +11,52 @@ export default function useMeetings() {
 
     const queryKey = ["meetings"];
 
-    const meetings = useQuery({
+    const messageQuery = useQuery({
         queryKey: queryKey,
         queryFn: (): ActiveMeeting[] => {
             return [];
         },
-    }).data;
+    });
 
     useQuery({
         queryKey: [...queryKey, "registerCallbacks"],
         queryFn: (): boolean => {
             if (!connection) return false;
             HubClient.registerReceiveMeetingRequest(connection, receiveMeetingRequest);
-            HubClient.registerRecieveMeetingCancellation(connection, receiveMeetingCancellation);
+            HubClient.registerReceiveMeetingCancellation(connection, receiveMeetingCancellation);
             HubClient.registerReceiveMeetingConfirmation(connection, receiveMeetingConfirmation);
             return true;
         },
         enabled: (!!connection && !!clientUser)
     });
 
+    const initMessagesWithEmptyIfUndefined = () => {
+        const meetings = messageQuery.data;
+        if (!meetings) {
+            queryClient.setQueryData(queryKey, []);
+        }
+        return queryClient.getQueryData(queryKey) as ActiveMeeting[];
+    }
+
     const addMeeting = (meeting: ActiveMeeting) => {
+        const meetings = initMessagesWithEmptyIfUndefined();
+        console.log(meetings);
         if (!meetings) return;
 
+        console.log('Adding meeting');
+        console.log(meeting);
         queryClient.setQueryData(queryKey, [...meetings, meeting]);
     }
 
     const removeMeeting = (user: UserIdentity): void => {
+        const meetings = initMessagesWithEmptyIfUndefined();
         if (!meetings) return;
 
         queryClient.setQueryData(queryKey, [...meetings].filter(m => m.user.id != user.id));
     }
 
     const getMeetingByUser = (user: UserIdentity): ActiveMeeting | undefined => {
+        const meetings = initMessagesWithEmptyIfUndefined();
         if (!meetings) return;
 
         return meetings.find(meeting => meeting.user.id == user.id);
@@ -58,6 +72,7 @@ export default function useMeetings() {
     }
 
     const setMeetingState = (user: UserIdentity, state: MeetingState): ActiveMeeting | undefined => {
+        const meetings = initMessagesWithEmptyIfUndefined();
         if (!meetings) return;
 
         const meeting = getMeetingByUser(user);
@@ -162,7 +177,7 @@ export default function useMeetings() {
     }
 
     return {
-        meetings,
+        meetings: messageQuery.data,
         getMeetingByUser,
         requestMeeting,
         cancelMeeting,

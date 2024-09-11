@@ -58,11 +58,6 @@ public class Hub(LetsMeetDbContext db, HubPersistence persistence) : Hub<IHubCli
         persistence.UpdateLastLocation(dto, db);
         persistence.LogRegisteredUsers();
 
-        // foreach (var connectionId in persistence.ConnectionIdsExceptUser(dto.User))
-        // {
-        //     await Clients.Client(connectionId).ReceiveUserLocations(persistence.LastLocations);
-        // }
-
         await Clients.All.ReceiveUserLocations(persistence.LastLocations);
 
         Console.WriteLine("---");

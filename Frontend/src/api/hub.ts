@@ -42,15 +42,19 @@ export const HubClient = {
         hubRegistrations.push(serverMethodName);
     },
 
-    registerRecieveMeetingCancellation: function (connection: HubConnection, callback: (meeting: Meeting) => void) {
-        const serverMethodName = 'RecieveMeetingCancellation';
+    registerReceiveMeetingCancellation: function (connection: HubConnection, callback: (meeting: Meeting) => void) {
+        const serverMethodName = 'ReceiveMeetingCancellation';
 
         if (hubRegistrations.includes(serverMethodName)) {
             console.error(`${serverMethodName} has already been registered`);
             return;
         }
 
-        connection.on(serverMethodName, callback);
+        connection.on(serverMethodName, (meeting: Meeting) => {
+            console.log("!");
+            callback(meeting);
+        });
+
         hubRegistrations.push(serverMethodName);
     },
 
