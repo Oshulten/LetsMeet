@@ -18,10 +18,22 @@ export default function ClientUserMarker() {
         zIndex: 1
     }
 
+    const glyph = document.createElement("img");
+    if (clientUser.imageUrl) {
+        glyph.src = clientUser.imageUrl;
+        // glyph.innerHTML = "A";
+        glyph.style.width = '35px';
+        glyph.style.height = '35px';
+        glyph.classList.add("rounded-full")
+    }
+
+
     const pinProps: PinProps = {
-        background: '#00AA00',
-        glyphColor: '#000',
-        borderColor: '#000'
+        background: '#44AA44',
+        glyphColor: '#AAA',
+        borderColor: '#444444',
+        scale: 1.5,
+        glyph: glyph
     }
 
     return (

@@ -27,7 +27,8 @@ export default function useClientUser() {
             const clientUser: User = {
                 username: clerkUser.username!,
                 id: clerkUser.id,
-                location: defaultLocation
+                location: defaultLocation,
+                imageUrl: clerkUser.imageUrl
             }
 
             return clientUser;

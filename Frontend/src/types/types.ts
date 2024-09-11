@@ -27,7 +27,8 @@ export type UserLocation = {
 }
 
 export type User = UserIdentity & {
-    location: google.maps.LatLngLiteral
+    location: google.maps.LatLngLiteral,
+    imageUrl?: string
 }
 
 export type MeetingState = 'awaitingOtherUserConfirmation' | 'awaitingUserConfirmation' | 'confirmed'

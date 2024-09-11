@@ -4,8 +4,6 @@ import { createRoot } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { routeTree } from './routeTree.gen'
 import { createRouter, RouterProvider } from '@tanstack/react-router';
-import { DefaultCatchBoundary } from './components/DefaultCatchBoundary.tsx';
-import { NotFound } from './components/NotFound.tsx';
 import './css/index.css'
 
 import { Clerk } from '@clerk/clerk-js'

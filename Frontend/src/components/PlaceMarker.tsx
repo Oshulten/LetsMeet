@@ -1,38 +1,29 @@
-/* eslint-disable react/react-in-jsx-scope */
 import { AdvancedMarker, AdvancedMarkerProps, InfoWindow, InfoWindowProps, Pin, PinProps, useAdvancedMarkerRef } from "@vis.gl/react-google-maps";
 import { useState } from "react";
-import haversine from 'haversine-distance';
-import readableDistance from "../utilities/readableDistance";
-import { UserLocation } from "../types/types";
-import useClientUser from "../hooks/useClientUser";
-import Meeting from "./Meeting";
-import capitalize from "capitalize";
 
-export interface RemoteUserMarkerProps {
-    remoteLocation: UserLocation,
+/* eslint-disable react/react-in-jsx-scope */
+interface PlaceMarkerProps {
+    place: google.maps.places.Place
 }
 
-export default function RemoteUserMarker({ remoteLocation }: RemoteUserMarkerProps) {
-    const { clientUser } = useClientUser();
+export default function PlaceMarker({ place } : PlaceMarkerProps) {
     const [markerRef, marker] = useAdvancedMarkerRef();
     const [infoWindowShown, setInfoWindowShown] = useState(true);
 
-    if (!clientUser) return <></>
+    if (!place) return <></>
 
     const infoWindowHeaderContent = (
-        <h2 className="leading-3 font-bold text-lg">{capitalize.words(remoteLocation.user.username)}</h2>
-    );
+        <div className="flex flex-row">
+            <h2 className="font-bold text-lg">{place.displayName}</h2>
+        </div>);
 
     const infoWindowMainContent = (
-        <div className="flex flex-col items-start justify-center gap-4">
-            <p className='text-left'>is {readableDistance(haversine(remoteLocation.location, clientUser.location))} away</p>
-            <Meeting remoteUser={{ username: remoteLocation.user.username, id: remoteLocation.user.id }} />
+        <div>
         </div>);
 
     const markerProps: AdvancedMarkerProps = {
-        position: remoteLocation.location,
+        position: place.location,
         onClick: () => setInfoWindowShown(isShown => !isShown),
-        className: "overscroll-contain"
     }
 
     const pinProps: PinProps = {

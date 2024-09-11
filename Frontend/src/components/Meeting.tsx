@@ -1,6 +1,7 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { UserIdentity } from "../types/types";
 import useMeetings from "../hooks/useMeetings";
+import capitalize from "capitalize";
 
 interface Props {
     remoteUser: UserIdentity
@@ -11,13 +12,15 @@ export default function Meeting({ remoteUser }: Props) {
 
     const meeting = getMeetingByUser(remoteUser);
 
+    const btnClassNames = 'btn border-none text-white font-normal w-full'
+
     if (!meeting)
         return (
             <button
                 onClick={() => {
                     requestMeeting(remoteUser);
                 }}
-                className="btn btn-info text-white font-normal w-full">
+                className={btnClassNames + " btn-success"}>
                 <p>{`Let's meet!`}</p>
             </button>)
 
@@ -28,26 +31,25 @@ export default function Meeting({ remoteUser }: Props) {
                     onClick={() => {
                         cancelMeeting(remoteUser);
                     }}
-                    className="btn btn-info text-white font-normal w-full">
+                    className={btnClassNames + " btn-info"}>
                     Waiting for response
                     <span className="loading loading-spinner text-white"></span>
                 </button>)
 
         case 'awaitingUserConfirmation':
             return (<>
-                <p>{`${remoteUser.username} wants to meet you!`}</p>
                 <button
                     onClick={() => {
                         requestMeeting(remoteUser);
                     }}
-                    className="btn btn-info text-white font-normal w-full">
-                    {`Let's meet!`}
+                    className={btnClassNames + " btn-success"}>
+                    {`Meet with ${capitalize.words(remoteUser.username)}`}
                 </button>
                 <button
                     onClick={() => {
                         cancelMeeting(remoteUser);
                     }}
-                    className="btn btn-info text-white font-normal w-full" >
+                    className={btnClassNames + " bg-rose-700"}>
                     {`Not a good time...`}
                 </button>
             </>)

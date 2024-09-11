@@ -7,11 +7,14 @@ import { UserLocation } from '../types/types';
 import RemoteUserMarker, { RemoteUserMarkerProps } from './RemoteUserMarker';
 import ClientUserMarker from './ClientUserMarker';
 import useMeetings from '../hooks/useMeetings';
+import usePlaces from '../hooks/usePlaces';
+import PlaceMarker from './PlaceMarker';
 
 export default function ClientMap() {
     const { clientUser } = useClientUser();
     const { remoteUserLocations } = useRemoteUsers();
     useMeetings();
+    const { places } = usePlaces();
 
 
     if (!clientUser) {
@@ -33,16 +36,19 @@ export default function ClientMap() {
         } as RemoteUserMarkerProps;
     }
 
+    console.log(places);
+
     return (
         <>
-            <Map {...mapProps} className="w-96 h-96">
+            <Map {...mapProps} className="w-full flex-auto">
                 {remoteUserLocations && remoteUserLocations.map(userLocation =>
                     <RemoteUserMarker key={userLocation.user.id} {...remoteUserMarkerProps(userLocation)} />)
                 }
+                {/* {places && places.map(place =>
+                    <PlaceMarker key={place.id} place={place} />)
+                } */}
                 <ClientUserMarker />
             </Map>
-            {/* <p>{JSON.stringify(remoteUserLocations)}</p>
-            <p>{JSON.stringify(meetings ?? "meetingRequests is undefined")}</p> */}
         </>
     );
 }

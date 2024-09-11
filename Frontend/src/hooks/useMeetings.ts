@@ -173,8 +173,9 @@ export default function useMeetings() {
         console.debug(`Meeting confirmed between ${meeting.participants[0].user.username} and ${meeting.participants[1].user.username}`);
         console.log(meeting);
 
-        const places = await suggestMeetingPlaces(meeting.participants);
-        console.log(places);
+        queryClient.setQueryData(queryKey, []);
+
+        await suggestMeetingPlaces(meeting.participants);
     }
 
     return {
