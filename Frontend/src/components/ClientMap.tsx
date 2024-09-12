@@ -10,7 +10,7 @@ import Direction from './Direction';
 
 import { UserLocation } from '../types/types';
 import ConfirmedMeetingMarker from './ConfirmedMeetingMarker';
-import SuccessfulMeetingModal, { openSuccessfulMeetingModal } from './SuccessfulMeetingModal';
+import SuccessfulMeetingModal from './SuccessfulMeetingModal';
 
 /* eslint-disable react/react-in-jsx-scope */
 
@@ -49,7 +49,6 @@ export default function ClientMap() {
                 <Direction />
             </Map>
             <SuccessfulMeetingModal />
-            <button onClick={() => openSuccessfulMeetingModal("Stranger", "35")}>Open modal</button>
         </>
     );
 }

@@ -13,7 +13,6 @@ export default function ConfirmedMeetingMarker() {
 
     const place = confirmedMeeting.place;
 
-
     const infoWindowHeaderContent = (
         <h2 className="leading-3 font-bold text-lg">{place.displayName}</h2>);
 
@@ -35,6 +34,7 @@ export default function ConfirmedMeetingMarker() {
 
     const infoWindowProps: InfoWindowProps = {
         anchor: marker,
+        style: { backgroundColor: "rgba(0, 0, 0, 0.5);" },
         onClose: () => setInfoWindowShown(false),
         headerContent: infoWindowHeaderContent
     }

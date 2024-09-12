@@ -23,7 +23,7 @@ export default function useDirections(map: google.maps.Map | null) {
         if (!routesLibrary || !map || !clientUser) return;
 
         setDirectionService(new routesLibrary.DirectionsService());
-        setDirectionsRenderers([0, 1].map(() => new routesLibrary.DirectionsRenderer({})));
+        setDirectionsRenderers([0, 1].map(() => new routesLibrary.DirectionsRenderer({ map: null, markerOptions: { visible: false } })));
     }, [routesLibrary, map]);
 
     useEffect(() => {

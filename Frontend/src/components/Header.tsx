@@ -14,8 +14,8 @@ export default function Header() {
             <SignOutButton>
                 <button className="btn">Sign out</button>
             </SignOutButton>
-            <UserButton />
             <p className="text-lg ml-auto">{`${username}`}</p>
+            <UserButton />
         </div>
     );
 }
