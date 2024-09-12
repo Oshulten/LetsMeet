@@ -20,6 +20,11 @@ export type ActiveMeeting = {
     state: MeetingState
 }
 
+export type ConfirmedMeeting = {
+    participants?: UserLocation[],
+    place?: google.maps.places.Place
+}
+
 //Backend: DtoUserLocation
 export type UserLocation = {
     user: UserIdentity,

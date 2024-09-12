@@ -3,15 +3,13 @@ import { MapProps, Map } from '@vis.gl/react-google-maps';
 import useClientUser from '../hooks/useClientUser';
 import useRemoteUsers from '../hooks/useRemoteUsers';
 import useMeetings from '../hooks/useMeetings';
-import usePlaces from '../hooks/usePlaces';
 
 import RemoteUserMarker, { RemoteUserMarkerProps } from './RemoteUserMarker';
 import ClientUserMarker from './ClientUserMarker';
-import PlaceMarker from './PlaceMarker';
 import Direction from './Direction';
 
 import { UserLocation } from '../types/types';
-import generateDefaultLocation from '../utilities/defaultLocation';
+import ConfirmedMeetingMarker from './ConfirmedMeetingMarker';
 
 /* eslint-disable react/react-in-jsx-scope */
 
@@ -19,7 +17,6 @@ export default function ClientMap() {
     const { clientUser } = useClientUser();
     const { remoteUserLocations } = useRemoteUsers();
     useMeetings();
-    const { place } = usePlaces();
 
     if (!clientUser) {
         console.log("clientUser is undefined");
@@ -46,7 +43,7 @@ export default function ClientMap() {
                 {remoteUserLocations && remoteUserLocations.map(userLocation =>
                     <RemoteUserMarker key={userLocation.user.id} {...remoteUserMarkerProps(userLocation)} />)
                 }
-                {place && <PlaceMarker place={place} />}
+                <ConfirmedMeetingMarker />
                 <ClientUserMarker />
                 <Direction />
             </Map>

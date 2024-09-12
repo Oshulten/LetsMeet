@@ -1,16 +1,17 @@
 import { AdvancedMarker, AdvancedMarkerProps, InfoWindow, InfoWindowProps, Pin, PinProps, useAdvancedMarkerRef } from "@vis.gl/react-google-maps";
 import { useState } from "react";
+import useMeetings from "../hooks/useMeetings";
 
 /* eslint-disable react/react-in-jsx-scope */
-interface PlaceMarkerProps {
-    place: google.maps.places.Place
-}
 
-export default function PlaceMarker({ place } : PlaceMarkerProps) {
+export default function ConfirmedMeetingMarker() {
     const [markerRef, marker] = useAdvancedMarkerRef();
     const [infoWindowShown, setInfoWindowShown] = useState(true);
+    const { confirmedMeeting } = useMeetings();
 
-    if (!place) return <></>
+    if (!confirmedMeeting?.place) return null;
+
+    const place = confirmedMeeting.place;
 
     const infoWindowHeaderContent = (
         <div className="flex flex-row">

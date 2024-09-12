@@ -5,7 +5,7 @@ import haversine from 'haversine-distance';
 import readableDistance from "../utilities/readableDistance";
 import { UserLocation } from "../types/types";
 import useClientUser from "../hooks/useClientUser";
-import Meeting from "./Meeting";
+import MeetingDialog from "./MeetingDialog";
 import capitalize from "capitalize";
 
 export interface RemoteUserMarkerProps {
@@ -26,7 +26,7 @@ export default function RemoteUserMarker({ remoteLocation }: RemoteUserMarkerPro
     const infoWindowMainContent = (
         <div className="flex flex-col items-start justify-center gap-4">
             <p className='text-left'>is {readableDistance(haversine(remoteLocation.location, clientUser.location))} away</p>
-            <Meeting remoteUser={{ username: remoteLocation.user.username, id: remoteLocation.user.id }} />
+            <MeetingDialog remoteUser={{ username: remoteLocation.user.username, id: remoteLocation.user.id }} />
         </div>);
 
     const markerProps: AdvancedMarkerProps = {

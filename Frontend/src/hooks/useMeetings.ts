@@ -1,27 +1,54 @@
 import { useQuery } from "@tanstack/react-query";
 import useClientUser from "./useClientUser";
 import useConnection from "./useConnection";
-import { ActiveMeeting, Meeting, MeetingConfirmation, MeetingState, UserIdentity, userIdentityFromUser } from "../types/types";
+import { ActiveMeeting, ConfirmedMeeting, Meeting, MeetingConfirmation, MeetingState, UserIdentity, userIdentityFromUser } from "../types/types";
 import { queryClient } from "../main";
 import { HubClient, HubServer } from "../api/hub";
-import usePlaces from "./usePlaces";
+import { mean, max } from "mathjs";
+import haversine from 'haversine-distance';
 
 export default function useMeetings() {
     const { clientUser } = useClientUser();
     const connection = useConnection();
-    const { suggestMeetingPlaces } = usePlaces();
 
-    const queryKey = ["meetings"];
+    const queryKeyMeetings = ["meetings"];
+    const queryKeyLibrary = [...queryKeyMeetings, "placesLibrary"];
+    const queryKeyRegisterCallbacks = [...queryKeyMeetings, "registerCallbacks"];
+    const queryKeyConfirmedMeeting = [...queryKeyMeetings, "confirmedMeeting"];
 
-    const messageQuery = useQuery({
-        queryKey: queryKey,
+    const meetingsQuery = useQuery({
+        queryKey: queryKeyMeetings,
         queryFn: (): ActiveMeeting[] => {
             return [];
         },
     });
 
+    const getMeetings = () => {
+        const meetings = queryClient.getQueryData(queryKeyMeetings);
+
+        if (!meetings) {
+            queryClient.setQueryData(queryKeyMeetings, []);
+        }
+
+        return queryClient.getQueryData(queryKeyMeetings) as ActiveMeeting[];
+    }
+
+    const setMeetings = (meetings: ActiveMeeting[]) =>
+        queryClient.setQueryData(queryKeyMeetings, meetings);
+
     useQuery({
-        queryKey: [...queryKey, "registerCallbacks"],
+        queryKey: queryKeyLibrary,
+        queryFn: async (): Promise<google.maps.PlacesLibrary> => {
+            console.log("load places library");
+            return await google.maps.importLibrary("places") as google.maps.PlacesLibrary;;
+        },
+    });
+
+    const getPlacesLibrary = () =>
+        queryClient.getQueryData(queryKeyLibrary) as google.maps.PlacesLibrary;
+
+    useQuery({
+        queryKey: queryKeyRegisterCallbacks,
         queryFn: (): boolean => {
             if (!connection) return false;
             HubClient.registerReceiveMeetingRequest(connection, receiveMeetingRequest);
@@ -32,42 +59,73 @@ export default function useMeetings() {
         enabled: (!!connection && !!clientUser)
     });
 
-    const initMessagesWithEmptyIfUndefined = () => {
-        const meetings = messageQuery.data;
-        if (!meetings) {
-            queryClient.setQueryData(queryKey, []);
+    useQuery({
+        queryKey: queryKeyConfirmedMeeting,
+        queryFn: (): ConfirmedMeeting => {
+            return {};
         }
-        return queryClient.getQueryData(queryKey) as ActiveMeeting[];
+    });
+
+    const getConfirmedMeeting = () =>
+        queryClient.getQueryData(queryKeyConfirmedMeeting) as ConfirmedMeeting;
+
+    const setConfirmedMeeting = (meeting: ConfirmedMeeting) =>
+        queryClient.setQueryData(queryKeyConfirmedMeeting, meeting);
+
+    const suggestMeetingPlace = async () => {
+        const confirmedMeeting = getConfirmedMeeting();
+        const placesLibrary = getPlacesLibrary();
+
+        console.log(placesLibrary);
+
+        if (!placesLibrary || !confirmedMeeting || !confirmedMeeting.participants) return;
+
+        console.log("ready to set up meeting place");
+        const locations = confirmedMeeting.participants.map((participant) => participant.location);
+
+        const meanLocation: google.maps.LatLngLiteral = {
+            lat: mean(locations.map(location => location.lat)),
+            lng: mean(locations.map(location => location.lng)),
+        };
+
+        const maxDistanceFromMeanLocation = max(locations.map(location =>
+            haversine(location, meanLocation)
+        ));
+
+        const request = {
+            fields: ['displayName', 'location', 'id'],
+            locationRestriction: {
+                center: meanLocation,
+                radius: maxDistanceFromMeanLocation + 50,
+            },
+            includedPrimaryTypes: ['restaurant'],
+            maxResultCount: 1,
+            rankPreference: 'DISTANCE',
+        } as google.maps.places.SearchNearbyRequest;
+
+        console.log("getting places");
+
+        try {
+            const { places } = await getPlacesLibrary().Place.searchNearby(request);
+            console.log("found places");
+            setConfirmedMeeting({ ...confirmedMeeting, place: places[0] });
+            console.log(getConfirmedMeeting());
+        } catch (error) {
+            console.error((error as Error).message);
+        }
     }
 
-    const addMeeting = (meeting: ActiveMeeting) => {
-        const meetings = initMessagesWithEmptyIfUndefined();
-        console.log(meetings);
-        if (!meetings) return;
+    const addMeeting = (meeting: ActiveMeeting) =>
+        setMeetings([...getMeetings(), meeting]);
 
-        console.log('Adding meeting');
-        console.log(meeting);
-        queryClient.setQueryData(queryKey, [...meetings, meeting]);
-    }
+    const removeMeeting = (user: UserIdentity) =>
+        setMeetings([...getMeetings()].filter(m => m.user.id != user.id))
 
-    const removeMeeting = (user: UserIdentity): void => {
-        const meetings = initMessagesWithEmptyIfUndefined();
-        if (!meetings) return;
-
-        queryClient.setQueryData(queryKey, [...meetings].filter(m => m.user.id != user.id));
-    }
-
-    const getMeetingByUser = (user: UserIdentity): ActiveMeeting | undefined => {
-        const meetings = initMessagesWithEmptyIfUndefined();
-        if (!meetings) return;
-
-        return meetings.find(meeting => meeting.user.id == user.id);
-    }
+    const getMeetingByUser = (user: UserIdentity) =>
+        getMeetings().find(meeting => meeting.user.id == user.id);
 
     const confirmMeeting = async (meeting: ActiveMeeting) => {
         if (!connection || !clientUser) return;
-
-        console.log("confirm meeting");
 
         await HubServer.confirmMeeting(connection, {
             requestUser: userIdentityFromUser(clientUser),
@@ -76,24 +134,17 @@ export default function useMeetings() {
     }
 
     const setMeetingState = (user: UserIdentity, state: MeetingState): ActiveMeeting | undefined => {
-        const meetings = initMessagesWithEmptyIfUndefined();
-        if (!meetings) return;
+        const meetings = getMeetings();
 
         const meeting = getMeetingByUser(user);
         if (!meeting) return;
 
-        const newMeeting = { ...meeting, state: state };
-
-        const newMeetings = meetings.map(meeting =>
-            meeting.user.id == user.id ? newMeeting : meeting);
-
-        queryClient.setQueryData(queryKey, [newMeetings]);
+        setMeetings(meetings.map(m =>
+            m.user.id == user.id ? { ...meeting, state: state } : m))
     }
 
     const cancelMeeting = async (targetUser: UserIdentity) => {
         if (!connection || !clientUser) return;
-
-        console.log(`You cancel a meeting with ${targetUser.username}`);
 
         removeMeeting(targetUser);
 
@@ -105,8 +156,6 @@ export default function useMeetings() {
 
     const requestMeeting = async (targetUser: UserIdentity) => {
         if (!connection || !clientUser) return;
-
-        console.debug(`You request a meeting with ${targetUser.username}`);
 
         const existingMeeting = getMeetingByUser(targetUser);
 
@@ -135,8 +184,6 @@ export default function useMeetings() {
     }
 
     const receiveMeetingRequest = (meeting: Meeting) => {
-        console.log(`${meeting.requestUser.username} wants a meeting with you`);
-
         const existingMeeting = getMeetingByUser(meeting.requestUser);
 
         if (!existingMeeting) {
@@ -159,8 +206,6 @@ export default function useMeetings() {
     }
 
     const receiveMeetingCancellation = (meeting: Meeting) => {
-        console.log(`${meeting.requestUser.username} cancelled a meeting with you`);
-
         const existingMeeting = getMeetingByUser(meeting.requestUser);
 
         if (!existingMeeting)
@@ -170,18 +215,25 @@ export default function useMeetings() {
     }
 
     const receiveMeetingConfirmation = async (meeting: MeetingConfirmation) => {
-        console.debug(`Meeting confirmed between ${meeting.participants[0].user.username} and ${meeting.participants[1].user.username}`);
-        console.log(meeting);
+        setMeetings([]);
+        setConfirmedMeeting({ participants: meeting.participants });
+        suggestMeetingPlace();
+    }
 
-        queryClient.setQueryData(queryKey, []);
+    const getFinalizedConfirmedMeeting = () => {
+        const confirmedMeeting = getConfirmedMeeting();
 
-        await suggestMeetingPlaces(meeting.participants);
+        if (!confirmedMeeting?.participants || !confirmedMeeting?.place)
+            return;
+
+        return confirmedMeeting;
     }
 
     return {
-        meetings: messageQuery.data,
+        meetings: meetingsQuery.data,
         getMeetingByUser,
         requestMeeting,
         cancelMeeting,
+        confirmedMeeting: getFinalizedConfirmedMeeting(),
     }
 }
