@@ -12,9 +12,6 @@ export default function usePlaces() {
         queryKey: queryKeyLibrary,
         queryFn: async (): Promise<google.maps.PlacesLibrary> => {
             console.log("load places library");
-            console.log(google.maps.importLibrary)
-            const x = await google.maps.importLibrary("places");
-            console.log(x);
             return await google.maps.importLibrary("places") as google.maps.PlacesLibrary;;
         },
     });

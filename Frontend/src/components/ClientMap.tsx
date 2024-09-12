@@ -1,21 +1,26 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { MapProps, Map } from '@vis.gl/react-google-maps';
-// import ClientUserMarker from './ClientUserMarker';
+
 import useClientUser from '../hooks/useClientUser';
 import useRemoteUsers from '../hooks/useRemoteUsers';
-import { UserLocation } from '../types/types';
-import RemoteUserMarker, { RemoteUserMarkerProps } from './RemoteUserMarker';
-import ClientUserMarker from './ClientUserMarker';
 import useMeetings from '../hooks/useMeetings';
 import usePlaces from '../hooks/usePlaces';
+import useDirections from '../hooks/useDirections';
+
+import RemoteUserMarker, { RemoteUserMarkerProps } from './RemoteUserMarker';
+import ClientUserMarker from './ClientUserMarker';
 import PlaceMarker from './PlaceMarker';
+import Direction from './Direction';
+
+import { UserLocation } from '../types/types';
+import generateDefaultLocation from '../utilities/defaultLocation';
 
 export default function ClientMap() {
     const { clientUser } = useClientUser();
     const { remoteUserLocations } = useRemoteUsers();
     useMeetings();
     const { places, suggestMeetingPlacesTest } = usePlaces();
-
+    const { suggestRoute } = useDirections();
 
     if (!clientUser) {
         console.log("clientUser is undefined");
@@ -46,8 +51,10 @@ export default function ClientMap() {
                     <PlaceMarker key={place.id} place={place} />)
                 }
                 <ClientUserMarker />
+                <Direction />
             </Map>
             <button onClick={() => suggestMeetingPlacesTest()}>Suggest Places</button>
+            <button onClick={() => suggestRoute(clientUser.location, generateDefaultLocation(0.02))}>Suggest Route</button>
         </>
     );
 }

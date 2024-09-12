@@ -3,12 +3,10 @@ import { User, userLocationFromUser } from "../types/types";
 import { clerk, queryClient } from "../main";
 import useConnection from "./useConnection";
 import { HubServer } from "../api/hub";
+import generateDefaultLocation from "../utilities/defaultLocation";
 
 export default function useClientUser() {
-    const defaultLocation: google.maps.LatLngLiteral = {
-        lat: parseFloat(import.meta.env.VITE_DEFAULT_LOCATION_LAT) + Math.random() * 0.01,
-        lng: parseFloat(import.meta.env.VITE_DEFAULT_LOCATION_LNG) + Math.random() * 0.01
-    }
+    const defaultLocation = generateDefaultLocation(0.02);
 
     const queryKey = ["clientUser"];
 
