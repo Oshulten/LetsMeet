@@ -22,16 +22,12 @@ export default function useDirections() {
     });
 
     const suggestRoute = async (origin: google.maps.LatLngLiteral, destination: google.maps.LatLngLiteral) => {
-        console.log("suggestRoute");
-
         const route = routeQuery.data;
 
         if (!route) {
-            console.log("Route is not loaded");
             return;
         }
 
-        console.log("Route is loaded");
         console.log(route);
 
         const request: google.maps.DirectionsRequest = {
@@ -57,7 +53,6 @@ export default function useDirections() {
         const directionsResult = await suggestRoute(origin, destination);
 
         if (!directionsResult) {
-            console.log("No directions result");
             return;
         }
 
