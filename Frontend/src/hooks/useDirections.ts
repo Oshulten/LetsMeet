@@ -5,11 +5,14 @@ import useClientUser from "./useClientUser";
 import useMeetings from "./useMeetings";
 import useRemoteUsers from "./useRemoteUsers";
 import { UserLocation } from "../types/types";
+import haversine from 'haversine-distance';
 
-export default function useRoutes(map: google.maps.Map | null) {
+export default function useDirections(map: google.maps.Map | null) {
+    const proximityForSuccessfulMeeting = 50;
+
     const { clientUser } = useClientUser();
     const { remoteUserLocations } = useRemoteUsers();
-    const { confirmedMeeting } = useMeetings();
+    const { confirmedMeeting, setConfirmedMeetingAsSuccess } = useMeetings();
 
     const routesLibrary = useMapsLibrary('routes');
     const [directionsService, setDirectionService] = useState<google.maps.DirectionsService>();
@@ -23,7 +26,6 @@ export default function useRoutes(map: google.maps.Map | null) {
         setDirectionsRenderers([0, 1].map(() => new routesLibrary.DirectionsRenderer({ map })));
     }, [routesLibrary, map]);
 
-
     useEffect(() => {
         const getCurrentOrigins = () => {
             if (!confirmedMeeting?.participants || !clientUser?.location) {
@@ -34,14 +36,14 @@ export default function useRoutes(map: google.maps.Map | null) {
             const currentOrigins: google.maps.LatLngLiteral[] = [];
 
             const clientUserLocation: UserLocation = {
-                user: { 
+                user: {
                     id: clientUser.id,
                     username: clientUser.username
                 },
                 location: clientUser.location
-             };
+            };
 
-             confirmedMeeting.participants.forEach(participant => {
+            confirmedMeeting.participants.forEach(participant => {
                 const matchingUserLocation = [...remoteUserLocations, clientUserLocation].find(x => x.user.id == participant.user.id);
                 if (!matchingUserLocation) {
                     console.error("remote user mismatch with confirmed meeting");
@@ -74,6 +76,11 @@ export default function useRoutes(map: google.maps.Map | null) {
 
             if (lastOriginsAreIdenticalToOrigins(origins)) return;
 
+            if (haversine(origins[0], origins[1]) < proximityForSuccessfulMeeting) {
+                console.log("Users met!");
+                setConfirmedMeetingAsSuccess();
+            }
+
             const destination = confirmedMeeting.place?.location;
 
             const requests: google.maps.DirectionsRequest[] = origins.map(origin => ({
@@ -91,6 +98,7 @@ export default function useRoutes(map: google.maps.Map | null) {
             setLastOrigins(origins);
         }
 
+        if (!confirmedMeeting) return;
         renderRoutes();
     }, [directionsService, directionsRenderers, clientUser, confirmedMeeting, remoteUserLocations]);
 }

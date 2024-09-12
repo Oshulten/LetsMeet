@@ -222,11 +222,24 @@ export default function useMeetings() {
         return confirmedMeeting;
     }
 
+    const setConfirmedMeetingAsSuccess = () => {
+        const confirmedMeeting = getConfirmedMeeting();
+
+        if (!confirmedMeeting?.participants) return;
+
+        const usernames = confirmedMeeting.participants.map(p => p.user.username);
+
+        console.log(`Successful meeting between ${usernames[0]} and ${usernames[1]}`)
+
+        setConfirmedMeeting({});
+    }
+
     return {
         meetings: meetingsQuery.data,
         getMeetingByUser,
         requestMeeting,
         cancelMeeting,
         confirmedMeeting: getFinalizedConfirmedMeeting(),
+        setConfirmedMeetingAsSuccess
     }
 }
