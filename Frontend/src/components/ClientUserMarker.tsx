@@ -1,4 +1,5 @@
 import { AdvancedMarker, AdvancedMarkerProps, Pin, PinProps } from "@vis.gl/react-google-maps";
+
 import useClientUser from "../hooks/useClientUser";
 
 /* eslint-disable react/react-in-jsx-scope */
@@ -21,7 +22,6 @@ export default function ClientUserMarker() {
     const glyph = document.createElement("img");
     if (clientUser.imageUrl) {
         glyph.src = clientUser.imageUrl;
-        // glyph.innerHTML = "A";
         glyph.style.width = '35px';
         glyph.style.height = '35px';
         glyph.classList.add("rounded-full")

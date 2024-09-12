@@ -114,18 +114,14 @@ export default function usePlaces() {
         ));
 
         const request = {
-            // required parameters
             fields: ['displayName', 'location', 'id'],
             locationRestriction: {
                 center: meanLocation,
                 radius: maxDistanceFromMeanLocation + 50,
             },
-            // optional parameters
-            // includedPrimaryTypes: ['restaurant'],
-            maxResultCount: 5,
+            includedPrimaryTypes: ['restaurant'],
+            maxResultCount: 1,
             rankPreference: 'DISTANCE',
-            // language: 'en-US',
-            // region: 'us',
         } as google.maps.places.SearchNearbyRequest;
 
         console.log("getting places");

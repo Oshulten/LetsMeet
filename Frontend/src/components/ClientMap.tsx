@@ -1,4 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
 import { MapProps, Map } from '@vis.gl/react-google-maps';
 
 import useClientUser from '../hooks/useClientUser';
@@ -14,6 +13,8 @@ import Direction from './Direction';
 
 import { UserLocation } from '../types/types';
 import generateDefaultLocation from '../utilities/defaultLocation';
+
+/* eslint-disable react/react-in-jsx-scope */
 
 export default function ClientMap() {
     const { clientUser } = useClientUser();
