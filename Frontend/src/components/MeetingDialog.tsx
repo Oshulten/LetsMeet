@@ -7,7 +7,7 @@ interface Props {
     remoteUser: UserIdentity
 }
 
-export default function Meeting({ remoteUser }: Props) {
+export default function MeetingDialog({ remoteUser }: Props) {
     const { getMeetingByUser, requestMeeting, cancelMeeting } = useMeetings();
 
     const meeting = getMeetingByUser(remoteUser);
