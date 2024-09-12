@@ -4,7 +4,6 @@ import useClientUser from '../hooks/useClientUser';
 import useRemoteUsers from '../hooks/useRemoteUsers';
 import useMeetings from '../hooks/useMeetings';
 import usePlaces from '../hooks/usePlaces';
-import useDirections from '../hooks/useDirections';
 
 import RemoteUserMarker, { RemoteUserMarkerProps } from './RemoteUserMarker';
 import ClientUserMarker from './ClientUserMarker';
@@ -20,8 +19,7 @@ export default function ClientMap() {
     const { clientUser } = useClientUser();
     const { remoteUserLocations } = useRemoteUsers();
     useMeetings();
-    const { place, suggestMeetingPlacesTest } = usePlaces();
-    const { suggestRoute } = useDirections();
+    const { place } = usePlaces();
 
     if (!clientUser) {
         console.log("clientUser is undefined");
@@ -52,8 +50,6 @@ export default function ClientMap() {
                 <ClientUserMarker />
                 <Direction />
             </Map>
-            <button onClick={() => suggestMeetingPlacesTest()}>Suggest Places</button>
-            <button onClick={() => suggestRoute(clientUser.location, generateDefaultLocation(0.02))}>Suggest Route</button>
         </>
     );
 }
