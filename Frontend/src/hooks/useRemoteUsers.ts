@@ -13,24 +13,20 @@ export default function useRemoteUsers() {
 
     const receiveUserLocationsCallback = (fetchedLocations: UserLocation[]) => {
         if (!connection || !clientUser) return;
-        console.log("Receiving locations");
-        console.log(fetchedLocations);
+
         const remoteLocations = fetchedLocations.filter(location => location.user.id != clientUser.id)
         queryClient.setQueryData(queryKey, remoteLocations);
-        const queryData = queryClient.getQueryData(queryKey);
-        console.log(queryData);
     }
 
     const registerCallbacks = async () => {
         if (!connection || !clientUser) return;
-        console.log("registerCallbacks");
+
         HubClient.registerReceiveUserLocations(connection, receiveUserLocationsCallback);
     }
 
     const registrationQuery = useQuery({
         queryKey: queryKey,
         queryFn: async (): Promise<UserLocation[]> => {
-            console.log(connection);
             await registerCallbacks();
             return [] as UserLocation[];
         },
@@ -39,7 +35,7 @@ export default function useRemoteUsers() {
             connection != undefined
     });
 
-    const remoteUsersQuery = useQuery({
+    useQuery({
         queryKey: queryKey,
         queryFn: async (): Promise<UserLocation[]> => {
             return (queryClient.getQueryData(queryKey) && []) as UserLocation[];
@@ -48,7 +44,11 @@ export default function useRemoteUsers() {
             registrationQuery.status == 'success'
     });
 
+    const getRemoteUsers = () => {
+        return queryClient.getQueryData(queryKey) as UserLocation[];
+    }
+
     return {
-        remoteUserLocations: remoteUsersQuery.data,
+        remoteUserLocations: getRemoteUsers()
     }
 }

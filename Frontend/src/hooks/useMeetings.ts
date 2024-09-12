@@ -8,8 +8,8 @@ import { mean, max } from "mathjs";
 import haversine from 'haversine-distance';
 
 export default function useMeetings() {
-    const { clientUser } = useClientUser();
     const connection = useConnection();
+    const { clientUser } = useClientUser();
 
     const queryKeyMeetings = ["meetings"];
     const queryKeyLibrary = [...queryKeyMeetings, "placesLibrary"];
@@ -76,11 +76,8 @@ export default function useMeetings() {
         const confirmedMeeting = getConfirmedMeeting();
         const placesLibrary = getPlacesLibrary();
 
-        console.log(placesLibrary);
-
         if (!placesLibrary || !confirmedMeeting || !confirmedMeeting.participants) return;
 
-        console.log("ready to set up meeting place");
         const locations = confirmedMeeting.participants.map((participant) => participant.location);
 
         const meanLocation: google.maps.LatLngLiteral = {
@@ -103,13 +100,9 @@ export default function useMeetings() {
             rankPreference: 'DISTANCE',
         } as google.maps.places.SearchNearbyRequest;
 
-        console.log("getting places");
-
         try {
             const { places } = await getPlacesLibrary().Place.searchNearby(request);
-            console.log("found places");
             setConfirmedMeeting({ ...confirmedMeeting, place: places[0] });
-            console.log(getConfirmedMeeting());
         } catch (error) {
             console.error((error as Error).message);
         }
