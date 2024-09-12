@@ -23,15 +23,24 @@ export default function useDirections(map: google.maps.Map | null) {
         if (!routesLibrary || !map || !clientUser) return;
 
         setDirectionService(new routesLibrary.DirectionsService());
-        setDirectionsRenderers([0, 1].map(() => new routesLibrary.DirectionsRenderer({ map })));
+        setDirectionsRenderers([0, 1].map(() => new routesLibrary.DirectionsRenderer({})));
     }, [routesLibrary, map]);
 
     useEffect(() => {
+        const disableDirections = () => {
+            if (!directionsRenderers) return;
+
+            directionsRenderers.forEach(renderer => renderer.setMap(null));
+        }
+
+        const enableDirections = () => {
+            if (!directionsRenderers) return;
+
+            directionsRenderers.forEach(renderer => renderer.setMap(map));
+        }
+
         const getCurrentOrigins = () => {
-            if (!confirmedMeeting?.participants || !clientUser?.location) {
-                console.error("!");
-                return;
-            }
+            if (!confirmedMeeting?.participants || !clientUser?.location) return;
 
             const currentOrigins: google.maps.LatLngLiteral[] = [];
 
@@ -98,7 +107,12 @@ export default function useDirections(map: google.maps.Map | null) {
             setLastOrigins(origins);
         }
 
-        if (!confirmedMeeting) return;
+        if (!confirmedMeeting?.place) {
+            disableDirections();
+            return;
+        }
+
+        enableDirections();
         renderRoutes();
     }, [directionsService, directionsRenderers, clientUser, confirmedMeeting, remoteUserLocations]);
 }
