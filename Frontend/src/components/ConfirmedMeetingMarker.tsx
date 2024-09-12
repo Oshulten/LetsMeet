@@ -7,19 +7,19 @@ import useMeetings from "../hooks/useMeetings";
 export default function ConfirmedMeetingMarker() {
     const [markerRef, marker] = useAdvancedMarkerRef();
     const [infoWindowShown, setInfoWindowShown] = useState(true);
-    const { confirmedMeeting } = useMeetings();
+    const { confirmedMeeting, cancelConfirmedMeeting } = useMeetings();
 
     if (!confirmedMeeting?.place) return null;
 
     const place = confirmedMeeting.place;
 
+
     const infoWindowHeaderContent = (
-        <div className="flex flex-row">
-            <h2 className="font-bold text-lg">{place.displayName}</h2>
-        </div>);
+        <h2 className="leading-3 font-bold text-lg">{place.displayName}</h2>);
 
     const infoWindowMainContent = (
         <div>
+            <button className="btn btn-warning" onClick={() => cancelConfirmedMeeting()}>Cancel meeting</button>
         </div>);
 
     const markerProps: AdvancedMarkerProps = {

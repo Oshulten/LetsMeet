@@ -8,7 +8,6 @@ import { mean, max } from "mathjs";
 import haversine from 'haversine-distance';
 import { openSuccessfulMeetingModal } from "../components/SuccessfulMeetingModal";
 import capitalize from "capitalize";
-import SuccessfulMeetingModal from '../components/SuccessfulMeetingModal';
 
 export default function useMeetings() {
     const connection = useConnection();
@@ -209,6 +208,17 @@ export default function useMeetings() {
             return;
 
         removeMeeting(meeting.requestUser);
+
+        const confirmedMeeting = getFinalizedConfirmedMeeting();
+
+        if (!confirmedMeeting) return;
+
+        const meetingIds = [meeting.requestUser.id, meeting.targetUser.id].sort();
+        const participantIds = confirmedMeeting.participants!.map(p => p.user.id).sort();
+
+        if (meetingIds[0] == participantIds[0] && meetingIds[1] == participantIds[1]) {
+            cancelConfirmedMeeting();
+        }
     }
 
     const receiveMeetingConfirmation = async (meeting: MeetingConfirmation) => {
@@ -243,12 +253,36 @@ export default function useMeetings() {
         setConfirmedMeeting({});
     }
 
+    const cancelConfirmedMeeting = async () => {
+        const confirmedMeeting = getConfirmedMeeting();
+
+        if (!confirmedMeeting?.participants || !clientUser || !connection) return;
+
+        const otherParticipant = confirmedMeeting.participants.find(p => p.user.id != clientUser.id);
+
+        if (!otherParticipant) return;
+
+        const meetingCancellation = {
+            requestUser: userIdentityFromUser(clientUser),
+            targetUser: otherParticipant.user
+        };
+
+        console.log(meetingCancellation);
+
+        await HubServer.cancelMeeting(connection, meetingCancellation);
+
+        console.log(`Cancelled confirmed meeting with ${meetingCancellation.targetUser.username}. Shame on you.`);
+
+        setConfirmedMeeting({});
+    }
+
     return {
         meetings: meetingsQuery.data,
         getMeetingByUser,
         requestMeeting,
         cancelMeeting,
         confirmedMeeting: getFinalizedConfirmedMeeting(),
-        setConfirmedMeetingAsSuccess
+        setConfirmedMeetingAsSuccess,
+        cancelConfirmedMeeting
     }
 }
