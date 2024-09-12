@@ -7,8 +7,10 @@ import { HubClient, HubServer } from "../api/hub";
 import { mean, max } from "mathjs";
 import haversine from 'haversine-distance';
 import { openSuccessfulMeetingModal } from "../components/SuccessfulMeetingModal";
+import capitalize from "capitalize";
+import SuccessfulMeetingModal from '../components/SuccessfulMeetingModal';
 
-export default function useMeetings(successfulMeetingModalId?: string) {
+export default function useMeetings() {
     const connection = useConnection();
     const { clientUser } = useClientUser();
 
@@ -196,8 +198,7 @@ export default function useMeetings(successfulMeetingModalId?: string) {
 
             confirmMeeting(meeting);
 
-            if (successfulMeetingModalId)
-                openSuccessfulMeetingModal(successfulMeetingModalId);
+            return;
         }
     }
 
@@ -228,11 +229,16 @@ export default function useMeetings(successfulMeetingModalId?: string) {
     const setConfirmedMeetingAsSuccess = () => {
         const confirmedMeeting = getConfirmedMeeting();
 
-        if (!confirmedMeeting?.participants) return;
+        if (!confirmedMeeting?.participants || !clientUser) return;
 
         const usernames = confirmedMeeting.participants.map(p => p.user.username);
 
         console.log(`Successful meeting between ${usernames[0]} and ${usernames[1]}`)
+
+        const otherParticipant = confirmedMeeting.participants.find(p => p.user.id == clientUser.id);
+        const displayName = capitalize(otherParticipant?.user?.username ?? "Stranger");
+        const numberOfMeetings = "32";
+        openSuccessfulMeetingModal(displayName, numberOfMeetings);
 
         setConfirmedMeeting({});
     }

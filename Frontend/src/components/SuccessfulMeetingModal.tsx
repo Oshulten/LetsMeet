@@ -1,11 +1,8 @@
 /* eslint-disable react/react-in-jsx-scope */
-interface SuccessfulMeetingModalProps {
-    id: string
-}
 
-export default function SuccessfulMeetingModal({ id }: SuccessfulMeetingModalProps) {
+export default function SuccessfulMeetingModal() {
     return (
-        <dialog id={id} className="modal">
+        <dialog id={import.meta.env.VITE_SUCCESSFUL_MEETING_MODAL_ID} className="modal">
             <div className="modal-box">
                 <h3 className="font-bold text-lg">Congratulations, you talked to a stranger!</h3>
                 <p className="py-4">We hope you and <b id="displayName"></b> stay in touch in the future.</p>
@@ -20,8 +17,8 @@ export default function SuccessfulMeetingModal({ id }: SuccessfulMeetingModalPro
     );
 }
 
-export function openSuccessfulMeetingModal(id: string, displayName?: string, numberOfMeetings?: string) {
-    const modal = document.getElementById(id) as HTMLDialogElement;
+export function openSuccessfulMeetingModal(displayName?: string, numberOfMeetings?: string) {
+    const modal = document.getElementById(import.meta.env.VITE_SUCCESSFUL_MEETING_MODAL_ID) as HTMLDialogElement;
 
     const displayNameElement = modal.querySelector("#displayName");
     if (displayNameElement)
@@ -30,6 +27,8 @@ export function openSuccessfulMeetingModal(id: string, displayName?: string, num
     const numberOfMeetingsElement = modal.querySelector("#numberOfMeetings");
     if (numberOfMeetingsElement)
         numberOfMeetingsElement.innerHTML = numberOfMeetings ?? "some number of";
+
+    console.log(`showing modal with displayName ${displayName} and numberOfMeetings ${numberOfMeetings}`);
 
     modal.showModal()
 }

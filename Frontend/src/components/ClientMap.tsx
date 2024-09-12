@@ -15,11 +15,9 @@ import SuccessfulMeetingModal, { openSuccessfulMeetingModal } from './Successful
 /* eslint-disable react/react-in-jsx-scope */
 
 export default function ClientMap() {
-    const successfulMeetingModalId = "success";
-
     const { clientUser } = useClientUser();
     const { remoteUserLocations } = useRemoteUsers();
-    useMeetings(successfulMeetingModalId);
+    useMeetings();
 
     if (!clientUser) {
         console.log("clientUser is undefined");
@@ -50,8 +48,8 @@ export default function ClientMap() {
                 <ClientUserMarker />
                 <Direction />
             </Map>
-            <SuccessfulMeetingModal id={successfulMeetingModalId} />
-            <button onClick={() => openSuccessfulMeetingModal(successfulMeetingModalId, "Stranger", "35")}>Open modal</button>
+            <SuccessfulMeetingModal />
+            <button onClick={() => openSuccessfulMeetingModal("Stranger", "35")}>Open modal</button>
         </>
     );
 }
