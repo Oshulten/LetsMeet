@@ -6,8 +6,9 @@ import { queryClient } from "../main";
 import { HubClient, HubServer } from "../api/hub";
 import { mean, max } from "mathjs";
 import haversine from 'haversine-distance';
+import { openSuccessfulMeetingModal } from "../components/SuccessfulMeetingModal";
 
-export default function useMeetings() {
+export default function useMeetings(successfulMeetingModalId?: string) {
     const connection = useConnection();
     const { clientUser } = useClientUser();
 
@@ -194,7 +195,9 @@ export default function useMeetings() {
                 return;
 
             confirmMeeting(meeting);
-            return;
+
+            if (successfulMeetingModalId)
+                openSuccessfulMeetingModal(successfulMeetingModalId);
         }
     }
 
