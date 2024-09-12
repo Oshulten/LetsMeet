@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Backend.Database;
 using Backend.Dto;
 using Backend.Models;
@@ -10,59 +6,89 @@ namespace Backend.Services;
 
 public class HubPersistence
 {
-    private Dictionary<string /* ClerkId */, Geolocation> _lastLocations = [];
-    private Dictionary<string /* ConnectionId */, User> _activeUsers = [];
+    private class UserRegistration(DtoUser user, string connectionId, LatLng? lastLocation)
+    {
+        public DtoUser User { get; set; } = user;
+        public string ConnectionId { get; set; } = connectionId;
+        public LatLng? LastLocation { get; set; } = lastLocation;
+    };
 
-    public List<DtoGeolocation> LastLocationPerUser =>
-        _lastLocations
-            .Select(keyvalue => (DtoGeolocation)keyvalue.Value)
+    private List<UserRegistration> _userRegistrations = [];
+
+    public void RegisterUser(string connectionId, DtoUser user, LetsMeetDbContext db)
+    {
+        _userRegistrations = _userRegistrations
+            .Where(registration => registration.User.Id != user.Id)
             .ToList();
 
-    public string ConnectionIdByUserId(string userId) =>
-        _activeUsers.FirstOrDefault(item => item.Value.Id == userId).Key;
-
-    public User RegisterUser(string connectionId, DtoUser dtoUser, LetsMeetDbContext db)
-    {
-        Console.WriteLine("RegisterUser");
-        LogActiveUsers();
-
-        if (_activeUsers.ContainsKey(connectionId))
-        {
-            Console.WriteLine("1");
-            return _activeUsers[connectionId];
-        }
-
-        //Checks if a user with a specific clerkId exists in the dictionary
-        if (_activeUsers.Values.FirstOrDefault(u => u.Id == dtoUser.ClerkId) is null)
-        {
-            Console.WriteLine("2");
-            var existingUser = db.AddUser(dtoUser);
-            _activeUsers.TryAdd(connectionId, existingUser);
-            return existingUser;
-        }
-
-        Console.WriteLine("2");
-        return _activeUsers[connectionId];
+        _userRegistrations.Add(new UserRegistration((DtoUser)db.AddUser(user), connectionId, null));
     }
 
-    public void DeregisterUserByConnectionId(string connectionId) => _activeUsers.Remove(connectionId);
+    public List<string> ConnectionIdsExceptUser(DtoUser user) =>
+        _userRegistrations
+            .Where(registration => registration.User.Id != user.Id)
+            .Select(registration => registration.ConnectionId)
+            .ToList();
 
-    public List<User> ActiveUsers => [.. _activeUsers.Values];
-
-    public void LogActiveUsers()
+    public void DeregisterUserByConnectionId(string connectionId)
     {
-        var itemStrings = _activeUsers.Select(item => $"{item.Value.Username} [{item.Key}]: {item.Value.Id}");
-        Console.WriteLine($"Connected users:\n\t{string.Join("\n\t", itemStrings)}");
+        var user = _userRegistrations.FirstOrDefault(registration => registration.ConnectionId == connectionId);
+
+        if (user is null)
+        {
+            return;
+        }
+
+        _userRegistrations = _userRegistrations
+            .Where(registration => registration.User.Id != user.User.Id)
+            .ToList();
     }
 
-    public void AddToLastLocations(string clerkId, Geolocation location)
-    {
-        Console.WriteLine($"Add location {location.Id} with clerkId {clerkId}");
-        _lastLocations.TryAdd(clerkId, location);
+    public List<DtoUserLocation> LastLocations =>
+         _userRegistrations
+            .Where(registration => registration.LastLocation != null)
+            .Select(registration => new DtoUserLocation(registration.User, registration.LastLocation!))
+            .ToList();
 
-        if (_lastLocations[clerkId].Timestamp < location.Timestamp)
+    public void UpdateLastLocation(DtoUserLocation userLocation, LetsMeetDbContext db)
+    {
+        var userRegistration = _userRegistrations.FirstOrDefault(registration => registration.User.Id == userLocation.User.Id);
+
+        if (userRegistration is null)
         {
-            _lastLocations[clerkId] = location;
+            Console.WriteLine($"[{nameof(HubPersistence)} - {nameof(UpdateLastLocation)}] [ERROR]: {userLocation.User.Username} is not registered");
+            return;
         }
+
+        db.AddGeolocation(userLocation);
+
+        userRegistration.LastLocation = userLocation.Location;
+    }
+
+    public string? ConnectionIdByUser(DtoUser user) =>
+        _userRegistrations.FirstOrDefault(registration => registration.User.Id == user.Id)?.ConnectionId;
+
+    public void LogRegisteredUsers()
+    {
+        if (_userRegistrations.Count == 0)
+        {
+            Console.WriteLine($"[{nameof(HubPersistence)} - {nameof(UpdateLastLocation)}]: No registered users");
+            return;
+        }
+
+        var itemStrings = _userRegistrations.Select(registration =>
+            $"{registration.User.Username} [{registration.ConnectionId}]: {(registration.LastLocation is null ? "(No last location)" : registration.LastLocation)}");
+        Console.WriteLine($"Registered users:\n\t{string.Join("\n\t", itemStrings)}");
+    }
+
+    public DtoMeetingConfirmation MeetingConfirmation(DtoMeeting meeting)
+    {
+        List<string> participantIds = [meeting.RequestUser.Id, meeting.TargetUser.Id];
+
+        var includedLocations = LastLocations
+            .Where(location => participantIds.Contains(location.User.Id))
+            .ToList();
+            
+        return new(includedLocations);
     }
 }

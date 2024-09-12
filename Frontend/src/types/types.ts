@@ -1,79 +1,51 @@
-export type DtoUser = {
+//Backend: DtoUser
+export type UserIdentity = {
     username: string,
-    clerkId: string
+    id: string
 }
 
-export type DtoLocation = {
-    clerkId: string,
-    username: string,
-    latitude: number,
-    longitude: number
-}
-
-export type DtoMeeting = {
-    requestUser: DtoUser,
-    targetUser: DtoUser
-}
-
-export type UserLocation = {
-    user: User,
-    location: google.maps.LatLngLiteral
-}
-
-export type User = {
-    username: string,
-    clerkId: string,
-    location: google.maps.LatLngLiteral
-}
-
+//Backend: DtoMeeting
 export type Meeting = {
-    requestUser: User,
-    targetUser: User
+    requestUser: UserIdentity,
+    targetUser: UserIdentity
 }
 
-export const dtoFromUser = (user: User) => {
-    return { username: user.username, clerkId: user.clerkId } as DtoUser;
+//Backend: DtoMeetingConfirmation
+export type MeetingConfirmation = {
+    participants: UserLocation[]
 }
 
-export const dtoFromMeeting = (meeting: Meeting) => {
-    return meeting as DtoMeeting;
+export type ActiveMeeting = {
+    user: UserIdentity,
+    state: MeetingState
 }
 
-export const dtoFromUserLocation = (location: UserLocation) => {
-    return {
-        clerkId: location.user.clerkId,
-        username: location.user.username,
-        latitude: location.location.lat,
-        longitude: location.location.lng
-    } as DtoLocation;
+//Backend: DtoUserLocation
+export type UserLocation = {
+    user: UserIdentity,
+    location: google.maps.LatLngLiteral
 }
 
-export const userFromDto = (user: DtoUser, location: google.maps.LatLngLiteral) => {
-    return { ...user, location } as User;
+export type User = UserIdentity & {
+    location: google.maps.LatLngLiteral,
+    imageUrl?: string
 }
 
-export const userLocationFromDto = (loc: DtoLocation) => {
+export type MeetingState = 'awaitingOtherUserConfirmation' | 'awaitingUserConfirmation' | 'confirmed'
+
+export function userLocationFromUser(user: User) {
     return {
         user: {
-            clerkId: loc.clerkId,
-            username: loc.username
+            id: user.id,
+            username: user.username
         },
-        location: {
-            lat: loc.latitude,
-            lng: loc.longitude
-        }
+        location: user.location
     } as UserLocation;
 }
 
-export const meetingFromDto = (meeting: DtoMeeting) => {
+export function userIdentityFromUser(user: User) {
     return {
-        requestUser: {
-            clerkId: meeting.requestUser.clerkId,
-            username: meeting.requestUser.username
-        },
-        targetUser: {
-            clerkId: meeting.targetUser.clerkId,
-            username: meeting.targetUser.username
-        },
-    } as Meeting;
+        id: user.id,
+        username: user.username
+    } as UserIdentity;
 }

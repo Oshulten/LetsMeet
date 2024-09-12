@@ -1,60 +1,95 @@
 import { HubConnection } from "@microsoft/signalr";
-import { DtoLocation, Meeting, meetingFromDto, User, UserLocation, userLocationFromDto, DtoMeeting, dtoFromUser, dtoFromMeeting, dtoFromUserLocation } from '../types/types';
+import { UserLocation, Meeting, MeetingConfirmation } from '../types/types';
 
 function checkConnection(connection: HubConnection) {
-    if (!connection?.connectionId) {
-        console.error("Connection is not initialized");
+    if (!connection) {
+        console.log("Connection is not initialized");
         return false;
     }
+
+    if (connection.state != 'Connected') {
+        console.log("Connection is not connected");
+        return false;
+    }
+
     return true;
 }
 
+const hubRegistrations: string[] = [];
+
 export const HubClient = {
-    registerRecieveGeolocations: function (connection: HubConnection, callback: (fetchedLocations: UserLocation[]) => void) {
-        connection.on("ReceiveGeolocations", (fetchedLocations: DtoLocation[]) =>
-            callback(fetchedLocations.map(loc => userLocationFromDto(loc))))
+    registerReceiveUserLocations: function (connection: HubConnection, callback: (fetchedLocations: UserLocation[]) => void) {
+        const serverMethodName = 'ReceiveUserLocations';
+
+        if (hubRegistrations.includes(serverMethodName)) {
+            console.error(`${serverMethodName} has already been registered`);
+            return;
+        }
+
+        connection.on(serverMethodName, callback);
+        hubRegistrations.push(serverMethodName);
     },
+
     registerReceiveMeetingRequest: function (connection: HubConnection, callback: (meeting: Meeting) => void) {
-        connection.on("ReceiveMeetingRequest", (meeting: DtoMeeting) => {
-            callback(meetingFromDto(meeting));
-        });
+        const serverMethodName = 'ReceiveMeetingRequest';
+
+        if (hubRegistrations.includes(serverMethodName)) {
+            console.error(`${serverMethodName} has already been registered`);
+            return;
+        }
+
+        connection.on(serverMethodName, callback);
+        hubRegistrations.push(serverMethodName);
     },
-    registerRecieveMeetingCancellation: function (connection: HubConnection, callback: (meeting: Meeting) => void) {
-        connection.on("ReceiveMeetingCancellation", (meeting: DtoMeeting) => {
-            callback(meetingFromDto(meeting));
-        });
+
+    registerReceiveMeetingCancellation: function (connection: HubConnection, callback: (meeting: Meeting) => void) {
+        const serverMethodName = 'ReceiveMeetingCancellation';
+
+        if (hubRegistrations.includes(serverMethodName)) {
+            console.error(`${serverMethodName} has already been registered`);
+            return;
+        }
+
+        connection.on(serverMethodName, callback);
+
+        hubRegistrations.push(serverMethodName);
     },
-    registerReceiveMeetingConfirmation: function (connection: HubConnection, callback: (meeting: Meeting) => void) {
-        connection.on("ReceiveMeetingConfirmation", (meeting: DtoMeeting) => {
-            callback(meetingFromDto(meeting));
-        });
+
+    registerReceiveMeetingConfirmation: function (connection: HubConnection, callback: (meeting: MeetingConfirmation) => void) {
+        const serverMethodName = 'ReceiveMeetingConfirmation';
+
+        if (hubRegistrations.includes(serverMethodName)) {
+            console.error(`${serverMethodName} has already been registered`);
+            return;
+        }
+
+        connection.on(serverMethodName, callback);
+        hubRegistrations.push(serverMethodName);
     }
 }
 
 export const HubServer = {
-    registerUser: async function (connection: HubConnection, user: User) {
-        if (checkConnection(connection)) {
-            await connection.invoke("RegisterUser", dtoFromUser(user));
-        }
-    },
     requestMeeting: async function (connection: HubConnection, meeting: Meeting) {
         if (checkConnection(connection)) {
-            await connection.invoke("RequestMeeting", dtoFromMeeting(meeting));
+            await connection.invoke("RequestMeeting", meeting);
         }
     },
+
     cancelMeeting: async function (connection: HubConnection, meeting: Meeting) {
         if (checkConnection(connection)) {
-            await connection.invoke("CancelMeeting", dtoFromMeeting(meeting));
+            await connection.invoke("CancelMeeting", meeting);
         }
     },
-    sendLocation: async function (connection: HubConnection, location: UserLocation) {
+
+    updateLocation: async function (connection: HubConnection, location: UserLocation) {
         if (checkConnection(connection)) {
-            await connection.invoke("SendLocation", dtoFromUserLocation(location));
+            await connection.invoke("UpdateLocation", location);
         }
     },
+
     confirmMeeting: async function (connection: HubConnection, meeting: Meeting) {
         if (checkConnection(connection)) {
-            await connection.invoke("ConfirmMeeting", dtoFromMeeting(meeting));
+            await connection.invoke("ConfirmMeeting", meeting);
         }
     },
 }

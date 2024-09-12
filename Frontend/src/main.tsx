@@ -1,15 +1,26 @@
 /* eslint-disable react/react-in-jsx-scope */
-import { createContext } from 'react'
+import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { routeTree } from './routeTree.gen'
 import { createRouter, RouterProvider } from '@tanstack/react-router';
-import { DefaultCatchBoundary } from './components/DefaultCatchBoundary.tsx';
-import { NotFound } from './components/NotFound.tsx';
-import { ApplicationContext, defaultApplicationContext } from './types/AppContext.ts';
 import './css/index.css'
 
-const queryClient = new QueryClient();
+import { Clerk } from '@clerk/clerk-js'
+
+const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+
+export const clerk = new Clerk(clerkPubKey)
+await clerk.load({})
+
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      staleTime: Infinity
+    },
+  },
+})
 
 const router = createRouter({
   routeTree,
@@ -18,8 +29,6 @@ const router = createRouter({
   },
   defaultPreload: 'intent',
   defaultPreloadStaleTime: 0,
-  defaultErrorComponent: DefaultCatchBoundary,
-  defaultNotFoundComponent: () => <NotFound />,
 })
 
 declare module '@tanstack/react-router' {
@@ -28,12 +37,10 @@ declare module '@tanstack/react-router' {
   }
 }
 
-export const AppContext = createContext<ApplicationContext>(defaultApplicationContext);
-
 createRoot(document.getElementById('root')!).render(
-  <AppContext.Provider value={defaultApplicationContext}>
+  <StrictMode>
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
     </QueryClientProvider>
-  </AppContext.Provider>
+  </StrictMode>
 )

@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 
 namespace Backend.Models;
 
-public class DtoUser(string username, string clerkId)
+public class DtoUser(string username, string id)
 {
     public string Username { get; set; } = username;
-    public string ClerkId { get; set; } = clerkId;
+    public string Id { get; set; } = id;
 
     public static explicit operator DtoUser(User user) =>
         new(user.Username, user.Id);
