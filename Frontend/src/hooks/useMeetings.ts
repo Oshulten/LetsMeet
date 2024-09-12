@@ -5,11 +5,13 @@ import { ActiveMeeting, Meeting, MeetingConfirmation, MeetingState, UserIdentity
 import { queryClient } from "../main";
 import { HubClient, HubServer } from "../api/hub";
 import usePlaces from "./usePlaces";
+import useDirections from "./useDirections";
 
 export default function useMeetings() {
     const { clientUser } = useClientUser();
     const connection = useConnection();
     const { suggestMeetingPlaces } = usePlaces();
+    const { suggestRoute } = useDirections();
 
     const queryKey = ["meetings"];
 

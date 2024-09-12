@@ -144,6 +144,6 @@ export default function usePlaces() {
     return {
         suggestMeetingPlaces,
         suggestMeetingPlacesTest,
-        places: placesQuery.data
+        place: placesQuery.data ? placesQuery.data[0] : undefined
     }
 }

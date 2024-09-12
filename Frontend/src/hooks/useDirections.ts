@@ -53,10 +53,22 @@ export default function useDirections() {
         directionsRenderer.setDirections(directionsResult);
     }
 
+    const suggestAndRenderRoute = async (origin: google.maps.LatLngLiteral, destination: google.maps.LatLngLiteral, map: google.maps.Map) => {
+        const directionsResult = await suggestRoute(origin, destination);
+
+        if (!directionsResult) {
+            console.log("No directions result");
+            return;
+        }
+
+        await renderRoute(map, directionsResult);
+    }
+
     return {
         suggestRoute,
         route: directionQuery.data ? directionQuery.data[0] : undefined,
         renderRoute,
+        suggestAndRenderRoute,
     }
 
 }

@@ -1,16 +1,20 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { useMap } from "@vis.gl/react-google-maps";
 import useDirections from "../hooks/useDirections";
+import usePlaces from "../hooks/usePlaces";
+import useClientUser from "../hooks/useClientUser";
 
 export default function Direction() {
-    const { route, renderRoute } = useDirections();
+    const { suggestAndRenderRoute } = useDirections();
+    const { place } = usePlaces();
+    const { clientUser } = useClientUser();
     const map = useMap();
 
-    if (!route || !map) {
+    if (!map || !place || !clientUser) {
+        console.log("No map, place or clientUser");
         return <></>
     }
 
-    renderRoute(map, route);
-
+    suggestAndRenderRoute(clientUser.location, { lat: place.location!.lat(), lng: place.location!.lng() }, map);
     return <></>
 }
