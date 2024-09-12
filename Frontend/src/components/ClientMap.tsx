@@ -14,7 +14,7 @@ export default function ClientMap() {
     const { clientUser } = useClientUser();
     const { remoteUserLocations } = useRemoteUsers();
     useMeetings();
-    const { places } = usePlaces();
+    const { places, suggestMeetingPlacesTest } = usePlaces();
 
 
     if (!clientUser) {
@@ -36,19 +36,18 @@ export default function ClientMap() {
         } as RemoteUserMarkerProps;
     }
 
-    console.log(places);
-
     return (
         <>
             <Map {...mapProps} className="w-full flex-auto">
                 {remoteUserLocations && remoteUserLocations.map(userLocation =>
                     <RemoteUserMarker key={userLocation.user.id} {...remoteUserMarkerProps(userLocation)} />)
                 }
-                {/* {places && places.map(place =>
+                {places && places.map(place =>
                     <PlaceMarker key={place.id} place={place} />)
-                } */}
+                }
                 <ClientUserMarker />
             </Map>
+            <button onClick={() => suggestMeetingPlacesTest()}>Suggest Places</button>
         </>
     );
 }
