@@ -6,10 +6,13 @@ import { queryClient } from "../main";
 import { HubClient, HubServer } from "../api/hub";
 import { mean, max } from "mathjs";
 import haversine from 'haversine-distance';
+import { openSuccessfulMeetingModal } from "../components/SuccessfulMeetingModal";
+import capitalize from "capitalize";
+import SuccessfulMeetingModal from '../components/SuccessfulMeetingModal';
 
 export default function useMeetings() {
-    const { clientUser } = useClientUser();
     const connection = useConnection();
+    const { clientUser } = useClientUser();
 
     const queryKeyMeetings = ["meetings"];
     const queryKeyLibrary = [...queryKeyMeetings, "placesLibrary"];
@@ -76,11 +79,8 @@ export default function useMeetings() {
         const confirmedMeeting = getConfirmedMeeting();
         const placesLibrary = getPlacesLibrary();
 
-        console.log(placesLibrary);
-
         if (!placesLibrary || !confirmedMeeting || !confirmedMeeting.participants) return;
 
-        console.log("ready to set up meeting place");
         const locations = confirmedMeeting.participants.map((participant) => participant.location);
 
         const meanLocation: google.maps.LatLngLiteral = {
@@ -103,13 +103,9 @@ export default function useMeetings() {
             rankPreference: 'DISTANCE',
         } as google.maps.places.SearchNearbyRequest;
 
-        console.log("getting places");
-
         try {
             const { places } = await getPlacesLibrary().Place.searchNearby(request);
-            console.log("found places");
             setConfirmedMeeting({ ...confirmedMeeting, place: places[0] });
-            console.log(getConfirmedMeeting());
         } catch (error) {
             console.error((error as Error).message);
         }
@@ -201,6 +197,7 @@ export default function useMeetings() {
                 return;
 
             confirmMeeting(meeting);
+
             return;
         }
     }
@@ -229,11 +226,29 @@ export default function useMeetings() {
         return confirmedMeeting;
     }
 
+    const setConfirmedMeetingAsSuccess = () => {
+        const confirmedMeeting = getConfirmedMeeting();
+
+        if (!confirmedMeeting?.participants || !clientUser) return;
+
+        const usernames = confirmedMeeting.participants.map(p => p.user.username);
+
+        console.log(`Successful meeting between ${usernames[0]} and ${usernames[1]}`)
+
+        const otherParticipant = confirmedMeeting.participants.find(p => p.user.id == clientUser.id);
+        const displayName = capitalize(otherParticipant?.user?.username ?? "Stranger");
+        const numberOfMeetings = "32";
+        openSuccessfulMeetingModal(displayName, numberOfMeetings);
+
+        setConfirmedMeeting({});
+    }
+
     return {
         meetings: meetingsQuery.data,
         getMeetingByUser,
         requestMeeting,
         cancelMeeting,
         confirmedMeeting: getFinalizedConfirmedMeeting(),
+        setConfirmedMeetingAsSuccess
     }
 }

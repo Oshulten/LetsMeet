@@ -6,10 +6,11 @@ import useMeetings from '../hooks/useMeetings';
 
 import RemoteUserMarker, { RemoteUserMarkerProps } from './RemoteUserMarker';
 import ClientUserMarker from './ClientUserMarker';
-import Route from './Route';
+import Direction from './Direction';
 
 import { UserLocation } from '../types/types';
 import ConfirmedMeetingMarker from './ConfirmedMeetingMarker';
+import SuccessfulMeetingModal, { openSuccessfulMeetingModal } from './SuccessfulMeetingModal';
 
 /* eslint-disable react/react-in-jsx-scope */
 
@@ -45,8 +46,10 @@ export default function ClientMap() {
                 }
                 <ConfirmedMeetingMarker />
                 <ClientUserMarker />
-                <Route />
+                <Direction />
             </Map>
+            <SuccessfulMeetingModal />
+            <button onClick={() => openSuccessfulMeetingModal("Stranger", "35")}>Open modal</button>
         </>
     );
 }
