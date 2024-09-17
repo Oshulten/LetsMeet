@@ -19,7 +19,7 @@
         "@tanstack/react-query": "^5.53.1",
         "@tanstack/react-query-devtools": "^5.55.4",
         "@tanstack/react-router": "^1.52.3",
-        "@vis.gl/react-google-maps": "^1.1.0",
+        "@vis.gl/react-google-maps": "^1.2.0",
         "capitalize": "^2.0.4",
         "guid-typescript": "^1.0.9",
         "haversine-distance": "^1.2.3",

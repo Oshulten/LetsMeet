@@ -29,7 +29,6 @@ export default function useConnection() {
     });
 
     const initializeConnection = (clientUser?: User) => {
-
         const queryString = clientUser ? `?username=${clientUser.username}&clerkId=${clientUser.id}` : '';
 
         const connection =

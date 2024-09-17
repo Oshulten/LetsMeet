@@ -9,11 +9,12 @@ export default function useClientUser() {
     const defaultLocation = generateDefaultLocation(0.02);
 
     const queryKey = ["clientUser"];
+    const queryKeySendInitialLocation = [...queryKey, "sendInitialLocation"];
 
     const connection = useConnection();
 
     const clientUserQuery = useQuery({
-        queryKey: queryKey,
+        queryKey,
         queryFn: async (): Promise<User | undefined> => {
             const clerkUser = clerk.user;
 
@@ -34,7 +35,7 @@ export default function useClientUser() {
     });
 
     const sendInitialLocationQuery = useQuery({
-        queryKey: [...queryKey, "sendInitialLocation"],
+        queryKey: queryKeySendInitialLocation,
         queryFn: async (): Promise<boolean> => {
             if (!connection) return false;
             if (sendInitialLocationQuery.data) return true;
